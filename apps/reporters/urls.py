@@ -3,7 +3,7 @@
 
 import os
 from django.conf.urls.defaults import *
-import apps.reporters.views as views
+import reporters.views as views
 
 urlpatterns = patterns('',
     url(r'^reporters$',             views.index),

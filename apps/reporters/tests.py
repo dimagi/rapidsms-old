@@ -1,7 +1,7 @@
 from rapidsms.tests.scripted import TestScript
 from app import App
 from models import *
-from apps.modelrelationship.models import *
+from modelrelationship.models import *
 from django.contrib.contenttypes.models import ContentType
 
     

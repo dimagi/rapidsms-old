@@ -3,17 +3,20 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from rapidsms.webui.utils import render_to_response
-from apps.httptester.models import Message
-from apps.httptester.forms import MessageForm
+from models import Message
+from forms import MessageForm
 from django.core.urlresolvers import reverse
 from rapidsms.config import app_conf
 import datetime
 import urllib2
 import random
+import settings
 
 def index(req, form_class=MessageForm):
     form_instance = form_class()
     template_name="http/ajaxified.html"
+    
+    print settings.appconf
     # the following lines have been commented out since they aren't useful any longer
     #if req.method == 'POST':
     #   form_instance = form_class(req.POST)

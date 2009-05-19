@@ -4,7 +4,7 @@
 import re
 import rapidsms
 from rapidsms.parsers import Matcher
-from models import *
+from reporters.models import *
 
 
 # this is a temporary hack for the nigeria
