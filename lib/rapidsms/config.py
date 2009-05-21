@@ -4,7 +4,7 @@
 import os
 from ConfigParser import SafeConfigParser
 import log
-
+import logging
 
 def to_list (item, separator=","):
     return filter(None, map(lambda x: str(x).strip(), item.split(separator)))

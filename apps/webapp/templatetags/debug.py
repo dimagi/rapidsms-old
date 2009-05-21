@@ -6,6 +6,6 @@ from django import template
 register = template.Library()
 
 
-@register.inclusion_tag("webui/partials/debug-dump.html")
+@register.inclusion_tag("webapp/partials/debug-dump.html")
 def debug_dump():
     return { "queries": connection.queries }

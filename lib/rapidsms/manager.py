@@ -39,8 +39,6 @@ class Manager (object):
 def start (args):
     # if a specific conf has been provided (which it
     # will be), if we're inside the django reloaded
-    print "started baby!"
-    
     if "RAPIDSMS_INI" in os.environ:
         ini = os.environ["RAPIDSMS_INI"]
     
@@ -58,7 +56,7 @@ def start (args):
     # spawned by django
     os.environ["RAPIDSMS_INI"] = ini
     
-    print ini
+
 
     # read the config, which is shared
     # between the back and frontend
