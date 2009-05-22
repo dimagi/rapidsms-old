@@ -114,10 +114,10 @@ class App (rapidsms.app.App):
                 
                 # TODO: validate the language
                 
-                # validate and get the time object
-                if not time.isdigit():
-                    # todo
-                    pass
+                # validate and get the time object                
+#                if not time.isdigit():
+#                    # todo
+#                    pass
                     
                 # user ids are unique per-location so use location-id
                 # as the alias
