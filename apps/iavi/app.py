@@ -5,7 +5,7 @@ from rapidsms.message import Message
 from reporters.models import Reporter, Location
 from models import *
 from i18n.utils import get_translation as _
-from i18n.utils import get_language
+from i18n.utils import get_language_code
 from strings import strings
 import threading
 import time
