@@ -5,6 +5,7 @@ import apps.reporters.app as reporters_app
 import apps.tree.app as tree_app
 #import apps.i18n.app as i18n_app
 from apps.reporters.models import Reporter
+import datetime
 
 class TestApp (TestScript):
     apps = (reporters_app.App, App, tree_app.App )
@@ -26,15 +27,16 @@ class TestApp (TestScript):
             reg_2 < Error 002. Unknown location 34
             # bad participant ids
             reg_3 > *#En#22##*
-            reg_3 < Error . Id must be 3 numeric digits. You sent 
+            reg_3 < Error. Id must be 3 numeric digits. You sent 
             reg_3 > *#En#22#03#*
-            reg_3 < Error 03. Id must be 3 numeric digits. You sent 03 
+            reg_3 < Error. Id must be 3 numeric digits. You sent 03 
             reg_3 > *#En#22#0003#*
-            reg_3 < Error 0003. Id must be 3 numeric digits. You sent 0003 
+            reg_3 < Error. Id must be 3 numeric digits. You sent 0003 
             reg_3 > *#En#22#o003#*
-            reg_3 < Error o003. Id must be 3 numeric digits. You sent o003 
+            reg_3 < Error. Id must be 3 numeric digits. You sent o003 
             # test a duplicate id
             reg_4 > *#En#22#001#*
+            # but allow them to register with the same id in a different location
             reg_4 < Sorry, 001 has already been registered. Please choose a new user id.
             # but a duplicate at a new location should be ok
             reg_5 > *#En#19#001#*
@@ -51,7 +53,46 @@ class TestApp (TestScript):
         self.assertRaises(IaviReporter.DoesNotExist, IaviReporter.objects.get, **dict)     
         dict = {"alias":"22-003"}
         self.assertRaises(IaviReporter.DoesNotExist, IaviReporter.objects.get, **dict)     
-             
+    
+    def testTimeFormats(self):
+        reg_script = """
+            # test time format failures
+            # That's an "oh" 
+            time_format_1 > *#En#22#004#140O#*
+            time_format_1 < Error 004. Time must be 4 numeric digits between 0000 and 2359. You sent 140O
+            time_format_1 > *#En#22#004#2400#*
+            time_format_1 < Error 004. Time must be 4 numeric digits between 0000 and 2359. You sent 2400
+            time_format_1 > *#En#22#004#1460#*
+            time_format_1 < Error 004. Time must be 4 numeric digits between 0000 and 2359. You sent 1460
+            time_format_1 > *#En#22#004#0000#*
+            time_format_1 < Confirm 004 Registration is Complete
+            time_format_1 < Please Enter Your PIN Code
+            time_format_2 > *#En#22#005#*
+            time_format_2 < Confirm 005 Registration is Complete
+            time_format_2 < Please Enter Your PIN Code
+            time_format_3 > *#En#22#006#1838#*
+            time_format_3 < Confirm 006 Registration is Complete
+            time_format_3 < Please Enter Your PIN Code
+        """
+        self.runScript(reg_script)
+        
+        # this reporter should have been created
+        # and his time should be 0000
+        rep = IaviReporter.objects.get(alias="22-004")
+        time_status = StudyParticipant.objects.get(reporter=rep)
+        self.assertEqual(time_status.notification_time, datetime.time(0,0))
+        
+        # this one should get the default (1600)
+        rep = IaviReporter.objects.get(alias="22-005")
+        time_status = StudyParticipant.objects.get(reporter=rep)
+        self.assertEqual(time_status.notification_time, datetime.time(16,0))
+        
+        # this one should be 1838
+        rep = IaviReporter.objects.get(alias="22-006")
+        time_status = StudyParticipant.objects.get(reporter=rep)
+        self.assertEqual(time_status.notification_time, datetime.time(18,38))
+        
+    
         
     def testTestSubmission(self):
         self._register("tester", "001", "1234", "22", "en")
@@ -158,9 +199,9 @@ class TestApp (TestScript):
             pin_logic < Hello, Please Reply With Your PIN
             pin_logic > 1234
             # I would prefer this response was improved
-            pin_logic < "1234" is not a valid answer. You must enter your 4-digit PIN
+            pin_logic < Sorry, that wasn't the right PIN. Please try sending your 4-digit PIN again
             pin_logic > 1235
-            pin_logic < "1235" is not a valid answer. You must enter your 4-digit PIN
+            pin_logic < Sorry, that wasn't the right PIN. Please try sending your 4-digit PIN again
             # succeed
             pin_logic > 5555
             pin_logic < Did you have sex with your main partner in the last 24 hours? 
@@ -172,29 +213,29 @@ class TestApp (TestScript):
             pin_logic_2 > iavi uganda
             pin_logic_2 < Hello, Please Reply With Your PIN
             pin_logic_2 > 1234
-            pin_logic_2 < "1234" is not a valid answer. You must enter your 4-digit PIN
+            pin_logic_2 < Sorry, that wasn't the right PIN. Please try sending your 4-digit PIN again
             pin_logic_2 > 1235
-            pin_logic_2 < "1235" is not a valid answer. You must enter your 4-digit PIN
+            pin_logic_2 < Sorry, that wasn't the right PIN. Please try sending your 4-digit PIN again
             pin_logic_2 > 5555
-            pin_logic_2 < "5555" is not a valid answer. You must enter your 4-digit PIN
+            pin_logic_2 < Sorry, that wasn't the right PIN. Please try sending your 4-digit PIN again
             pin_logic_2 > abcd
-            pin_logic_2 < "abcd" is not a valid answer. You must enter your 4-digit PIN
+            pin_logic_2 < Sorry, that wasn't the right PIN. Please try sending your 4-digit PIN again 
             pin_logic_2 > 7777
-            pin_logic_2 < "7777" is not a valid answer. You must enter your 4-digit PIN
+            pin_logic_2 < Sorry, that wasn't the right PIN. Please try sending your 4-digit PIN again
             pin_logic_2 < Sorry, invalid answer 5 times. Your session will now end. Please try again later.
             # make sure we got bounced and test the other tree
             pin_logic_2 > iavi kenya
             pin_logic_2 < Hello, Please Reply With Your PIN
             pin_logic_2 > 1234
-            pin_logic_2 < "1234" is not a valid answer. You must enter your 4-digit PIN
+            pin_logic_2 < Sorry, that wasn't the right PIN. Please try sending your 4-digit PIN again 
             pin_logic_2 > 1235
-            pin_logic_2 < "1235" is not a valid answer. You must enter your 4-digit PIN
+            pin_logic_2 < Sorry, that wasn't the right PIN. Please try sending your 4-digit PIN again 
             pin_logic_2 > 5555
-            pin_logic_2 < "5555" is not a valid answer. You must enter your 4-digit PIN
+            pin_logic_2 < Sorry, that wasn't the right PIN. Please try sending your 4-digit PIN again 
             pin_logic_2 > abcd
-            pin_logic_2 < "abcd" is not a valid answer. You must enter your 4-digit PIN
+            pin_logic_2 < Sorry, that wasn't the right PIN. Please try sending your 4-digit PIN again 
             pin_logic_2 > 7777
-            pin_logic_2 < "7777" is not a valid answer. You must enter your 4-digit PIN
+            pin_logic_2 < Sorry, that wasn't the right PIN. Please try sending your 4-digit PIN again 
             pin_logic_2 < Sorry, invalid answer 5 times. Your session will now end. Please try again later.
         """
         self.runScript(script)
@@ -218,7 +259,7 @@ class TestApp (TestScript):
         
     def testUgandaLocalization(self):
         # and again in another language
-        self._register(**{"phone":"ugb_2", "id": "002", "language":"ug"})
+        self._register(**{"phone":"ugb_2", "id": "002", "language":"lg"})
         script = """
             ugb_2 > iavi uganda
             ugb_2 < Ssebo/Nnyabo Yingiza ennamba yo eye'kyaama mu ssimu yo. Era ennamba eyo giwereze ku kompyuta yaffe.
@@ -263,11 +304,11 @@ class TestApp (TestScript):
             kenya_1 < How many times did you have sex in the last 24 hours?
             kenya_1 > 50
             # this is ugly too.
-            kenya_1 < "50" is not a valid answer. You must enter a number between 1 and 19 or 0
+            kenya_1 < "50" is not a valid answer. You must enter a number between 0 and 19
             kenya_1 > a
-            kenya_1 < "a" is not a valid answer. You must enter a number between 1 and 19 or 0
+            kenya_1 < "a" is not a valid answer. You must enter a number between 0 and 19
             kenya_1 > -3
-            kenya_1 < "-3" is not a valid answer. You must enter a number between 1 and 19 or 0
+            kenya_1 < "-3" is not a valid answer. You must enter a number between 0 and 19
             kenya_1 < Sorry, invalid answer 3 times. Your session will now end. Please try again later.
             kenya_1 > iavi kenya
             kenya_1 < Hello, Please Reply With Your PIN

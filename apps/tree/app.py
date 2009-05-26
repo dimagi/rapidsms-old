@@ -5,7 +5,7 @@ import rapidsms
 from models import *
 from apps.reporters.models import Reporter
 from apps.i18n.utils import get_translation as _
-from apps.i18n.utils import get_language 
+from apps.i18n.utils import get_language_code 
 
 class App(rapidsms.app.App):
     
@@ -79,9 +79,14 @@ class App(rapidsms.app.App):
                     return
                 else:
                     # send them some hints about how to respond
-                    flat_answers = " or ".join([trans.answer.helper_text() for trans in transitions])
-                    self.debug("flat answers")
-                    msg.respond('"%s" is not a valid answer. You must enter %s' % (msg.text, flat_answers))
+                    if state.question.error_response:
+                        response = (_(state.question.error_response, get_language_code(session.connection)))
+                        if "%(answer)s" in response:
+                            response = response % ({"answer" : msg.text})
+                    else:
+                        flat_answers = " or ".join([trans.answer.helper_text() for trans in transitions])
+                        response = _('"%s" is not a valid answer. You must enter %s' % (msg.text, flat_answers), get_language_code(session.connection))
+                    msg.respond(response)
                     
                     # update the number of times the user has tried
                     # to answer this.  If they have reached the 
@@ -91,7 +96,7 @@ class App(rapidsms.app.App):
                     if state.num_retries and session.num_tries >= state.num_retries:
                         session.state = None
                         msg.respond(_("Sorry, invalid answer %(retries)s times. Your session will now end. Please try again later.",
-                                      get_language(session.connection)) % {"retries": session.num_tries })
+                                      get_language_code(session.connection)) % {"retries": session.num_tries })
                         
                     session.save()
                     return True
@@ -123,7 +128,7 @@ class App(rapidsms.app.App):
             if not session.state:
                 self._end_session(session)
                 if session.tree.completion_text:
-                    msg.respond(_(session.tree.completion_text, get_language(session.connection)))
+                    msg.respond(_(session.tree.completion_text, get_language_code(session.connection)))
                 
         # if there is a next question ready to ask
         # (and this includes THE FIRST), send it along
@@ -131,8 +136,8 @@ class App(rapidsms.app.App):
         if sessions:
             state = sessions[0].state
             if state.question:
-                msg.respond(_(state.question.text, get_language(sessions[0].connection)))
-                self.info(_(state.question.text, get_language(sessions[0].connection)))
+                msg.respond(_(state.question.text, get_language_code(sessions[0].connection)))
+                self.info(_(state.question.text, get_language_code(sessions[0].connection)))
         
         # if we haven't returned long before now, we're
         # long committed to dealing with this message

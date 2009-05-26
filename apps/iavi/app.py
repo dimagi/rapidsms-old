@@ -5,11 +5,12 @@ from rapidsms.message import Message
 from apps.reporters.models import Reporter, Location
 from models import *
 from apps.i18n.utils import get_translation as _
-from apps.i18n.utils import get_language
+from apps.i18n.utils import get_language_code
 from strings import strings
 import threading
 import time
 from datetime import datetime
+from datetime import time as dtt
 
 class App (rapidsms.app.App):
     
@@ -56,7 +57,7 @@ class App (rapidsms.app.App):
         
         # we'll be using the language in all our responses so
         # keep it handy
-        language = get_language(message.persistant_connection)
+        language = get_language_code(message.persistant_connection)
         
         # check pin conditions and process if they match
         if message.reporter and message.reporter.pk in self.pending_pins:
@@ -100,25 +101,32 @@ class App (rapidsms.app.App):
                 elif len(body_groups) == 4:
                     language, site, id, study_time = body_groups
                 else:
-                    message.respond(_(strings["unknown_format"], get_language(message.persistant_connection)))
+                    message.respond(_(strings["unknown_format"], get_language_code(message.persistant_connection)))
                 
                 # validate the format of the id, existence of location
                 if not re.match(r"^\d{3}$", id):
-                    message.respond("Error %s. Id must be 3 numeric digits. You sent %s" % (id, id))
+                    message.respond(_(strings["id_format"], get_language_code(message.persistant_connection)) % {"alias" : id})
                     return True
                 try:
                     location = Location.objects.get(code=site)
                 except Location.DoesNotExist:
-                    message.respond("Error %s. Unknown location %s" % (id, site))
+                    message.respond(_(strings["unknown_location"], get_language_code(message.persistant_connection)) % {"alias" : id, "location" : site})
                     return True
                 
                 # TODO: validate the language
                 
                 # validate and get the time object
-                if not time.isdigit():
-                    # todo
-                    pass
-                    
+                if re.match(r"^\d{4}$", study_time):
+                    hour = int(study_time[0:2])
+                    minute = int(study_time[2:4])
+                    if hour < 0 or hour >= 24 or minute < 0 or minute >= 60:
+                        message.respond(_(strings["time_format"], get_language_code(message.persistant_connection)) % {"alias" : id, "time" : study_time})
+                        return
+                    real_time = dtt(hour, minute)
+                else:
+                    message.respond(_(strings["time_format"], get_language_code(message.persistant_connection)) % {"alias" : id, "time" : study_time})
+                    return 
+                
                 # user ids are unique per-location so use location-id
                 # as the alias
                 alias = IaviReporter.get_alias(location.code, id)
@@ -132,15 +140,17 @@ class App (rapidsms.app.App):
                 reporter = IaviReporter(alias=alias, language=language, location=location, registered=message.date)
                 reporter.save()
                 
+                # create the study participant for this too.  Assume they're starting
+                # today and don't set a stop date.  This logic may be revisited
+                participant = StudyParticipant.objects.create(reporter=reporter, 
+                                                              start_date = datetime.now(),
+                                                              notification_time = real_time)
+                
                 # also attach the reporter to the connection 
                 message.persistant_connection.reporter=reporter
                 message.persistant_connection.save()
                 
-                # TODO: also do some tree stuff
-                # TODO: initiate pin sequence
-                
-                # send the response confirmation
-                message.respond("Confirm %s Registration is Complete" % id)
+                message.respond(_(strings["registration_complete"], language) % {"alias": id })
                 
                 # also send the PIN request and add this user to the 
                 # pending pins
@@ -170,13 +180,13 @@ class App (rapidsms.app.App):
             if iavi_reporter.pin:
                 return True
             else:
-                message.respond(_(strings["rejection_no_pin"], get_language(message.persistant_connection)))
+                message.respond(_(strings["rejection_no_pin"], get_language_code(message.persistant_connection)))
         else:
-            message.respond(_(strings["rejection_unknown_user"], get_language(message.persistant_connection)))
+            message.respond(_(strings["rejection_unknown_user"], get_language_code(message.persistant_connection)))
         return False
             
     def _process_pin(self, message):
-        language = get_language(message.persistant_connection)
+        language = get_language_code(message.persistant_connection)
         incoming_pin = message.text.strip()
         reporter = IaviReporter.objects.get(pk=message.reporter.pk)
         if self.pending_pins[reporter.pk]:
@@ -202,7 +212,7 @@ class App (rapidsms.app.App):
                 message.respond(_(strings["bad_pin_format"], language) % {"alias": reporter.study_id})
         return True
     
-    def _initiate_tree_sequence(self, user, language, initiator=None):
+    def _initiate_tree_sequence(self, user, survey_type, initiator=None):
         user_conn = user.connection()
         if user_conn:
             db_backend = user_conn.backend
@@ -211,9 +221,9 @@ class App (rapidsms.app.App):
             real_backend = self.router.get_backend(db_backend.slug)
             if real_backend:
                 connection = Connection(real_backend, user_conn.identity)
-                text = self._get_tree_sequence(language)
+                text = self._get_tree_sequence(survey_type)
                 if not text:
-                    return _(strings["unknown_language"],language) % ({"language":language, "alias":user.study_id})
+                    return _(strings["unknown_language"], survey_type) % ({"language":survey_type, "alias":user.study_id})
                 else:
                     # first ask the tree app to end any sessions it has open
                     if self.tree_app:
@@ -237,13 +247,21 @@ class App (rapidsms.app.App):
             self.error(error)
             return error
 
-    def _get_tree_sequence(self, language):
-        if re.match(r"^(ug[a-z]*)$", language, re.IGNORECASE):
+    def _get_tree_sequence(self, survey_type):
+        if re.match(r"^(ug[a-z]*)$", survey_type, re.IGNORECASE):
             return "iavi uganda"
-        elif re.match(r"^(ke[a-z]*|sw[a-z]*)$", language, re.IGNORECASE):
+        elif re.match(r"^(ke[a-z]*|sw[a-z]*)$", survey_type, re.IGNORECASE):
             return "iavi kenya"
         else:
             return None
+    
+    def _get_survey_type(self, location):
+        if "uganda" in location.type.name.lower():
+            return "ug"
+        elif "kenya" in location.type.name.lower():
+            return "ke"
+        else:
+            raise Exception("Can't initiate survey for unknown location type %s" % location.type)
     
     def _get_column(self, state):
         # this is just hard coded. *sigh*
@@ -313,10 +331,10 @@ class App (rapidsms.app.App):
                 test_session = TestSession.objects.get(tree_session=session)
                 if session.canceled:
                     test_session.status = "F"
-                    response = _(strings["test_fail"], get_language(test_session.initiator)) % ({"alias": iavi_reporter.study_id})
+                    response = _(strings["test_fail"], get_language_code(test_session.initiator)) % ({"alias": iavi_reporter.study_id})
                 else:
                     test_session.status = "P"
-                    response = _(strings["test_pass"], get_language(test_session.initiator)) % ({"alias": iavi_reporter.study_id})
+                    response = _(strings["test_pass"], get_language_code(test_session.initiator)) % ({"alias": iavi_reporter.study_id})
                 
                 test_session.save()
                 
@@ -393,10 +411,30 @@ class App (rapidsms.app.App):
         '''This loops and initiates surveys with registered participants
            based on some criteria (like daily)'''
         self.info("Starting survey initiator...")
+        prev_time = datetime.now().time()
         while True:
             # wait for some condition to be true, and when it is
             # start a survey
-            reporter = IaviReporter()
+            next_time = datetime.now().time()
+            # conditions are that the 
+            # notification time is between the previous seen time
+            # and the next time, the start date was sometime before
+            # or equal to today, and the end date is either null
+            # or after or equal to today
+            to_initiate = StudyParticipant.objects.filter\
+                (notification_time__gt=prev_time).filter\
+                (notification_time__lte=next_time).filter\
+                (start_date__lte=datetime.today())
+            for participant in to_initiate:
+                errors = self._initiate_tree_sequence(participant.reporter, 
+                                                      self._get_survey_type(participant.reporter.location))
+                # unfortunately I'm not sure what else we can do if something
+                # goes wrong here
+                if errors:
+                    self.error(errors)
+            
+            #update the previous time
+            prev_time = next_time
             
             # wait until it's time to check again
             time.sleep(seconds)
