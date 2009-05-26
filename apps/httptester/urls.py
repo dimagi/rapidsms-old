@@ -3,7 +3,7 @@
 
 import os
 from django.conf.urls.defaults import *
-import apps.httptester.views as views
+import views as views
 
 urlpatterns = patterns('',
     url(r'^http$', views.index),
@@ -15,6 +15,6 @@ urlpatterns = patterns('',
     
     # serve the static files for this HTTP app
     # TODO: this should be automatic, via WEBUI
-    (r'^static/http/(?P<path>.*)$', "django.views.static.serve",
-        {"document_root": os.path.dirname(__file__) + "/static"})
+#    (r'^static/http/(?P<path>.*)$', "django.views.static.serve",
+#        {"document_root": os.path.dirname(__file__) + "/static"})
 )

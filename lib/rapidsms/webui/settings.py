@@ -135,9 +135,17 @@ if "django" in conf:
 # ====================
 
 rapidsms_apps = [
-    "apps.%s" % (rs_app["type"])
+    "%s" % (rs_app["type"])
     for rs_app in conf["rapidsms"]["apps"]
 ]
+
+rapidsms_apps_conf = {}
+for rs_app in conf["rapidsms"]["apps"]:
+    appname = rs_app["type"]    
+    rapidsms_apps_conf[appname] = rs_app
+    
+
+
 
 # TODO: move these?
 INSTALLED_APPS = [

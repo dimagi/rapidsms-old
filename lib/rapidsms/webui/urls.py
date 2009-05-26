@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
-
+import logging
 import os
 from django.conf.urls.defaults import *
 
 urlpatterns = []
 
+#add the basic login stuffs
+urlpatterns += patterns('', (r'^accounts/login/$', 'django.contrib.auth.views.login'),('^accounts/logout/$', 'django.contrib.auth.views.logout_then_login'))
+
 
 # load the rapidsms configuration
 from rapidsms.config import Config
 conf = Config(os.environ["RAPIDSMS_INI"])
-
+import settings
 
 # iterate each of the active rapidsms apps (from the ini),
 # and (attempt to) import the urls.py from each. it's okay
@@ -19,38 +22,40 @@ for rs_app in conf["rapidsms"]["apps"]:
     try:
     
         # import the single "urlpatterns" attribute
-        package_name = "apps.%s.urls" % (rs_app["type"])
+        package_name = "%s.urls" % (rs_app["type"])
         module = __import__(package_name, {}, {}, ["urlpatterns"])
 
         # add the explicitly defined urlpatterns
         urlpatterns += module.urlpatterns
 
-        # does urls.py have a sibling "static" dir?
-        mod_dir = os.path.dirname(module.__file__)
-        static_dir = "%s/static" % mod_dir
-        if os.path.exists(static_dir):
-
-            # found a static dir, so automatically serve those files
-            # via django. this is frowned upon in production, since
-            # the server isn't tough (or fast), but there are so many
-            # places that static files can come from, i'm not sure how
-            # we would auto-configure that in apache. maybe we could
-            # extend manager.py, to output an http conf mapping all
-            # of this stuff for apache?
-            urlpatterns += patterns("", url(
-                "^static/%s/(?P<path>.*)$" % rs_app["type"],
-                "django.views.static.serve",
-                {"document_root": static_dir }
-            ))
+        if settings.USE_DJANGO_STATIC_SERVER == 'yes':
+            # does urls.py have a sibling "static" dir?
+            mod_dir = os.path.dirname(module.__file__)
+            static_dir = "%s/static" % mod_dir
+            if os.path.exists(static_dir):
+    
+                # found a static dir, so automatically serve those files
+                # via django. this is frowned upon in production, since
+                # the server isn't tough (or fast), but there are so many
+                # places that static files can come from, i'm not sure how
+                # we would auto-configure that in apache. maybe we could
+                # extend manager.py, to output an http conf mapping all
+                # of this stuff for apache?
+                urlpatterns += patterns("", url(
+                    "^static/%s/(?P<path>.*)$" % rs_app["type"],
+                    "django.views.static.serve",
+                    {"document_root": static_dir }
+                ))
     
     # urls.py couldn't be imported for
     # this app. no matter, just carry
     # on importing the others
-    except ImportError:
+    except ImportError, e:
+        logging.error("Url Import error: " + str(e))        
         pass
     
     # urls.py was imported, but it didn't
     # have "urlpatterns" attribute. this
     # should not happen... but does
-    except AttributeError:
+    except AttributeError, ea:        
         pass

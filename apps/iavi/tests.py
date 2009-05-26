@@ -1,10 +1,10 @@
 from rapidsms.tests.scripted import TestScript
 from app import App
 from models import *
-import apps.reporters.app as reporters_app
-import apps.tree.app as tree_app
+import reporters.app as reporters_app
+import tree.app as tree_app
 #import apps.i18n.app as i18n_app
-from apps.reporters.models import Reporter
+from reporters.models import Reporter
 import datetime
 
 class TestApp (TestScript):
@@ -418,5 +418,4 @@ class TestApp (TestScript):
             %(phone)s > %(pin)s
             %(phone)s < Thank You. Your PIN Has Been Set
         """ % ({"phone": phone, "id": id, "pin": pin, "language":language, "location": location } )
-        self.runScript(script)
-        
+        self.runScript(script)        

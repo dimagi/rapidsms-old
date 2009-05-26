@@ -3,7 +3,7 @@
 
 import os
 from django.conf.urls.defaults import *
-import apps.tree.views as views
+import tree.views as views
 
 urlpatterns = patterns('',
     (r'^tree$', views.index),
@@ -16,6 +16,6 @@ urlpatterns = patterns('',
     
     # serve the static files for this TREE app
     # TODO: this should be automatic, via WEBUI
-    (r'^static/tree/(?P<path>.*)$', "django.views.static.serve",
-        {"document_root": os.path.dirname(__file__) + "/static"})
+#    (r'^static/tree/(?P<path>.*)$', "django.views.static.serve",
+#        {"document_root": os.path.dirname(__file__) + "/static"})
 )

@@ -9,5 +9,5 @@ def check_availability(req):
     return HttpResponse("OK")
 
 @cache_page(60 * 15)
-def dashboard(req):
+def dashboard(req):    
 	return render_to_response(req, "dashboard.html")

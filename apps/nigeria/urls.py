@@ -3,7 +3,7 @@
 
 import os
 from django.conf.urls.defaults import *
-import apps.nigeria.views as views
+import nigeria.views as views
 
 urlpatterns = patterns('',
     url(r'^locgen/?$', views.generate),

@@ -6,14 +6,15 @@ from django import template
 register = template.Library()
 
 
+
 import datetime
 from django.utils.timesince import timesince
 from django.utils.safestring import mark_safe
 from django.utils.html import conditional_escape
 from django.template.defaultfilters import date as filter_date, time as filter_time
 
-from apps.reporters.models import *
-
+import reporters
+from reporters.models import *
 
 @register.filter()
 def magnitude_ago(value):

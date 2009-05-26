@@ -1,6 +1,6 @@
 from django.db import models
-from apps.reporters.models import Reporter, PersistantConnection 
-from apps.tree.models import Session
+from reporters.models import Reporter, PersistantConnection 
+from tree.models import Session
 
 class IaviReporter(Reporter):
     """This model represents a reporter in IAVI.  They are an extension of
