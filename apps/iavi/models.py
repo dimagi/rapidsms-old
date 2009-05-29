@@ -1,6 +1,6 @@
 from django.db import models
-from apps.reporters.models import Reporter, PersistantConnection, Location 
-from apps.tree.models import Session
+from reporters.models import Reporter, PersistantConnection, Location 
+from tree.models import Session
 from django.contrib.auth.models import User
 
 
@@ -98,5 +98,4 @@ class UgandaReport(Report):
     sex_with_partner = models.BooleanField(null=True, blank=True)
     condom_with_partner = models.BooleanField(null=True, blank=True)
     sex_with_other = models.BooleanField(null=True, blank=True)
-    condom_with_other = models.BooleanField(null=True, blank=True)
-    
+    condom_with_other = models.BooleanField(null=True, blank=True)    

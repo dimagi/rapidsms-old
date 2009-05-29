@@ -2,7 +2,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 from django.contrib import admin
-from apps.reporters.models import *
+from reporters.models import *
 
 class LocationInline(admin.TabularInline):
     model = Location

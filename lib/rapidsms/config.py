@@ -4,7 +4,7 @@
 import os
 from ConfigParser import SafeConfigParser
 import log
-
+import logging
 
 def to_list (item, separator=","):
     return filter(None, map(lambda x: str(x).strip(), item.split(separator)))
@@ -54,16 +54,20 @@ class Config (object):
            this without mucking with __import__."""
         
         # break the class name off the end of  module template
-        # i.e. "apps.ABCD.app.App" -> ("apps.ABC.app", "App")
+        # i.e. "ABCD.app.App" -> ("ABC.app", "App")
         try:
-            module_str, class_str = class_tmpl.rsplit(".",1)
-            module = __import__(module_str, {}, {}, [class_str])
+            split_module = class_tmpl.rsplit(".",1)            
+            module = __import__(split_module[0], {}, {}, split_module[1:])
+            #module = __import__(class_tmpl, {}, {}, [])
             
             # import the requested class or None
-            if hasattr(module, class_str):
-                return getattr(module, class_str)
+            if len(split_module) > 1 and hasattr(module, split_module[-1]):
+                return getattr(module, split_module[-1])
+            else:
+                return module
         
-        except ImportError:
+        except ImportError, e:
+            logging.error("App import error: " + str(e))            
             pass
 
 
@@ -85,10 +89,10 @@ class Config (object):
     
     def app_section (self, name):
         data = self.component_section(name)
-        mod_str = "apps.%s" % (data["type"])
+        mod_str = "%s" % (data["type"])
         
         # load the config.py for this app, if possible
-        config = self.__import_class("apps.%s.config" % data["type"])
+        config = self.__import_class("%s.config" % data["type"])
         if config is not None:
             
             # copy all of the names not starting with underscore (those are
@@ -99,7 +103,8 @@ class Config (object):
         
         # import the actual module, and add the path to the
         # config - it might not always be in rapidsms/apps/%s
-        data["path"] = self.__import_class("apps.%s" % data["type"]).__path__[0]
+        
+        data["path"] = self.__import_class("%s" % data["type"]).__path__[0]
         
         # return the component with the additional
         # app-specific data included.

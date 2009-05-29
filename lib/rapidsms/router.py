@@ -74,7 +74,7 @@ class Router (component.Receiver):
 
     def add_app (self, conf):
         try:
-            app = self.build_component("apps.%s.app.App", conf)
+            app = self.build_component("%s.app.App", conf)
             self.info("Added app: %r" % conf)
             self.apps.append(app)
             

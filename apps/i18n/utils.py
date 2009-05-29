@@ -2,7 +2,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 from models import Language, Translation
-from apps.reporters.models import PersistantConnection
+from reporters.models import PersistantConnection
 import re
 
 DEFAULT_LANGUAGE = "en"
@@ -30,5 +30,5 @@ def get_translation(string, language_code):
             return Translation.objects.get(language=language, original=string).translation
     except Translation.DoesNotExist:
         # hopefully the default passed in string will work
-        pass
+        pass    
     return string

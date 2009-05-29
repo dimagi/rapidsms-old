@@ -6,7 +6,7 @@ import os, re
 from datetime import datetime
 from django.db import models
 
-from apps.patterns.models import Pattern
+from patterns.models import Pattern
 
 # load the rapidsms configuration, for BackendManager
 # to check which backends are currently running
