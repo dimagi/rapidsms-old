@@ -46,12 +46,25 @@ for rs_app in conf["rapidsms"]["apps"]:
                     "django.views.static.serve",
                     {"document_root": static_dir }
                 ))
+        else:
+            try:
+                
+                mod_dir = os.path.dirname(os.path.abspath(module.__file__))
+                static_dir = "%s/static" % mod_dir                
+                     
+                if not os.path.exists(os.path.join(settings.MEDIA_ROOT, rs_app["type"])):
+                    if os.path.exists(static_dir) and settings.MEDIA_SERVER_PROG == 'apache':                                     
+                        os.symlink(static_dir, os.path.join(settings.MEDIA_ROOT,rs_app["type"]))
+                
+            except Exception, e:
+                logging.error("error with doing the symlinks: " + str(e))
+                pass
     
     # urls.py couldn't be imported for
     # this app. no matter, just carry
     # on importing the others
     except ImportError, e:
-        logging.error("Url Import error: " + str(e))        
+        #logging.error("Url Import error: " + str(e) + " appname: " + str(rs_app))        
         pass
     
     # urls.py was imported, but it didn't
