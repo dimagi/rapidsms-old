@@ -1,6 +1,8 @@
 from django.db import models
-from reporters.models import Reporter, PersistantConnection 
+from reporters.models import Reporter, PersistantConnection, Location 
 from tree.models import Session
+from django.contrib.auth.models import User
+
 
 class IaviReporter(Reporter):
     """This model represents a reporter in IAVI.  They are an extension of
@@ -21,8 +23,22 @@ class IaviReporter(Reporter):
         return location + "-" + study_id
     
     def __unicode__(self):
-        return self.connection().identity
+        if self.connection():
+            return self.connection().identity
+        return self.alias
         
+        
+class IaviProfile(models.Model):
+    """ A user profile for IAVI website users.  This allows us to attach
+        additional information to the users so that we can access these
+        fields from within our views """
+    # This is a required field for Django's profile settings
+    user = models.ForeignKey(User, unique=True)
+    # Optionally tie this to an SMS reporter
+    reporter = models.ForeignKey(IaviReporter, null=True, blank=True)
+    # Users can be associated with zero or more locations
+    locations = models.ManyToManyField(Location, null=True, blank=True)
+    
 class StudyParticipant(models.Model):
     """ This represents a participant in the IAVI study. """
     reporter = models.ForeignKey(IaviReporter)
@@ -82,5 +98,4 @@ class UgandaReport(Report):
     sex_with_partner = models.BooleanField(null=True, blank=True)
     condom_with_partner = models.BooleanField(null=True, blank=True)
     sex_with_other = models.BooleanField(null=True, blank=True)
-    condom_with_other = models.BooleanField(null=True, blank=True)
-    
+    condom_with_other = models.BooleanField(null=True, blank=True)    

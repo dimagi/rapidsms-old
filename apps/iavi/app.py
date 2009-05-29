@@ -9,7 +9,7 @@ from i18n.utils import get_language_code
 from strings import strings
 import threading
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from datetime import time as dtt
 
 class App (rapidsms.app.App):
@@ -69,13 +69,13 @@ class App (rapidsms.app.App):
         if match:
             self.info("Message matches! %s", message)
             body_groups = match.groups()[0].split("#")
-            if len(body_groups)== 4 and body_groups[0] == "8377":
+            if len(body_groups)== 3 and body_groups[0] == "8377":
                 # this is the testing format
                 # this is the (extremely ugly) format of testing
-                # *#8377#<Country/Language Group>#<Site Number>#<Last 4 Digits of Participant ID>#*
+                # *#8377#<Site Number>#<Last 4 Digits of Participant ID>#*
                 # TODO: implement testing
                 
-                code, language, site, id = body_groups
+                code, site, id = body_groups
                 alias = IaviReporter.get_alias(site, id)
                 try: 
                     # lookup the user in question and initiate the tree
@@ -83,7 +83,7 @@ class App (rapidsms.app.App):
                     # with them
                     user = IaviReporter.objects.get(alias=alias)
                     
-                    errors = self._initiate_tree_sequence(user, language, message.persistant_connection)
+                    errors = self._initiate_tree_sequence(user, message.persistant_connection)
                     if errors:
                         message.respond(errors)
                 except IaviReporter.DoesNotExist:
@@ -201,6 +201,8 @@ class App (rapidsms.app.App):
             else:
                 # oops they didn't match.  send a failure string
                 message.respond(_(strings["pin_mismatch"], language) % {"alias": reporter.study_id})
+                # put an empty value back in the list of pins
+                self.pending_pins[reporter.pk] = None
         else:
             # this is their first try.  make sure 
             # it's 4 numeric digits and if so ask for confirmation
@@ -212,7 +214,7 @@ class App (rapidsms.app.App):
                 message.respond(_(strings["bad_pin_format"], language) % {"alias": reporter.study_id})
         return True
     
-    def _initiate_tree_sequence(self, user, survey_type, initiator=None):
+    def _initiate_tree_sequence(self, user, initiator=None):
         user_conn = user.connection()
         if user_conn:
             db_backend = user_conn.backend
@@ -221,9 +223,9 @@ class App (rapidsms.app.App):
             real_backend = self.router.get_backend(db_backend.slug)
             if real_backend:
                 connection = Connection(real_backend, user_conn.identity)
-                text = self._get_tree_sequence(survey_type)
+                text = self._get_tree_sequence(user)
                 if not text:
-                    return _(strings["unknown_language"], survey_type) % ({"language":survey_type, "alias":user.study_id})
+                    return _(strings["unknown_survey_location"], get_language_code(user.connection)) % ({"location":user.location, "alias":user.study_id})
                 else:
                     # first ask the tree app to end any sessions it has open
                     if self.tree_app:
@@ -243,25 +245,18 @@ class App (rapidsms.app.App):
                 self.error(error)
                 return error
         else:
-            error = "Can't find connection %s.  Messages will not be sent" % connection
+            error = "Can't find connection %s.  Messages will not be sent" % user_conn
             self.error(error)
             return error
 
-    def _get_tree_sequence(self, survey_type):
-        if re.match(r"^(ug[a-z]*)$", survey_type, re.IGNORECASE):
-            return "iavi uganda"
-        elif re.match(r"^(ke[a-z]*|sw[a-z]*)$", survey_type, re.IGNORECASE):
+    def _get_tree_sequence(self, user):
+        # this is very hacky
+        if user.location.type.name == "Kenya Location":
             return "iavi kenya"
+        elif  user.location.type.name == "Uganda Location":
+            return "iavi uganda"
         else:
             return None
-    
-    def _get_survey_type(self, location):
-        if "uganda" in location.type.name.lower():
-            return "ug"
-        elif "kenya" in location.type.name.lower():
-            return "ke"
-        else:
-            raise Exception("Can't initiate survey for unknown location type %s" % location.type)
     
     def _get_column(self, state):
         # this is just hard coded. *sigh*
@@ -411,11 +406,17 @@ class App (rapidsms.app.App):
         '''This loops and initiates surveys with registered participants
            based on some criteria (like daily)'''
         self.info("Starting survey initiator...")
-        prev_time = datetime.now().time()
+        prev_time = (datetime.now() + timedelta(hours=2)).time()
         while True:
-            # wait for some condition to be true, and when it is
-            # start a survey
-            next_time = datetime.now().time()
+            # wait for the time to pass when they registered to start a survey
+            # and when it is, start it
+            
+            # super hack... add 3 hours because of the time zone difference
+            # i'm sure there is a better way to do this with real time zones
+            # but i'm also sure I don't want to figure it out right nowx 
+            now_adjusted =  datetime.now() + timedelta(hours=2) 
+            next_time = now_adjusted.time()
+            self.debug("Adjusted time: %s, checking for participants to notify" % next_time)
             # conditions are that the 
             # notification time is between the previous seen time
             # and the next time, the start date was sometime before
@@ -424,10 +425,11 @@ class App (rapidsms.app.App):
             to_initiate = StudyParticipant.objects.filter\
                 (notification_time__gt=prev_time).filter\
                 (notification_time__lte=next_time).filter\
-                (start_date__lte=datetime.today())
+                (start_date__lte=now_adjusted.date())
             for participant in to_initiate:
-                errors = self._initiate_tree_sequence(participant.reporter, 
-                                                      self._get_survey_type(participant.reporter.location))
+                self.debug("Initiating sequence for %s" % participant.reporter);
+                errors = self._initiate_tree_sequence(participant.reporter) 
+                                                      
                 # unfortunately I'm not sure what else we can do if something
                 # goes wrong here
                 if errors:

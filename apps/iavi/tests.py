@@ -95,28 +95,75 @@ class TestApp (TestScript):
     
         
     def testTestSubmission(self):
-        self._register("tester", "001", "1234", "22", "en")
-        self._register("nurse", "002", "1234", "22", "en")
+        tester = self._register("tester", "001", "1234", "19", "en")
+        nurse = self._register("nurse", "002", "1234", "19", "en")
         script = """
             # base case
-            nurse > *#8377#ug#22#001#*
+            nurse > *#8377#19#001#*
             tester < Hello, Please Reply With Your PIN
             tester > 1234
             tester < Did you have sex with your main partner in the last 24 hours?
             tester > no
+        """
+        self.runScript(script)
+        # make sure we got an active session for this.
+        self.assertEqual(1, len(TestSession.objects.all()))
+        session = TestSession.objects.get(tester=tester)
+        self.assertEqual(nurse.connection(),session.initiator)
+        self.assertEqual("A",session.status)
+        script = """
             tester < Did you have vaginal sex with any other partner in the last 24 hours?
             tester > NO
             # due to some minor quirkiness, the nurse's message actually comes first
             nurse < 001 Passes Test            
             tester < Questionnaire is complete. Thank you.
             # unknown user
-            nurse > *#8377#ug#22#003#*
+            nurse > *#8377#19#003#*
             nurse < Error 003. Unknown user.
-            # unknown language
-            nurse > *#8377#huh#22#002#*
-            nurse < Error 002. Unknown language/region: huh.
         """
         self.runScript(script)
+        # try in another language 
+        self._register("tester2", "003", "1234", "19", "lg")
+        script = """
+            nurse > *#8377#19#003#*
+            tester2 < Ssebo/Nnyabo Yingiza ennamba yo eye'kyaama mu ssimu yo. Era ennamba eyo giwereze ku kompyuta yaffe.
+            tester2 > 1234
+            tester2 < Wetabyeeko mu kikolwa eky'omukwano n'omwagalwawo gw'olinaye mukunoonyereza kuno mu lunaku lumu oluyise?
+            tester2 > yes
+            tester2 < Mwakozesezza kondomu?
+            tester2 > yes
+            tester2 < Wetabyeeko mu kikolwa ky'omukwano n'omwagalwawo omulala yenna mu lunaku lumu oluyise?
+            tester2 > no
+            nurse < 003 Passes Test            
+            tester2 < Ebibuuzo bino bikomemye wano. Webale nnyo kuwaayo budde bwo.
+        """
+        self.runScript(script)
+        # try another location
+        self._register("tester3", "004", "1234", "22", "en")
+        script = """
+            nurse > *#8377#22#004#*
+            tester3 < Hello, Please Reply With Your PIN
+            tester3 > 1234
+            tester3 < How many times did you have sex in the last 24 hours?
+            tester3 > 2
+            tester3 < Of the number of times that you had sex in the last 24 hours, how many times were condoms used?
+            tester3 > 2
+            nurse < 004 Passes Test            
+            tester3 < Interview is complete. Remember to use a new condom each time you have sex and take your pills as agreed. Thank you
+        """
+        self.runScript(script)    
+        # make sure these didn't count as real sessions
+        self.assertEqual(0, len(Report.objects.all()))
+        self.assertEqual(3, len(TestSession.objects.all()))
+        for session in TestSession.objects.all():
+            # the users were marked as passed
+            self.assertEqual("P", session.status)
+            self.assertEqual(nurse.connection(), session.initiator)
+        for session in TestSession.objects.all():
+            # the users were marked as passed
+            self.assertEqual("P", session.status)
+            self.assertEqual(nurse.connection(), session.initiator)
+        
         
     def testPinEntry(self):
         # this does a base registration/pin combo with everyhing correct
@@ -158,10 +205,11 @@ class TestApp (TestScript):
             # test mismatch
             pin_3 < Please Enter Your PIN Code Again
             pin_3 > 1235
-            pin_3 < Error 003. PINs did not match.
-            # todo - implement and test that bit of functionality
-            # pin_3 < Error 003. PINs did not match.  Respond with "iavi set pin" to try again.
-
+            pin_3 < Error 003. PINs did not match. Please enter your PIN Code
+            pin_3 > 1234
+            pin_3 < Please Enter Your PIN Code Again
+            pin_3 > 1235
+            pin_3 < Error 003. PINs did not match. Please enter your PIN Code
         """
         self.runScript(pin_script)
         
@@ -340,6 +388,27 @@ class TestApp (TestScript):
             kenya_2 < Maswali yamekwisha. Kumbuka kutumia mpira mpya wa kondom kila unavyo fanya mapenzi na kumeza dawa kama ulivyoshauriwa. Asante sana
         """
         self.runScript(script)
+        # test error messages
+        script = """
+            kenya_2 > iavi kenya
+            kenya_2 < Tafadhali peana jibu ukitumia nambari yako binafsi ya kujitambulisha
+            kenya_2 > 1235
+            kenya_2 < Samahani, nambari uliyopeana sio sahihi. Tafadhali jaribu kubonyeza nambari yako ya kujitambulisha tena
+            kenya_2 > 1234
+            kenya_2 < Umefanya mapenzi mara ngapi kwa masaa ishirini na nne iliopita?
+            kenya_2 > abc
+            kenya_2 < "abc" sio jibu sahihi. Lazima ubonyeze nambari kati ya sufuri hadi kumi na tisa
+            kenya_2 > 2
+            kenya_2 < Kwa masaa hiyo kumi na nne iliopita, ulitumia mipira ya Kondom mara ngapi ulipofanya mapenzi?
+            kenya_2 > 6
+            kenya_2 < "6" silo jibu sahihi. Lazima ubonyeze nambari inayolingana au iliyo chini ya jibu uliopeana hapo awali
+            kenya_2 > 6
+            kenya_2 < "6" silo jibu sahihi. Lazima ubonyeze nambari inayolingana au iliyo chini ya jibu uliopeana hapo awali
+            kenya_2 > 6
+            kenya_2 < "6" silo jibu sahihi. Lazima ubonyeze nambari inayolingana au iliyo chini ya jibu uliopeana hapo awali
+            kenya_2 < Samahani, jibu lisilo sahihi mara 3. Muda wako umekwisha. Tafadhali jaribu tena baadaye
+        """
+        self.runScript(script)
     
     def testSessionListeners(self):
         self._register("session_listener")
@@ -418,4 +487,6 @@ class TestApp (TestScript):
             %(phone)s > %(pin)s
             %(phone)s < Thank You. Your PIN Has Been Set
         """ % ({"phone": phone, "id": id, "pin": pin, "language":language, "location": location } )
-        self.runScript(script)        
+        self.runScript(script)
+        return IaviReporter.objects.get(alias=IaviReporter.get_alias(location, id))
+        
