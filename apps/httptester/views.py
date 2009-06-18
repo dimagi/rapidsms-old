@@ -16,21 +16,8 @@ def index(req, form_class=MessageForm):
     form_instance = form_class()
     template_name="http/ajaxified.html"
     
-    print settings.appconf
-    # the following lines have been commented out since they aren't useful any longer
-    #if req.method == 'POST':
-    #   form_instance = form_class(req.POST)
-    #   if form_instance.is_valid():
-    #       msg = form_instance.save(commit=False)
-    #       msg.date = datetime.datetime.now()
-    #       msg.save();
-    #       url = "http://localhost:8080/%s/%s" % (msg.phone_number, urllib2.quote(msg.body))
-    #       urllib2.urlopen(url)
-    #       #return render_to_response('shared/thanks.html')
-    #   else:
-    #       print "something bad happened"
-    return render_to_response(req, template_name, {
-    })
+    return render_to_response(req, template_name, {})
+    
 
 def index_basic(req):
     
