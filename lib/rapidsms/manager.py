@@ -3,6 +3,7 @@
 
 from config import Config
 from router import Router
+import log
 import os, sys, shutil
 
 # the Manager class is a bin for various RapidSMS specific management methods
@@ -96,5 +97,10 @@ def start (args):
     elif settings:
         # none of the commands were recognized,
         # so hand off to Django        
+        
+        # initialize the log for debugging.
+        # this is not the right place to set this up
+        # but this is a quick way to get it working
+        log.init_logger(conf["django-log"]["level"],log_file = conf["django-log"]["file"])
         execute_manager(settings)
         

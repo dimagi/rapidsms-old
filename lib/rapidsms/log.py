@@ -39,3 +39,13 @@ class Logger (object):
         level = getattr(logging, level.upper())
         kwargs = {"extra":{"component":sender.title}}
         self.log.log(level, msg, *args, **kwargs)
+        
+def init_logger(log_level, log_file):
+    '''Utility method to initialize the python logger, in a similar
+       fashion to the rapidsms logger'''
+    if log_level and log_file:
+        log = logging.getLogger()
+        log.setLevel(getattr(logging, log_level.upper()))
+        file_handler = logging.handlers.RotatingFileHandler(log_file, maxBytes=8192, backupCount=256)
+        log.addHandler(file_handler)
+        
