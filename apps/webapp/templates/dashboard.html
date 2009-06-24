@@ -1,6 +1,15 @@
 {% extends "layout.html" %}
 {% block title %}Dashboard{% endblock %}
+{% block javascripts %}
+<script type="text/javascript" src="/static/webapp/javascripts/jquery.flot.js"></script>
+<script type="text/javascript" src="/static/webapp/javascripts/jquery.flot.pie.pack.js"></script>
+<!--[if IE]><script type="text/javascript" src="/static/webapp/javascripts/excanvas.pack.js"></script>
+<![endif]-->
+{% endblock %}
+{% load cache %}
 
 {% block content %}
-Welcome to RapidSMS IAVI! 
+{# cache content of dashboard for one hour #}
+{% cache 3600 dashboard %}
+{% endcache %}
 {% endblock %}

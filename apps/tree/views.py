@@ -5,6 +5,7 @@
 from django.http import HttpResponse
 from django.template import RequestContext
 from rapidsms.webui.utils import render_to_response
+from django.contrib.auth.decorators import login_required, permission_required
 
 from models import *
 
@@ -12,6 +13,8 @@ from StringIO import StringIO
 import csv
 
 
+@login_required
+@permission_required("tree.can_view")
 def index(req):
     allTrees = Tree.objects.all()
     if len(allTrees) != 0:
@@ -22,6 +25,8 @@ def index(req):
 		return render_to_response(req, "tree/index.html", {})
 
 
+@login_required
+@permission_required("tree.can_view")
 def data(req, id = None):
     allTrees = Tree.objects.all()
     # ok, the plan is to generate a table of responses per state, but this is tricky with loops.
@@ -64,19 +69,15 @@ def data(req, id = None):
                         paths[path][session] = entry.transition.answer
                     else:
                         paths[path] = { session : entry.transition.answer }
-            print paths
             return render_to_response(req, "tree/data.html",
                                       { "trees": allTrees, "t": t, "paths" : paths, "sessions" : sessions, "loops" : loops }
                                       )
-        print all_states
         # now we need to map all states to answers
         states_w_answers = {}
         for state in all_states:
             states_w_answers[state] = map((lambda x: x.answer), state.transition_set.all()) 
-        print states_w_answers
         # now we need to get all the entries
         all_entries = Entry.objects.all().filter(session__tree = t)
-        print all_entries
         if loops:
             # stupid error fix to prevent trees with loops from exploding.  This should be done better
             t = Tree()
@@ -87,6 +88,8 @@ def data(req, id = None):
         return render_to_response("tree/index.html",
             context_instance=RequestContext(req))
 
+@login_required
+@permission_required("tree.can_view")
 def export(req, id = None):
     t = get_tree(id)
     all_states = t.get_all_states()

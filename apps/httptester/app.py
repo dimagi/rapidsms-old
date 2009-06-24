@@ -2,7 +2,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 import rapidsms
-from models import Message
 import datetime
 
 class App(rapidsms.app.App):
@@ -13,6 +12,7 @@ class App(rapidsms.app.App):
         self._host = host
         # aw poop.  where can i stick these?  how about some ugly
         # global variables for now
+        
     
     def handle(self, message):
         self.debug("got message %s" % (message))

@@ -33,11 +33,24 @@ class IaviProfile(models.Model):
         additional information to the users so that we can access these
         fields from within our views """
     # This is a required field for Django's profile settings
-    user = models.ForeignKey(User, unique=True)
+    user = models.ForeignKey(User, unique=True, editable=False)
     # Optionally tie this to an SMS reporter
     reporter = models.ForeignKey(IaviReporter, null=True, blank=True)
     # Users can be associated with zero or more locations
     locations = models.ManyToManyField(Location, null=True, blank=True)
+    
+    class Meta:
+        permissions = (
+            # the permission required for this tab to display in the UI
+            ("can_view", "Can view iavi data"),
+            ("can_read_participants", "Can view participant data"),
+            ("can_write_participants", "Can edit participant data"),
+            ("can_see_data", "Can view study data"),
+            ("is_admin", "Is an administrator for IAVI"),
+        )
+    
+    def __unicode__(self):
+        return "%s --> %s" % (self.user, self.reporter)
     
 class StudyParticipant(models.Model):
     """ This represents a participant in the IAVI study. """
