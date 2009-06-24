@@ -10,7 +10,6 @@ from django.contrib.auth.decorators import login_required
 def check_availability(req):
     return HttpResponse("OK")
 
-@cache_page(60 * 15)
 @login_required
 def dashboard(req):
 	return render_to_response(req, "dashboard.html")
