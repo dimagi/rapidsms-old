@@ -258,16 +258,22 @@ class End2EndHandler(RapidBaseHttpHandler):
     param_text = "msg"
     param_sender = "snr"
     
-    outgoing_url = "http://switch1.yo.co.ug/ybs_p/task.php"
-    outgoing_params = {"ybsacctno" : "1000193801", 
-                 "sysrid" : "5", 
-                 "method" : "acsendsms", 
-                 "type" : "1", 
-                 "nostore" : "1", 
-                 "ybs_autocreate_authorization" : "c32d86ed21921f3a2c4140ac8e65e188"
-                 }
-    param_text_outgoing = "sms_content"
-    param_phone_outgoing = "destinations"
+    outgoing_url = "http://gw1.promessaging.com/sms.php"
+    backup_outgoing_url = "http://gw2.promessaging.com/sms.php"
+    # id (customer identification number)
+    # pw (password)
+    # dnr (recipient code)
+    # snr (originator code)
+    # ddt (deferred delivery time)
+    # test flag indicating test mode (SMS will not be send out) (0 or 1)
+    # msg (for transporting a text-message)
+    outgoing_params = {"id" : "ID", 
+                       "pw" : "PW", 
+                       "test" : "1", 
+                       }
+    param_text_outgoing = "msg"
+    param_dst_outgoing = "dnr"
+    param_sender_outgoing = "snr"
 
 
     def do_GET(self):
@@ -295,7 +301,7 @@ class End2EndHandler(RapidBaseHttpHandler):
                 elif param[0] == End2EndHandler.param_sender:
                     # TODO watch out because urllib.unquote 
                     # will blow up on unicode text 
-                    sender = param[1]
+                    sender = urllib.unquote(param[1])
                 # TODO: deal with timestamps
             if text and sender: 
                 # messages come in from end2end with + instead of spaces, so
@@ -315,26 +321,33 @@ class End2EndHandler(RapidBaseHttpHandler):
     @classmethod
     def outgoing(klass, message):
         # todo: make this end2end
-        klass.backend.debug("Yo outgoing message: %s" % message)
-        params = YoHandler.outgoing_params.copy()
-        params[YoHandler.param_text_outgoing] = urllib2.quote(message.text)
-        params[YoHandler.param_phone_outgoing] = urllib2.quote(message.connection.identity)
+        klass.backend.debug("End2End outgoing message: %s" % message)
+        params = End2EndHandler.outgoing_params.copy()
+        params[End2EndHandler.param_text_outgoing] = urllib2.quote(message.text)
+        params[End2EndHandler.param_dst_outgoing] = urllib2.quote(message.connection.identity)
         lines = []
-        ok = False
-        for line in urllib2.urlopen(YoHandler.outgoing_url, urllib.urlencode(params)): 
-            if "ybs_autocreate_status=OK" in line:
-                ok = True
-            elif "ybs_autocreate_status=ERROR" in line:
-                ok = False
-            lines.append(line)
-        if ok:
+        success = False
+        response = ""
+        for url in [End2EndHandler.outgoing_url, End2EndHandler.backup_outgoing_url]:
+             
+            try:
+                response = urllib2.urlopen(End2EndHandler.outgoing_url, urllib.urlencode(params))
+                for line in response:
+                    if "-ERR" in line:
+                        # fail
+                        klass.backend.error("Error from gateway %s:\n%s" % (url, response))
+                        continue
+                # we didn't fail if we made it out
+                success = True
+                # stop looping over the urls on the first success
+                break
+            except Exception, e:
+                klass.backend.error("problem submitting to: %s" % url)
+        if success:
             lines.insert(0,"Success!")
         else:
             lines.insert(0,"Error!")
         
-        klass.backend.debug("submitting to url: %s" % YoHandler.outgoing_url)
-        
-        response = "\n".join([line for line in lines])
         klass.backend.debug("Got response: %s" % response)
         
         
