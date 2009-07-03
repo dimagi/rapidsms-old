@@ -109,7 +109,6 @@ def render_to_response(req, template_name, dictionary=None, **kwargs):
     # add the template information to the dictionary, 
     # if necessary
     if not "base_template" in rs_dict:
-        print "base template is: %s" % settings.BASE_TEMPLATE
         rs_dict["base_template"] = settings.BASE_TEMPLATE
     
     # pass on the combined dicts to the original function
