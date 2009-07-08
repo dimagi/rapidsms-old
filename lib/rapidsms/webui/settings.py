@@ -2,7 +2,10 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 import os, time
-
+import rapidsms.log as rapid_log
+import logging
+from rapidsms.config import Config
+conf = Config(os.environ["RAPIDSMS_INI"])
 
 
 DEBUG = True
@@ -151,3 +154,8 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.admindocs'
 ] + [app["module"] for app in RAPIDSMS_APPS.values()]
+
+
+rapid_log.init_logger(conf["django-log"]["level"],log_file = conf["django-log"]["file"])
+logging.debug("Initialized the log to %s!" % conf["django-log"]["file"])
+
