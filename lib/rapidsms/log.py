@@ -10,6 +10,7 @@ LOG_CHANNEL = "rapidsms"
 LOG_SIZE    = 8192 # 8192 bytes = 64 kb
 LOG_BACKUPS = 256 # number of logs to keep around
 LOG_FORMAT  = "%(asctime)s %(levelname)s [%(component)s]: %(message)s"
+HQ_LOG_FORMAT  = "%(asctime)s %(levelname)s: %(message)s"
 LOG_LEVEL   = "info"
 LOG_FILE    = "/tmp/rapidsms.log"
 
@@ -37,16 +38,20 @@ class Logger (object):
         
     def write(self, sender, level, msg, *args):
         level = getattr(logging, level.upper())
-        kwargs = {"extra":{"component":sender.title}}
+        #kwargs = {"extra":{"component":sender.title}}
         self.log.log(level, msg, *args, **kwargs)
         
 def init_logger(log_level, log_file):
     '''Utility method to initialize the python logger, in a similar
        fashion to the rapidsms logger'''
+    logging.debug("init_logger begin")
     if log_level and log_file:
+        logging.debug("are we even getting here?")
         log = logging.getLogger()
         logging.raiseExceptions = 0
         log.setLevel(getattr(logging, log_level.upper()))
         file_handler = logging.handlers.RotatingFileHandler(log_file, maxBytes=8192, backupCount=256)
+        formatter = logging.Formatter(HQ_LOG_FORMAT)
+        file_handler.setFormatter(formatter)
         log.addHandler(file_handler)
         
