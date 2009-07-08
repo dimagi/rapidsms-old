@@ -45,11 +45,15 @@ def init_logger(log_level, log_file):
     '''Utility method to initialize the python logger, in a similar
        fashion to the rapidsms logger'''
     if log_level and log_file:
-        log = logging.getLogger()
-        logging.raiseExceptions = 0
-        log.setLevel(getattr(logging, log_level.upper()))
-        file_handler = logging.handlers.RotatingFileHandler(log_file, maxBytes=8192, backupCount=256)
-        formatter = logging.Formatter(HQ_LOG_FORMAT)
-        file_handler.setFormatter(formatter)
-        log.addHandler(file_handler)
-        
+        try:
+            log = logging.getLogger()
+            logging.raiseExceptions = 0
+            log.setLevel(getattr(logging, log_level.upper()))
+            file_handler = logging.handlers.RotatingFileHandler(log_file, maxBytes=8192, backupCount=256)
+            formatter = logging.Formatter(HQ_LOG_FORMAT)
+            file_handler.setFormatter(formatter)
+            log.addHandler(file_handler)
+        except Exception, e:
+            # don't make this take down the whole application
+            logging.error("Probably initializign logger: %s" % e) 
+            
