@@ -44,9 +44,7 @@ class Logger (object):
 def init_logger(log_level, log_file):
     '''Utility method to initialize the python logger, in a similar
        fashion to the rapidsms logger'''
-    logging.debug("init_logger begin")
     if log_level and log_file:
-        logging.debug("are we even getting here?")
         log = logging.getLogger()
         logging.raiseExceptions = 0
         log.setLevel(getattr(logging, log_level.upper()))
