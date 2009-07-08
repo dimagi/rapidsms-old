@@ -320,11 +320,11 @@ class End2EndHandler(RapidBaseHttpHandler):
 
     @classmethod
     def outgoing(klass, message):
-        # todo: make this end2end
         klass.backend.debug("End2End outgoing message: %s" % message)
         params = End2EndHandler.outgoing_params.copy()
-        params[End2EndHandler.param_text_outgoing] = urllib2.quote(message.text)
-        params[End2EndHandler.param_dst_outgoing] = urllib2.quote(message.connection.identity)
+        params[End2EndHandler.param_text_outgoing] = message.text
+        params[End2EndHandler.param_dst_outgoing] = message.connection.identity
+        print params
         lines = []
         success = False
         response = ""
@@ -335,7 +335,7 @@ class End2EndHandler(RapidBaseHttpHandler):
                 for line in response:
                     if "-ERR" in line:
                         # fail
-                        klass.backend.error("Error from gateway %s:\n%s" % (url, response))
+                        klass.backend.error("Error from gateway %s:\n%s" % (url, line))
                         continue
                 # we didn't fail if we made it out
                 success = True
@@ -348,7 +348,7 @@ class End2EndHandler(RapidBaseHttpHandler):
         else:
             lines.insert(0,"Error!")
         
-        klass.backend.debug("Got response: %s" % response)
+        klass.backend.debug("Got response: %s" % "\n".join(response))
         
         
 class MTechHandler(RapidBaseHttpHandler):
