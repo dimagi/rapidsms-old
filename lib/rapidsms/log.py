@@ -45,6 +45,7 @@ def init_logger(log_level, log_file):
        fashion to the rapidsms logger'''
     if log_level and log_file:
         log = logging.getLogger()
+        logging.raiseExceptions = 0
         log.setLevel(getattr(logging, log_level.upper()))
         file_handler = logging.handlers.RotatingFileHandler(log_file, maxBytes=8192, backupCount=256)
         log.addHandler(file_handler)
