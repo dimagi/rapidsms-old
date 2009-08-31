@@ -24,8 +24,8 @@ for rs_app in settings.RAPIDSMS_APPS.values():
 
         # add the explicitly defined urlpatterns
         urlpatterns += module.urlpatterns
-
-        if settings.USE_DJANGO_STATIC_SERVER:
+        
+        if hasattr(settings,'USE_DJANGO_STATIC_SERVER'):
             # does urls.py have a sibling "static" dir?
             mod_dir = os.path.dirname(module.__file__)
             static_dir = "%s/static" % mod_dir        
