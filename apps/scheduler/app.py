@@ -30,7 +30,7 @@ class App (rapidsms.app.App):
         self.schedule_thread.stop()
 
 class SchedulerThread (threading.Thread):
-    _speedup = 0
+    _speedup = None
     
     def __init__ (self, schedule_interval):
         super(SchedulerThread, self).__init__(\
@@ -38,7 +38,7 @@ class SchedulerThread (threading.Thread):
             args=(schedule_interval,))
         self.daemon = True
         self._stop = threading.Event()
-        self._speedup = 0
+        self._speedup = None
 
     def stop(self):
         self._stop.set()
@@ -46,7 +46,7 @@ class SchedulerThread (threading.Thread):
     def stopped(self):
         return self._stop.isSet()
     
-    def _debug_speedup(self, speedup):
+    def _debug_speedup(self, minutes=0, hours=0, days=0):
         """ This function is purely for the sake of debugging/unit-tests 
         It specifies a time interval in minutes by which the scheduler
         loop jumps ahead. This makes it possible to test long-term intervals
@@ -54,7 +54,7 @@ class SchedulerThread (threading.Thread):
         
         Arguments: speedup - speedup interval in minutes
         """
-        self._speedup = speedup
+        self._speedup = timedelta(minutes=minutes, hours=hours, days=days)
             
     def scheduler_loop(self, interval=60):
         now = datetime.now()
@@ -76,14 +76,14 @@ class SchedulerThread (threading.Thread):
                         else: schedule.save()
                     # should we delete expired schedules? we do now.
                     if schedule.end_time:
-                        if schedule.end_time > now:
+                        if now > schedule.end_time:
                             schedule.delete()
-            next_run = now + timedelta(seconds=interval)
-            if self._speedup != 0: # debugging/testing only!
-                updated_now = now + timedelta(minutes=self._speedup)
+            if self._speedup is not None: # debugging/testing only!
+                now = now + self._speedup
                 time.sleep(1)
             else: 
+                next_run = now + timedelta(seconds=interval)
                 updated_now = datetime.now()
-            while updated_now < next_run:
-                time.sleep((next_run - updated_now).seconds)
-            now = next_run
+                while updated_now < next_run:
+                    time.sleep((next_run - updated_now).seconds)
+                now = next_run
