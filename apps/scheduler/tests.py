@@ -1,4 +1,5 @@
 import time
+import logging
 from datetime import datetime, timedelta
 from rapidsms.tests.scripted import TestScript
 import scheduler.app as scheduler_app
@@ -55,5 +56,5 @@ class TestApp (TestScript):
          
 def callback_func(arg):
     global callback_counter
-    print "adding %s to global_var (%s)" % (arg, callback_counter)
+    logging.info("adding %s to global_var (%s)" % (arg, callback_counter))
     callback_counter = callback_counter + arg
