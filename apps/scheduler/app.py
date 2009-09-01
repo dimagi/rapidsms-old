@@ -1,6 +1,22 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4 encoding=utf-8
 
+"""
+The following is yet another django-based solution for cron.
+What this gives us that other solutions don't seem to (yet) is:
+* persistence. all schedules are saved in the db.
+* platform-independent
+* integration with rapidsms router (doesn't require manually launching
+another cron process)
+* specification of schedules with minute/hour/day/month granularity, 
+including python datetime built-in knowledge of short months, etc.
+
+Other django cron solutions out there include:
+http://www.djangosnippets.org/snippets/1348/ - non-persistent, standalone process
+http://code.google.com/p/django-cron/ - run_every x seconds
+various solutions using linux cron + os.setupenviron
+"""
+
 import time
 import threading
 from datetime import datetime, timedelta
