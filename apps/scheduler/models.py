@@ -9,12 +9,15 @@ from fields import PickledObjectField
 ALL = '*'
 
 class EventSchedule(models.Model):
-    # create a new EventSchedule and save it every time 
-    # you want to register a new event on a schedule
-    # we can implement one_off future events by setting count to 1 
-    # not all timespans need to be specified. Those left null will
-    # default to "all". i.e. if hour=null and day=3, the event
-    # will fire every hour on the third day
+    """ create a new EventSchedule and save it every time 
+    you want to register a new event on a schedule
+    we can implement one_off future events by setting count to 1 
+    All timespans less than the specified one must be set
+    i.e. a weekly schedule must also specify which hour, minute, etc.
+    However, all timespans greater than the specified one
+    default to "all" (as long as one is specified).
+    i.e. a weekly schedule will fire every month
+    """
     description = models.CharField(max_length=255, null=True)
     # how many times do we want this event to fire? optional
     count = models.IntegerField(null=True)
@@ -145,3 +148,12 @@ class EventSchedule(models.Model):
             return True
         return False
 
+############################
+# global utility functions #
+############################
+
+def set_weekly_event(callback, day, hour, minute, callback_args):
+    # relies on all the built-in checks in EventSchedule.save()
+    schedule = EventSchedule(callback, hours=set([hour]), day_of_week=set([hour]), \
+                             minutes=set([minute]), callback_args=callback_args )
+    schedule.save()

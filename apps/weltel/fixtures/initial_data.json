@@ -1,0 +1,402 @@
+[
+    {
+        "pk": 1, 
+        "model": "weltel.site", 
+        "fields": {}
+    }, 
+    {
+        "pk": 1, 
+        "model": "locations.location", 
+        "fields": {
+            "code": "test_site", 
+            "name": "Test Site", 
+            "parent": null, 
+            "longitude": null, 
+            "latitude": null, 
+            "type": null
+        }
+    },
+    {
+        "pk": 1, 
+        "model": "patterns.pattern", 
+        "fields": {
+            "regex": "(well)", 
+            "name": "well"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "patterns.pattern", 
+        "fields": {
+            "regex": "(reg[a-z]*)", 
+            "name": "register"
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "patterns.pattern", 
+        "fields": {
+            "regex": "(set)", 
+            "name": "set"
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "patterns.pattern", 
+        "fields": {
+            "regex": "(nurse)", 
+            "name": "nurse"
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "patterns.pattern", 
+        "fields": {
+            "regex": "(unsubscribe)", 
+            "name": "unsubscribe"
+        }
+    }, 
+    {
+        "pk": 11, 
+        "model": "patterns.pattern", 
+        "fields": {
+            "regex": "([a-z0-9]+)", 
+            "name": "patient_id"
+        }
+    }, 
+    {
+        "pk": 12, 
+        "model": "patterns.pattern", 
+        "fields": {
+            "regex": "([a-z0-9]+)", 
+            "name": "site_code"
+        }
+    }, 
+    {
+        "pk": 13, 
+        "model": "patterns.pattern", 
+        "fields": {
+            "regex": "(+?[0-9 -]+)", 
+            "name": "phone_number"
+        }
+    }, 
+    {
+        "pk": 14, 
+        "model": "patterns.pattern", 
+        "fields": {
+            "regex": "(\\w+)", 
+            "name": "problem_code"
+        }
+    }, 
+    {
+        "pk": 15, 
+        "model": "patterns.pattern", 
+        "fields": {
+            "regex": "(m|f|male|female)", 
+            "name": "gender"
+        }
+    }, 
+    {
+        "pk": 16, 
+        "model": "patterns.pattern", 
+        "fields": {
+            "regex": "(\\w+)", 
+            "name": "outcome_code"
+        }
+    },
+    {
+        "pk": 17, 
+        "model": "patterns.pattern", 
+        "fields": {
+            "regex": "(phone)", 
+            "name": "phone"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "form.app", 
+        "fields": {
+            "name": "weltel"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "form.form", 
+        "fields": {
+            "form_tokens": [
+                8, 
+                9, 
+                10, 
+                11
+            ], 
+            "code": 2, 
+            "apps": [
+                1
+            ], 
+            "name": "register_patient"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "form.form", 
+        "fields": {
+            "form_tokens": [
+                12
+            ], 
+            "code": 13, 
+            "apps": [
+                1
+            ], 
+            "name": "phone"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "form.form", 
+        "fields": {
+            "form_tokens": [
+                15
+            ], 
+            "code": 4, 
+            "apps": [
+                1
+            ], 
+            "name": "set_default_phone"
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "form.form", 
+        "fields": {
+            "form_tokens": [
+                8
+            ], 
+            "code": 5, 
+            "apps": [
+                1
+            ], 
+            "name": "register_nurse"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "form.token", 
+        "fields": {
+            "abbreviation": "well", 
+            "patterns": [
+                1
+            ], 
+            "name": "WelTel Keyword"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "form.token", 
+        "fields": {
+            "abbreviation": "register", 
+            "patterns": [
+                2
+            ], 
+            "name": "register"
+        }
+    }, 
+    {
+        "pk": 13, 
+        "model": "form.token", 
+        "fields": {
+            "abbreviation": "phone", 
+            "patterns": [
+                17
+            ], 
+            "name": "phone"
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "form.token", 
+        "fields": {
+            "abbreviation": "set", 
+            "patterns": [
+                4
+            ], 
+            "name": "set"
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "form.token", 
+        "fields": {
+            "abbreviation": "nurse", 
+            "patterns": [
+                5
+            ], 
+            "name": "nurse"
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "form.token", 
+        "fields": {
+            "abbreviation": "patient_id", 
+            "patterns": [
+                11
+            ], 
+            "name": "patient_id"
+        }
+    }, 
+    {
+        "pk": 8, 
+        "model": "form.token", 
+        "fields": {
+            "abbreviation": "gender", 
+            "patterns": [
+                15
+            ], 
+            "name": "gender"
+        }
+    }, 
+    {
+        "pk": 9, 
+        "model": "form.token", 
+        "fields": {
+            "abbreviation": "site_code", 
+            "patterns": [
+                12
+            ], 
+            "name": "site_code"
+        }
+    }, 
+    {
+        "pk": 10, 
+        "model": "form.token", 
+        "fields": {
+            "abbreviation": "phone_number", 
+            "patterns": [
+                13
+            ], 
+            "name": "phone_number"
+        }
+    }, 
+    {
+        "pk": 11, 
+        "model": "form.token", 
+        "fields": {
+            "abbreviation": "problem_code", 
+            "patterns": [
+                14
+            ], 
+            "name": "problem_code"
+        }
+    }, 
+    {
+        "pk": 12, 
+        "model": "form.token", 
+        "fields": {
+            "abbreviation": "outcome_code", 
+            "patterns": [
+                16
+            ], 
+            "name": "outcome_code"
+        }
+    }, 
+    {
+        "pk": 8, 
+        "model": "form.formtoken", 
+        "fields": {
+            "token": 9, 
+            "required": 1, 
+            "sequence": 1
+        }
+    }, 
+    {
+        "pk": 15, 
+        "model": "form.formtoken", 
+        "fields": {
+            "token": 13, 
+            "required": 1, 
+            "sequence": 1
+        }
+    }, 
+    {
+        "pk": 9, 
+        "model": "form.formtoken", 
+        "fields": {
+            "token": 7, 
+            "required": 1, 
+            "sequence": 2
+        }
+    }, 
+    {
+        "pk": 10, 
+        "model": "form.formtoken", 
+        "fields": {
+            "token": 8, 
+            "required": 0, 
+            "sequence": 3
+        }
+    }, 
+    {
+        "pk": 11, 
+        "model": "form.formtoken", 
+        "fields": {
+            "token": 10, 
+            "required": 0, 
+            "sequence": 4
+        }
+    }, 
+    {
+        "pk": 12, 
+        "model": "form.formtoken", 
+        "fields": {
+            "token": 7, 
+            "required": 1, 
+            "sequence": 1
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "form.domainform", 
+        "fields": {
+            "form": 1, 
+            "sequence": 1
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "form.domainform", 
+        "fields": {
+            "form": 4, 
+            "sequence": 2
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "form.domainform", 
+        "fields": {
+            "form": 3, 
+            "sequence": 3
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "form.domainform", 
+        "fields": {
+            "form": 2, 
+            "sequence": 4
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "form.domain", 
+        "fields": {
+            "code": 1, 
+            "domain_forms": [
+                1, 
+                2, 
+                3, 
+                4
+            ], 
+            "name": "Weltel"
+        }
+    }
+]
