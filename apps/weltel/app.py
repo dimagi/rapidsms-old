@@ -6,11 +6,12 @@ WELTEL core logic
 
 import re
 import rapidsms
-from rapidsms.message import Message
+import logging
 from rapidsms.parsers.keyworder import Keyworder
 from rapidsms.i18n import ugettext_noop as _
 from reporters.models import Reporter
-from weltel.formslogic import WeltelFormsLogic
+from weltel.formslogic import WeltelFormsLogic, REGISTER_COMMAND, NURSE_COMMAND
+from weltel.models import Nurse, Patient, PatientState
 
 class App (rapidsms.app.App):
     kw = Keyworder()
@@ -37,6 +38,14 @@ class App (rapidsms.app.App):
         pass
 
     def handle (self, message):
+        try:
+            message.patient = Patient.objects.get(reporter_ptr=message.reporter)
+        except Patient.DoesNotExist:
+            pass
+        try:
+            message.nurse = Nurse.objects.get(reporter_ptr=message.reporter)
+        except Nurse.DoesNotExist:
+            pass
         # use the keyworder to see if the forms app can help us
         try:
             if hasattr(self, "kw"):
@@ -53,8 +62,7 @@ class App (rapidsms.app.App):
                     func(self, message, *captures)
                     return True
                 else:
-                    self.debug("NO MATCH FOR %s" % message.text)
-                    message.respond( _("Command not recognized") )            
+                    self.unrecognized(message)
             else:
                 self.debug("App does not instantiate Keyworder as 'kw'")
         except Exception:
@@ -83,4 +91,46 @@ class App (rapidsms.app.App):
                   (regex, function.im_class, function.im_func.func_name))
         self.kw.regexen.append((re.compile(regex, re.IGNORECASE), function))
  
+
+    def is_patient(f):
+        def new_f(self, message, *args):
+            if not hasattr(message,'patient'):
+                message.respond( _("This number is not registered.") + REGISTER_COMMAND )
+                return
+            f(self, message, *args)
+        return new_f
+        
+    def is_nurse(f):
+        def new_f(self, message, *args):
+            if not hasattr(message,'patient'):
+                message.respond( _("This number is not registered to a nurse.") )
+                return
+            f(self, message, *args)
+        return new_f
+        
+    @kw("(sawa|poa|nzuri|safi)(.*)")
+    @is_patient
+    def sawa(self, message, sawa, extra=None):
+        message.patient.set_state('sawa')
+        # Note that all messages are already logged in logger
+        logging.info("Patient %s set to 'sawa'" % message.patient.alias)
+        message.respond( _("Asante") )
+    
+    @kw("(shida)\s*([0-9])(.*)")
+    @is_patient
+    def shida(self, message, shida, problem_code, extra=None):
+        message.patient.set_state('shida')
+        logging.info("Patient %s set to 'shida'" % message.patient.alias)
+        message.respond( _("Pole %(code)s") % {'code':problem_code} )
+    
+    @kw("(shida)(whatever)")
+    @is_patient
+    def shida(self, message, shida, new_problem):
+        message.patient.set_state('shida')
+        logging.info("Patient %s set to 'shida'" % message.patient.alias)
+        message.respond( _("Pole") )
+        
+    def unrecognized(self, message):
+        self.debug("NO MATCH FOR %s" % message.text)
+        message.respond( _("Command not recognized") )
 

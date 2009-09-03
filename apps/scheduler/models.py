@@ -157,6 +157,7 @@ class EventSchedule(models.Model):
 
 def set_weekly_event(callback, day, hour, minute, callback_args):
     # relies on all the built-in checks in EventSchedule.save()
-    schedule = EventSchedule(callback, hours=set([hour]), day_of_week=set([hour]), \
-                             minutes=set([minute]), callback_args=callback_args )
+    schedule = EventSchedule(callback=callback, hours=set([hour]), \
+                             days_of_week=set([hour]), minutes=set([minute]), \
+                             callback_args=callback_args )
     schedule.save()
