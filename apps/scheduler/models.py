@@ -17,6 +17,9 @@ class EventSchedule(models.Model):
     However, all timespans greater than the specified one
     default to "all" (as long as one is specified).
     i.e. a weekly schedule will fire every month
+    
+    callback - all callback function must take as the first 
+        argument a reference to a 'router' object
     """
     description = models.CharField(max_length=255, null=True)
     # how many times do we want this event to fire? optional
