@@ -6,6 +6,60 @@
     }, 
     {
         "pk": 1, 
+        "model": "weltel.patientstate", 
+        "fields": {
+            "code": "default", 
+            "name": "Default", 
+            "description": ""
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "weltel.patientstate", 
+        "fields": {
+            "code": "sawa", 
+            "name": "Sawa", 
+            "description": ""
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "weltel.patientstate", 
+        "fields": {
+            "code": "shida", 
+            "name": "Shida", 
+            "description": ""
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "weltel.patientstate", 
+        "fields": {
+            "code": "other", 
+            "name": "Other", 
+            "description": ""
+        }
+    },
+    {
+        "pk": 5, 
+        "model": "weltel.patientstate", 
+        "fields": {
+            "code": "inactive", 
+            "name": "Inactive", 
+            "description": ""
+        }
+    },
+    {
+        "pk": 6, 
+        "model": "weltel.patientstate", 
+        "fields": {
+            "code": "unsubscribe", 
+            "name": "Unsubscribe", 
+            "description": ""
+        }
+    },
+    {
+        "pk": 1, 
         "model": "locations.location", 
         "fields": {
             "code": "test_site", 
