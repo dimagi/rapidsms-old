@@ -139,7 +139,7 @@ class WeltelFormsLogic(FormsLogic):
                 return [_("Invalid phone number %(num)s") % {"num" : phone_number}]
         return False
     
-    def is_nurse_invalid(self, site_id):
+    def is_nurse_invalid(self, site_code):
         if len(site_code) == 0:
             return [_("Missing 'site_code'.") + NURSE_COMMAND ]
         try:

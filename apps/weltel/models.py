@@ -24,20 +24,14 @@ GENDER_CHOICES=(
     (FEMALE,'female')
 )
 
-class PatientState(models.Model):
-    code = models.CharField(max_length=15)
-    name = models.CharField(max_length=63, null=True, blank=True)
-    description = models.CharField(max_length=255, null=True, blank=True)
-    
-    def __unicode__(self):
-        return self.name if self.name else self.code
-
 class Patient(Reporter):
     """ This model represents a patient for WelTel """
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True)
     locations = models.ForeignKey(Site, null=True)
     default_connection = models.ForeignKey(PersistantConnection, null=True)
-    state = models.ForeignKey(PatientState, default=PatientState.objects.get(code='default') )
+    state = models.ForeignKey("PatientState")
+    active = models.BooleanField(default=True)
+    subscribed = models.BooleanField(default=True)
     
     # make 'patient_id' an alias for reporter.alias
     def _get_patient_id(self):
@@ -45,18 +39,55 @@ class Patient(Reporter):
     def _set_patient_id(self, value):
         self.alias = value
     patient_id = property(_get_patient_id, _set_patient_id)
+    
+    def register_event(self, code, issuer=None):
+        event = EventType.objects.get(code=code).next_state
+        self.state = event.next_state
+        self.save()
+        if issuer is None: issuer = self
+        EventLog(event=event, patient=self, triggered_by=issuer).save()
 
-# an event log showing when patients states were manually transitioned
-# (i.e. when a nurse submitted a follow up report that resulted in a
-# state transition)
-class PatientStateLog(models.Model):
-    patient = models.ForeignKey(Patient)
-    transitioned_to = models.ForeignKey(PatientState, null=True)
-    # typically, nurses will trigger transitions
-    # but one can imagine an administrator doing it via a webui or something
-    by = models.CharField(max_length=63, null=True)
-    date = models.DateTimeField(null=False, default=datetime.now() )
+class PatientState(models.Model):
+    code = models.CharField(max_length=15)
+    name = models.CharField(max_length=63, null=True, blank=True)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    
     def __unicode__(self):
         return self.name if self.name else self.code
-    # TODO - link this to patient.save()
+    
+# events in a patient's history
+# - can be associated with a state transition
+class EventType(models.Model):
+    code = models.CharField(max_length=15)
+    name = models.CharField(max_length=63, null=True, blank=True)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    next_state = models.ForeignKey(PatientState)
 
+    def __unicode__(self):
+        return self.name if self.name else self.code
+
+    #automatic deregistration
+    #unsubscribe
+
+class ProblemType(EventType):
+    """ Patient reports a problem """
+    class Meta:
+        abstract = True
+            
+class OutcomeType(EventType):
+    """ Nurse reports an outcome """
+    class Meta:
+        abstract = True
+
+class EventLog(models.Model):
+    event = models.ForeignKey(EventType)
+    date = models.DateTimeField(null=False, default=datetime.now() )
+    patient = models.ForeignKey(Patient)
+    # can be triggered by patient, nurse, admin, IT, etc.
+    triggered_by = models.CharField(max_length=63, null=True)
+    notes = models.CharField(max_length=255, null=True)
+    active = models.BooleanField(default=True)
+    subscribed = models.BooleanField(default=True)
+    
+    def __unicode__(self):
+        return self.name if self.name else self.code

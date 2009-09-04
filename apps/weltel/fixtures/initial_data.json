@@ -6,6 +6,36 @@
     }, 
     {
         "pk": 1, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "next_state": 3, 
+            "code": "1", 
+            "name": "No Answer", 
+            "description": "Patient did not pick up the phone."
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "next_state": 6, 
+            "code": "2", 
+            "name": "Gone", 
+            "description": "Patient has left this site. "
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "next_state": 2, 
+            "code": "3", 
+            "name": "Healthy", 
+            "description": "Patient is healthy again."
+        }
+    }, 
+    {
+        "pk": 1, 
         "model": "weltel.patientstate", 
         "fields": {
             "code": "default", 

@@ -11,7 +11,7 @@ from rapidsms.parsers.keyworder import Keyworder
 from rapidsms.i18n import ugettext_noop as _
 from reporters.models import Reporter
 from weltel.formslogic import WeltelFormsLogic, REGISTER_COMMAND, NURSE_COMMAND
-from weltel.models import Nurse, Patient, PatientState
+from weltel.models import Nurse, Patient, PatientState, OutcomeType
 
 class App (rapidsms.app.App):
     kw = Keyworder()
@@ -111,7 +111,7 @@ class App (rapidsms.app.App):
     @kw("(sawa|poa|nzuri|safi)(.*)")
     @is_patient
     def sawa(self, message, sawa, extra=None):
-        message.patient.set_state('sawa')
+        message.patient.register_event('sawa')
         # Note that all messages are already logged in logger
         logging.info("Patient %s set to 'sawa'" % message.patient.alias)
         message.respond( _("Asante") )
@@ -119,16 +119,34 @@ class App (rapidsms.app.App):
     @kw("(shida)\s*([0-9])(.*)")
     @is_patient
     def shida(self, message, shida, problem_code, extra=None):
-        message.patient.set_state('shida')
+        message.patient.register_event('shida')
         logging.info("Patient %s set to 'shida'" % message.patient.alias)
         message.respond( _("Pole %(code)s") % {'code':problem_code} )
     
     @kw("(shida)(whatever)")
     @is_patient
     def shida(self, message, shida, new_problem):
-        message.patient.set_state('shida')
+        message.patient.register_event('shida')
         logging.info("Patient %s set to 'shida'" % message.patient.alias)
         message.respond( _("Pole") )
+    
+    @kw("(numbers)\s+(numbers)")
+    @is_nurse
+    def outcome(self, message, patient_id, outcome_code):
+        """ Expecting a text from a nurse of the form: <patient-id> <outcome-code> """
+        try:
+            patient = Patient.objects.get(alias=patient_id)
+        except Patient.DoesNotExist:
+            message.respond( _("Patient (%(id)s) not recognized.")%{'id':patient_id} )
+            return
+        try:
+            patient.register_event(outcome_code)
+        except OutcomeType.DoesNotExist:
+            message.respond( _("Outcome (%(code)s) not recognized.")%{'code':outcome_code} )
+            return
+        logging.info("Patient %s set to '%s'" % (message.patient.alias, outcome_code))
+        message.respond( _("Patient %(id)s updated to %(code)s") % \
+                         {'id':patient_id, 'code':outcome_code} )
         
     def unrecognized(self, message):
         self.debug("NO MATCH FOR %s" % message.text)
