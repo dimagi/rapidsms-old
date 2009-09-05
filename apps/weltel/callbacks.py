@@ -18,9 +18,8 @@ def automatic_deregistration(router, reporter_id):
     timeout_interval = timedelta(weeks=2)
     timeout = datetime.now() - timeout_interval
     # check if patients have not been seen in a while
-    inactive = PatientState.objects.get(code='inactive')
     patients = Patient.objects.filter(location=site)
-    active = patients.filter(state__code__ne='inactive').filter(state__code__ne='unsubscribe')
+    active = patients.filter(active=True).filter(subscribed=True)
     for patient in active:
         active = False
         # check a) no messages in X time from any of their connections
@@ -37,17 +36,17 @@ def automatic_deregistration(router, reporter_id):
             if last_touched > timeout:
                 active = True
         if active == False:
-            patient.state = inactive
+            patient.active = False
             patient.save()
     return
 
 def shida_report(router, reporter_id):
     # compile report for each site
     for site in Site.objects.all():
-        # all patients who are inactive (haven't seen in a while)
-        # who replied 'shida' or who replied 'other'
-        # or new patients with unknown status
+        # get all patients who responded shida, 'other', or are in the default state
         patients = Patient.objects.filter(location=site).filter(state__code__ne='sawa')
+        # get all patients in sawa state but from whom we haven't heard in 3 weeks
+        patients = patients + Patient.objects.filter(location=site).filter(state__code__eq='sawa', active=False)
         report = ''
         for patient in patients:
             report = report + "%s %s %s " % (patient.patient_id, \
@@ -55,4 +54,7 @@ def shida_report(router, reporter_id):
         # send report to all nurses registered for that site
         for nurse in Nurses.objects.filter(locations=site):
             connection = nurse.connection()
-            router.outgoing(Message(connection, report))
+            if report:
+                router.outgoing(Message(connection, report))
+            else:
+                router.outgoing(Message(connection, _("no problem patients")))
