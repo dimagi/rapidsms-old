@@ -11,7 +11,11 @@ from rapidsms.parsers.keyworder import Keyworder
 from rapidsms.i18n import ugettext_noop as _
 from reporters.models import Reporter
 from weltel.formslogic import WeltelFormsLogic, REGISTER_COMMAND, NURSE_COMMAND
-from weltel.models import Nurse, Patient, PatientState, OutcomeType
+from weltel.models import Nurse, Patient, PatientState, OutcomeType, ProblemType, EventType
+
+SAWA = 'sawa'
+SHIDA = 'shida'
+OTHER = 'other'
 
 class App (rapidsms.app.App):
     kw = Keyworder()
@@ -62,7 +66,7 @@ class App (rapidsms.app.App):
                     func(self, message, *captures)
                     return True
                 else:
-                    self.unrecognized(message)
+                    self.other(message)
             else:
                 self.debug("App does not instantiate Keyworder as 'kw'")
         except Exception:
@@ -111,23 +115,29 @@ class App (rapidsms.app.App):
     @kw("(sawa|poa|nzuri|safi)(.*)")
     @is_patient
     def sawa(self, message, sawa, extra=None):
-        message.patient.register_event('sawa')
+        message.patient.register_event(SAWA)
         # Note that all messages are already logged in logger
-        logging.info("Patient %s set to 'sawa'" % message.patient.alias)
+        logging.info("Patient %s set to '%s'" % (message.patient.alias, SAWA))
         message.respond( _("Asante") )
     
     @kw("(shida)\s*([0-9])(.*)")
     @is_patient
     def shida(self, message, shida, problem_code, extra=None):
-        message.patient.register_event('shida')
-        logging.info("Patient %s set to 'shida'" % message.patient.alias)
-        message.respond( _("Pole %(code)s") % {'code':problem_code} )
+        response = ''
+        try:
+            message.patient.register_event(problem_code)
+        except ProblemType.DoesNotExist:
+            response = _("Problem %(code)s not recognized. ") % \
+                        {'code':problem_code} 
+            message.patient.register_event(SHIDA)
+        logging.info("Patient %s set to '%s'" % (message.patient.alias, SHIDA) )
+        message.respond( response + _("Pole %(code)s") % {'code':problem_code} )
     
-    @kw("(shida)(whatever)")
+    @kw("(shida)(whatever)?")
     @is_patient
-    def shida(self, message, shida, new_problem):
-        message.patient.register_event('shida')
-        logging.info("Patient %s set to 'shida'" % message.patient.alias)
+    def shida_new(self, message, shida, new_problem=None):
+        message.patient.register_event(SHIDA)
+        logging.info("Patient %s set to '%s'" % (message.patient.alias, SHIDA) )
         message.respond( _("Pole") )
     
     @kw("(numbers)\s+(numbers)")
@@ -148,7 +158,10 @@ class App (rapidsms.app.App):
         message.respond( _("Patient %(id)s updated to %(code)s") % \
                          {'id':patient_id, 'code':outcome_code} )
         
-    def unrecognized(self, message):
-        self.debug("NO MATCH FOR %s" % message.text)
-        message.respond( _("Command not recognized") )
+    @is_patient
+    def other(self, message):
+        message.patient.register_event(OTHER)
+        logging.info("Patient %s sent unrecognized command '%s'" % \
+                     (message.patient.alias, OTHER))
+        message.respond( _("Command not recognized.") )
 

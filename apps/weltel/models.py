@@ -15,8 +15,12 @@ class Nurse(Reporter):
     # Nurses can be associated with zero or more locations
     # this could get very confusing, since 'reporters' has its own 'location'
     # field. But that's a hack, so we shouldn't use it.
-    locations = models.ManyToManyField(Site, null=True)
-    
+    sites = models.ManyToManyField(Site, null=True)
+
+    def __unicode__(self):
+        if self.alias: return self.alias
+        return self.id
+
 MALE = 'm'
 FEMALE = 'f'
 GENDER_CHOICES=(
@@ -27,12 +31,16 @@ GENDER_CHOICES=(
 class Patient(Reporter):
     """ This model represents a patient for WelTel """
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True)
-    locations = models.ForeignKey(Site, null=True)
-    default_connection = models.ForeignKey(PersistantConnection, null=True)
     state = models.ForeignKey("PatientState")
     active = models.BooleanField(default=True)
     subscribed = models.BooleanField(default=True)
+    site = models.ForeignKey(Site)
     
+    def __unicode__(self):
+        if self.alias: return self.alias
+        if self.connection: return self.connection.identity
+        return self.id
+        
     # make 'patient_id' an alias for reporter.alias
     def _get_patient_id(self):
         return self.alias
@@ -41,7 +49,7 @@ class Patient(Reporter):
     patient_id = property(_get_patient_id, _set_patient_id)
     
     def register_event(self, code, issuer=None):
-        event = EventType.objects.get(code=code).next_state
+        event = EventType.objects.get(code=code)
         self.state = event.next_state
         self.save()
         if issuer is None: issuer = self
@@ -84,6 +92,7 @@ class EventLog(models.Model):
     date = models.DateTimeField(null=False, default=datetime.now() )
     patient = models.ForeignKey(Patient)
     # can be triggered by patient, nurse, admin, IT, etc.
+    # through sms, webui, etc. 
     triggered_by = models.CharField(max_length=63, null=True)
     notes = models.CharField(max_length=255, null=True)
     active = models.BooleanField(default=True)

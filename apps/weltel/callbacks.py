@@ -51,7 +51,7 @@ def shida_report(router, reporter_id):
         report = ''
         for patient in patients:
             report = report + "%s %s %s " % (patient.patient_id, \
-                     patient.default_connection.identity, patient.state.code)
+                     patient.connection.identity, patient.state.code)
         # send report to all nurses registered for that site
         for nurse in Nurses.objects.filter(locations=site):
             connection = nurse.connection()

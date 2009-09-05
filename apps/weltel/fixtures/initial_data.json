@@ -8,6 +8,36 @@
         "pk": 1, 
         "model": "weltel.eventtype", 
         "fields": {
+            "next_state": 2, 
+            "code": "sawa", 
+            "name": "Sawa", 
+            "description": "All's good"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "next_state": 3, 
+            "code": "shida", 
+            "name": "Shida", 
+            "description": "Hardship has come."
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "next_state": 4, 
+            "code": "other", 
+            "name": "Other", 
+            "description": "Unrecognized Command"
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "weltel.eventtype", 
+        "fields": {
             "next_state": 3, 
             "code": "1", 
             "name": "No Answer", 
@@ -15,7 +45,7 @@
         }
     }, 
     {
-        "pk": 2, 
+        "pk": 5, 
         "model": "weltel.eventtype", 
         "fields": {
             "next_state": 6, 
@@ -25,7 +55,7 @@
         }
     }, 
     {
-        "pk": 3, 
+        "pk": 6, 
         "model": "weltel.eventtype", 
         "fields": {
             "next_state": 2, 

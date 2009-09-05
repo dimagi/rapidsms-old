@@ -80,7 +80,7 @@ class WeltelFormsLogic(FormsLogic):
             phone_number = message.persistant_connection.identity
             # for now, set unique id to be phone number
             nurse, n_created = Nurse.objects.get_or_create(alias= phone_number)
-            nurse.locations.add(site)
+            nurse.sites.add(site)
             if n_created:
                 message.respond(_("Nurse %(id)s registered") % {"id": nurse.alias })
             
@@ -104,8 +104,7 @@ class WeltelFormsLogic(FormsLogic):
                 message.respond( "Phone number %(num)s is not registered" % \
                                  {"num": message.persistant_connection.identity } )
                 return
-            patient.default_connection = message.persistant_connection
-            patient.save()
+            patient.set_preferred_connection( message.persistant_connection )
             message.respond( "Patient %(id)s default phone set to %(num)s" % \
                              {"num": message.persistant_connection.identity, "id":patient.patient_id } )
         elif form_entry.form.code.abbreviation == "phone":
@@ -158,7 +157,7 @@ class WeltelFormsLogic(FormsLogic):
             patient = Patient(alias=patient_id)
             response = _("Patient %(id)s registered. ") % {"id": patient_id }
             p_created = True
-        patient.site_code = site_code
+        patient.site = Site.objects.get( code=site_code )
         if gender: patient.gender = gender
         patient.state = PatientState.objects.get(code='default')
         patient.save()
@@ -178,8 +177,7 @@ class WeltelFormsLogic(FormsLogic):
                        {"id": patient.patient_id, "num": phone_number, "old_id": conn.reporter.alias }
         conn.reporter = patient
         conn.save()
-        patient.default_connection = conn
-        patient.save()
+        patient.set_preferred_connection( conn )
         
         if p_created:
             # set up weekly mambo schedule for friday @ 12:30 pm
