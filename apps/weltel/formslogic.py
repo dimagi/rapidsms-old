@@ -6,8 +6,9 @@ from form.formslogic import FormsLogic
 from reporters.models import PersistantConnection
 from scheduler.models import set_weekly_event
 from weltel.models import Site, Patient, PatientState, Nurse, MALE, FEMALE
+from weltel.util import site_code_from_patient_id
 
-REGISTER_COMMAND = _("Correct format: 'well register site_id patient_id gender (phone_number)")
+REGISTER_COMMAND = _("Correct format: 'well register patient_id gender (phone_number)")
 NURSE_COMMAND = _("Correct format: 'well nurse site_id")
 
 #TODO - add basic check for when people submit fields in wrong order
@@ -22,7 +23,7 @@ class WeltelFormsLogic(FormsLogic):
         data = form_entry.to_dict()
 
         if form_entry.form.code.abbreviation == "register":
-            ret = self.is_patient_invalid(data["site_code"], data["patient_id"], \
+            ret = self.is_patient_invalid(data["patient_id"], \
                                           data["gender"], data["phone_number"])
             if not ret: 
                 # all fields were present and correct, so copy them into the
@@ -121,11 +122,14 @@ class WeltelFormsLogic(FormsLogic):
                 message.respond( "Phone %(num)s already registered with Patient %(id)s" % \
                                  {"id":patient.patient_id, "num":conn.identity} )
 
-    def is_patient_invalid(self, site_code, patient_id, gender=None, phone_number=None):
-        if len(site_code) == 0:
-            return [_("Missing 'site code'.") + REGISTER_COMMAND ]
-        if len(patient_id) == 0:
+    def is_patient_invalid(self, full_patient_id, gender=None, phone_number=None):
+        if len(full_patient_id) == 0:
             return [_("Missing 'patient_id'.") + REGISTER_COMMAND ]
+        try:
+            site_code = site_code_from_patient_id(patient_id)
+        except ValueError:
+            return [_("Poorly formatted patient_id: %(code)s") % \
+                    {"code" : full_patient_id}]
         try:
             Site.objects.get(code=site_code)
         except Site.DoesNotExist:
@@ -147,7 +151,7 @@ class WeltelFormsLogic(FormsLogic):
             return [_("Unknown sitecode %(code)s") % {"code" : site_code}]
         return False
 
-    def get_or_create_patient(self, site_code, patient_id, phone_number=None, \
+    def get_or_create_patient(self, patient_id, phone_number=None, \
                               backend=None, gender=None, date_registered=None):
         response = ''
         try:
@@ -157,6 +161,7 @@ class WeltelFormsLogic(FormsLogic):
             patient = Patient(alias=patient_id)
             response = _("Patient %(id)s registered. ") % {"id": patient_id }
             p_created = True
+        site_code = site_code_from_patient_id(patient_id)
         patient.site = Site.objects.get( code=site_code )
         if gender: patient.gender = gender
         patient.state = PatientState.objects.get(code='default')
@@ -177,10 +182,8 @@ class WeltelFormsLogic(FormsLogic):
                        {"id": patient.patient_id, "num": phone_number, "old_id": conn.reporter.alias }
         conn.reporter = patient
         conn.save()
-        patient.set_preferred_connection( conn )
-        
+        patient.set_preferred_connection( conn )        
         if p_created:
-            # set up weekly mambo schedule for friday @ 12:30 pm
-            set_weekly_event("weltel.callbacks.send_mambo", day=5, hour=12, \
-                             minute=30, callback_args=patient.id)
+            patient.subscribe()
         return response
+
