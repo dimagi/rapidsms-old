@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+{% load i18n %}
+{% load pagination-tags %}
+{% block title %}{{ patient }}{% endblock %}
+
+{% block content %}
+
+<div class="module">
+	<h2>{{ patient }}</h2>
+	<table>
+		<thead>
+			<tr>
+				<th scope="col">{% trans "Patient" %}</th>
+				<th scope="col">{% trans "First Name" %}</th>
+				<th scope="col">{% trans "Last Name" %}</th>
+				<th scope="col">{% trans "Gender" %}</th>
+				<th scope="col">{% trans "Phone Number" %}</th>
+				<th scope="col">{% trans "State" %}</th>
+				<th scope="col">{% trans "Active" %}</th>
+				<th scope="col">{% trans "Subscribed" %}</th>
+				<th scope="col">{% trans "Site" %}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><a href="/patient/{{ patient.pk }}/edit">{{ patient }}</a></td>
+                <td>{% if patient.first_name %}{{ patient.first_name }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>{% if patient.last_name %}{{ patient.last_name }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>{% if patient.gender %}{{ patient.gender }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>{% if patient.connection %}{{ patient.connection.identity }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>{% if patient.state %}{{ patient.state }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>{% if patient.active %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</td>
+                <td>{% if patient.subscribed %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</td>
+                <td>{% if patient.site %}{{ patient.site }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<h2>{% trans "History" %}</h2>
+	<table>
+		<thead>
+			<tr>
+				<th scope="col">{% trans "Source" %}</th>
+				<th scope="col">{% trans "Description" %}</th>
+				<th scope="col">{% trans "Date" %}</th>
+			</tr>
+		</thead>
+		<tbody>{% if logs.object_list %}{% for log in logs.object_list %}
+			<tr>
+				{% for field in log %}
+                <td>{{ field }}</td>
+                {% endfor %}
+			</tr>{% endfor %}{% else %}
+			<tr class="no-data">
+				<td colspan="3">
+					{% trans "No information has been submitted." %}
+				</td>
+			</tr>{% endif %}
+		</tbody>
+		<tfoot>
+			<tr>
+				<td colspan="3">
+					{% paginator logs %}
+				</td>
+			</tr>
+		</tfoot>
+	</table>
+</div>
+{% endblock %}
+
