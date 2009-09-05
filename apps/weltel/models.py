@@ -8,7 +8,24 @@ class Site(Location):
     # fields TBD
     pass
 
-class Nurse(Reporter):
+class WeltelUser(Reporter):
+    """ This model represents any weltel users """
+    subscribed = models.BooleanField(default=True)
+    class Meta:
+        abstract = True
+        
+    def unsubscribe(self):
+        self.set_subscribe(False)
+
+    def set_subscribe(self, bool):
+        if self.subscribed != bool:
+            self.subscribed = bool
+            self.save()
+            if not self.subscribed:
+                # delete all scheduled alerts for this user
+                schedules = EventSchedule.objects.filter(callback_args__contains=self.id).delete()
+
+class Nurse(WeltelUser):
     """ This model represents a nurse for WelTel. 
     
     """  
@@ -20,6 +37,12 @@ class Nurse(Reporter):
     def __unicode__(self):
         if self.alias: return self.alias
         return self.id
+    
+    def subscribe(self):
+        super(Nurse, self).set_subscribe(True)
+        # set up weekly mambo schedule for friday @ 12:30 pm
+        set_weekly_event("weltel.callbacks.shida_report", day=5, hour=12, \
+                         minute=30, callback_args=self.id)
 
 MALE = 'm'
 FEMALE = 'f'
@@ -28,12 +51,11 @@ GENDER_CHOICES=(
     (FEMALE,'female')
 )
 
-class Patient(Reporter):
+class Patient(WeltelUser):
     """ This model represents a patient for WelTel """
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True)
     state = models.ForeignKey("PatientState")
     active = models.BooleanField(default=True)
-    subscribed = models.BooleanField(default=True)
     site = models.ForeignKey(Site)
     
     def __unicode__(self):
@@ -54,6 +76,12 @@ class Patient(Reporter):
         self.save()
         if issuer is None: issuer = self
         EventLog(event=event, patient=self, triggered_by=issuer).save()
+
+    def subscribe(self):
+        super(Nurse, self).set_subscribe(True)
+        # set up weekly mambo schedule for friday @ 12:30 pm
+        set_weekly_event("weltel.callbacks.send_mambo", day=5, hour=12, \
+                         minute=30, callback_args=self.id)
 
 class PatientState(models.Model):
     code = models.CharField(max_length=15)

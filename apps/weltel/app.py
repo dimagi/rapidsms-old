@@ -13,9 +13,10 @@ from reporters.models import Reporter
 from weltel.formslogic import WeltelFormsLogic, REGISTER_COMMAND, NURSE_COMMAND
 from weltel.models import Nurse, Patient, PatientState, OutcomeType, ProblemType, EventType
 
-SAWA = 'sawa'
-SHIDA = 'shida'
-OTHER = 'other'
+SAWA_CODE = 'sawa'
+SHIDA_CODE = 'shida'
+OTHER_CODE = 'other'
+PATIENT_ID_REGEX = "[a-z]+/[0-9]+"
 
 class App (rapidsms.app.App):
     kw = Keyworder()
@@ -43,13 +44,12 @@ class App (rapidsms.app.App):
 
     def handle (self, message):
         try:
-            message.patient = Patient.objects.get(reporter_ptr=message.reporter)
+            message.reporter = Patient.objects.get(reporter_ptr=message.reporter)
         except Patient.DoesNotExist:
-            pass
-        try:
-            message.nurse = Nurse.objects.get(reporter_ptr=message.reporter)
-        except Nurse.DoesNotExist:
-            pass
+            try:
+                message.reporter = Nurse.objects.get(reporter_ptr=message.reporter)
+            except Nurse.DoesNotExist:
+                pass
         # use the keyworder to see if the forms app can help us
         try:
             if hasattr(self, "kw"):
@@ -94,53 +94,63 @@ class App (rapidsms.app.App):
         self.info("Registering regex: %s for function %s, %s" % \
                   (regex, function.im_class, function.im_func.func_name))
         self.kw.regexen.append((re.compile(regex, re.IGNORECASE), function))
- 
-
-    def is_patient(f):
-        def new_f(self, message, *args):
-            if not hasattr(message,'patient'):
-                message.respond( _("This number is not registered.") + REGISTER_COMMAND )
-                return
-            f(self, message, *args)
-        return new_f
-        
-    def is_nurse(f):
-        def new_f(self, message, *args):
-            if not hasattr(message,'patient'):
-                message.respond( _("This number is not registered to a nurse.") )
-                return
-            f(self, message, *args)
-        return new_f
-        
+    
+    @kw("(%s)\s*(.*)" % PATIENT_ID_REGEX)
+    def from_other_phone(self, message, patient_id, text):
+        message.reporter = Patient.objects.get(id=patient_id)
+        func,groups = self.kw.match(None, text)
+        getattr(self,func)(message,groups)
+    
     @kw("(sawa|poa|nzuri|safi)(.*)")
     @is_patient
     def sawa(self, message, sawa, extra=None):
-        message.patient.register_event(SAWA)
+        message.reporter.register_event(SAWA_CODE)
         # Note that all messages are already logged in logger
-        logging.info("Patient %s set to '%s'" % (message.patient.alias, SAWA))
+        logging.info("Patient %s set to '%s'" % (message.reporter.alias, SAWA_CODE))
         message.respond( _("Asante") )
     
-    @kw("(shida)\s*([0-9])(.*)")
+    @kw("(shida)\s*([0-9]+)(.*)")
     @is_patient
     def shida(self, message, shida, problem_code, extra=None):
         response = ''
         try:
-            message.patient.register_event(problem_code)
+            message.reporter.register_event(problem_code)
         except ProblemType.DoesNotExist:
             response = _("Problem %(code)s not recognized. ") % \
                         {'code':problem_code} 
-            message.patient.register_event(SHIDA)
-        logging.info("Patient %s set to '%s'" % (message.patient.alias, SHIDA) )
+            message.reporter.register_event(SHIDA_CODE)
+        logging.info("Patient %s set to '%s'" % (message.reporter.alias, SHIDA_CODE) )
         message.respond( response + _("Pole %(code)s") % {'code':problem_code} )
     
     @kw("(shida)(whatever)?")
     @is_patient
     def shida_new(self, message, shida, new_problem=None):
-        message.patient.register_event(SHIDA)
-        logging.info("Patient %s set to '%s'" % (message.patient.alias, SHIDA) )
+        message.reporter.register_event(SHIDA_CODE)
+        logging.info("Patient %s set to '%s'" % (message.reporter.alias, SHIDA_CODE) )
         message.respond( _("Pole") )
-    
-    @kw("(numbers)\s+(numbers)")
+
+    @is_patient
+    def other(self, message):
+        message.reporter.register_event(OTHER_CODE)
+        logging.info("Patient %s sent unrecognized command '%s'" % \
+                     (message.reporter.alias, OTHER_CODE))
+        message.respond( _("Command not recognized.") )
+
+    @kw("(well subscribe.*)")
+    @is_weltel_user
+    def subscribe(self, message, shida, new_problem=None):
+        message.reporter.subscribe()
+        logging.info("Patient %s subscribed" % (message.reporter.alias) )
+        message.respond( _("Karibu") )
+
+    @kw("(well unsubscribe.*)")
+    @is_weltel_user
+    def unsubscribe(self, message, shida, new_problem=None):
+        message.reporter.unsubscribe()
+        logging.info("%s unsubscribed" % (message.reporter.alias) )
+        message.respond( _("Kwaheri") )
+
+    @kw("(%s)\s+(numbers)" % PATIENT_ID_REGEX)
     @is_nurse
     def outcome(self, message, patient_id, outcome_code):
         """ Expecting a text from a nurse of the form: <patient-id> <outcome-code> """
@@ -154,14 +164,33 @@ class App (rapidsms.app.App):
         except OutcomeType.DoesNotExist:
             message.respond( _("Outcome (%(code)s) not recognized.")%{'code':outcome_code} )
             return
-        logging.info("Patient %s set to '%s'" % (message.patient.alias, outcome_code))
+        logging.info("Patient %s set to '%s'" % (message.reporter.alias, outcome_code))
         message.respond( _("Patient %(id)s updated to %(code)s") % \
                          {'id':patient_id, 'code':outcome_code} )
-        
-    @is_patient
-    def other(self, message):
-        message.patient.register_event(OTHER)
-        logging.info("Patient %s sent unrecognized command '%s'" % \
-                     (message.patient.alias, OTHER))
-        message.respond( _("Command not recognized.") )
 
+    def is_patient(f):
+        def decorator(self, message, *args):
+            if not instanceof(message.reporter,'Patient'):
+                message.respond( _("This number is not registered to a patient.") + \
+                                 REGISTER_COMMAND )
+                return
+            f(self, message, *args)
+        return decorator
+        
+    def is_nurse(f):
+        def decorator(self, message, *args):
+            if not instanceof(message.reporter,'Nurse'):
+                message.respond( _("This number is not registered to a nurse.") )
+                return
+            f(self, message, *args)
+        return decorator
+        
+    def is_weltel_user(f):
+        def decorator(self, message, *args):
+            if not instanceof(message.reporter,'Patient') and \
+                not instanceof(message.reporter,'Nurse'):
+                    message.respond( _("This number is not registered.") + \
+                                     REGISTER_COMMAND )
+                    return
+            f(self, message, *args)
+        return decorator
