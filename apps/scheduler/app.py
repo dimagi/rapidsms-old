@@ -109,5 +109,8 @@ class SchedulerThread (threading.Thread):
                 next_run = now + timedelta(seconds=interval)
                 updated_now = datetime.now()
                 while updated_now < next_run:
-                    time.sleep((next_run - updated_now).seconds)
+                    # we add another second since system time runs at microsecond accuracy
+                    # whereas python time is only second accuracy
+                    time.sleep((next_run - updated_now + timedelta(seconds=1)).seconds)
+                    updated_now = datetime.now()
                 now = next_run

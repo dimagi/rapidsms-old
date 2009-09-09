@@ -142,8 +142,8 @@ class EventSchedule(models.Model):
         
         return ((when.minute     in minutes) and
                 (when.hour       in hours) and
-                (when.day        in days_of_month) and
-                (when.weekday()  in days_of_week) and
+                ((when.day       in days_of_month) or
+                (when.weekday()  in days_of_week)) and
                 (when.month      in months))
 
     def _valid(self, timespan):
