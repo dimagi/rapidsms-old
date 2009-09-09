@@ -1,3 +1,14 @@
+"""
+A field which can store any pickleable object in the database. 
+It is database-agnostic, and should work with any database 
+backend you can throw at it.
+
+Pass in any object and it will be automagically converted 
+behind the scenes, and you never have to manually pickle or 
+unpickle anything. Also works fine when querying.
+
+http://www.djangosnippets.org/snippets/1694/ 
+"""
 from django.db import models
 
 try:
