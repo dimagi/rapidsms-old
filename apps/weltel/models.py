@@ -60,12 +60,6 @@ class Nurse(WeltelUser):
     
     def subscribe(self):
         super(Nurse, self).set_subscribe(True)
-        # set up weekly shida_report schedule for friday @ 12:30 pm
-        scheds = EventSchedule.objects.filter(callback="weltel.callbacks.shida_report", \
-                                  callback_args__contains=self.id)
-        if len(scheds) == 0:
-            set_weekly_event("weltel.callbacks.shida_report", day=5, hour=12, \
-                             minute=30, callback_args=self.id)
 
 MALE = 'm'
 FEMALE = 'f'
@@ -80,10 +74,12 @@ class Patient(WeltelUser):
     state = models.ForeignKey("PatientState")
     active = models.BooleanField(default=True)
     site = models.ForeignKey(Site)
+    # this is rather crude. TODO - change into some sort of dynamic logging system
+    date_registered = models.DateTimeField(null=False, default=datetime.now() )
     # a db table to tag all incoming messages having to do with this patient
     # note that this is both messages sent by this patient as well as
     # messages *about* this patient
-    incomingmessages = models.ManyToManyField(IncomingMessage, null=True)
+    related_messages = models.ManyToManyField(IncomingMessage, null=True)
     
     def __unicode__(self):
         if self.alias: return self.alias
@@ -103,6 +99,7 @@ class Patient(WeltelUser):
         self.save()
         if issuer is None: issuer = self
         EventLog(event=event, patient=self, triggered_by=issuer).save()
+        return event
 
     def subscribe(self):
         super(Patient, self).set_subscribe(True)
@@ -132,9 +129,6 @@ class EventType(models.Model):
     def __unicode__(self):
         return self.name if self.name else self.code
 
-    #automatic deregistration
-    #unsubscribe
-
 class ProblemType(EventType):
     """ Patient reports a problem """
     class Meta:
@@ -155,6 +149,9 @@ class EventLog(models.Model):
     notes = models.CharField(max_length=255, null=True)
     active = models.BooleanField(default=True)
     subscribed = models.BooleanField(default=True)
+
+    class Meta:
+        get_latest_by = 'date'
     
     def __unicode__(self):
         return self.name if self.name else self.code

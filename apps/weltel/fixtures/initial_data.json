@@ -1516,34 +1516,6 @@
         }
     }, 
     {
-        "pk": 2, 
-        "model": "form.form", 
-        "fields": {
-            "form_tokens": [
-                12
-            ], 
-            "code": 13, 
-            "apps": [
-                1
-            ], 
-            "name": "phone"
-        }
-    }, 
-    {
-        "pk": 3, 
-        "model": "form.form", 
-        "fields": {
-            "form_tokens": [
-                15
-            ], 
-            "code": 4, 
-            "apps": [
-                1
-            ], 
-            "name": "set_default_phone"
-        }
-    }, 
-    {
         "pk": 4, 
         "model": "form.form", 
         "fields": {
@@ -1577,28 +1549,6 @@
                 2
             ], 
             "name": "register"
-        }
-    }, 
-    {
-        "pk": 13, 
-        "model": "form.token", 
-        "fields": {
-            "abbreviation": "phone", 
-            "patterns": [
-                17
-            ], 
-            "name": "phone"
-        }
-    }, 
-    {
-        "pk": 4, 
-        "model": "form.token", 
-        "fields": {
-            "abbreviation": "set", 
-            "patterns": [
-                4
-            ], 
-            "name": "set"
         }
     }, 
     {
@@ -1657,41 +1607,10 @@
         }
     }, 
     {
-        "pk": 11, 
-        "model": "form.token", 
-        "fields": {
-            "abbreviation": "problem_code", 
-            "patterns": [
-                14
-            ], 
-            "name": "problem_code"
-        }
-    }, 
-    {
-        "pk": 12, 
-        "model": "form.token", 
-        "fields": {
-            "abbreviation": "outcome_code", 
-            "patterns": [
-                16
-            ], 
-            "name": "outcome_code"
-        }
-    }, 
-    {
         "pk": 8, 
         "model": "form.formtoken", 
         "fields": {
             "token": 9, 
-            "required": 1, 
-            "sequence": 1
-        }
-    }, 
-    {
-        "pk": 15, 
-        "model": "form.formtoken", 
-        "fields": {
-            "token": 13, 
             "required": 1, 
             "sequence": 1
         }
@@ -1740,31 +1659,13 @@
         }
     }, 
     {
-        "pk": 3, 
-        "model": "form.domainform", 
-        "fields": {
-            "form": 3, 
-            "sequence": 3
-        }
-    }, 
-    {
-        "pk": 4, 
-        "model": "form.domainform", 
-        "fields": {
-            "form": 2, 
-            "sequence": 4
-        }
-    }, 
-    {
         "pk": 1, 
         "model": "form.domain", 
         "fields": {
             "code": 1, 
             "domain_forms": [
                 1, 
-                2, 
-                3, 
-                4
+                2
             ], 
             "name": "Weltel"
         }
@@ -1798,27 +1699,11 @@
         }
     }, 
     {
-        "pk": 4, 
-        "model": "patterns.pattern", 
-        "fields": {
-            "regex": "(set)", 
-            "name": "set"
-        }
-    }, 
-    {
         "pk": 5, 
         "model": "patterns.pattern", 
         "fields": {
             "regex": "(nurse)", 
             "name": "nurse"
-        }
-    }, 
-    {
-        "pk": 6, 
-        "model": "patterns.pattern", 
-        "fields": {
-            "regex": "(unsubscribe)", 
-            "name": "unsubscribe"
         }
     }, 
     {
@@ -1846,35 +1731,11 @@
         }
     }, 
     {
-        "pk": 14, 
-        "model": "patterns.pattern", 
-        "fields": {
-            "regex": "(\\w+)", 
-            "name": "problem_code"
-        }
-    }, 
-    {
         "pk": 15, 
         "model": "patterns.pattern", 
         "fields": {
             "regex": "(m|f|male|female)", 
             "name": "gender"
-        }
-    }, 
-    {
-        "pk": 16, 
-        "model": "patterns.pattern", 
-        "fields": {
-            "regex": "(\\w+)", 
-            "name": "outcome_code"
-        }
-    }, 
-    {
-        "pk": 17, 
-        "model": "patterns.pattern", 
-        "fields": {
-            "regex": "(phone)", 
-            "name": "phone"
         }
     }, 
     {

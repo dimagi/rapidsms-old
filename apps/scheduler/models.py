@@ -161,3 +161,10 @@ def set_weekly_event(callback, day, hour, minute, callback_args):
                              days_of_week=set([hour]), minutes=set([minute]), \
                              callback_args=callback_args )
     schedule.save()
+
+def set_daily_event(callback, hour, minute, callback_args):
+    # relies on all the built-in checks in EventSchedule.save()
+    schedule = EventSchedule(callback=callback, hours=set([hour]), \
+                             minutes=set([minute]), \
+                             callback_args=callback_args )
+    schedule.save()

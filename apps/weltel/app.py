@@ -9,13 +9,15 @@ import rapidsms
 import logging
 from rapidsms.parsers.keyworder import Keyworder
 from rapidsms.i18n import ugettext_noop as _
-from reporters.models import Reporter
+from reporters.models import Reporter, PersistantConnection
+from scheduler.models import set_daily_event, EventSchedule
 from weltel.formslogic import WeltelFormsLogic, REGISTER_COMMAND, NURSE_COMMAND
 from weltel.models import Nurse, Patient, PatientState, OutcomeType, ProblemType, EventType
 
 SAWA_CODE = 'sawa'
 SHIDA_CODE = 'shida'
 OTHER_CODE = 'other'
+WELTEL_KEYWORD = "well"
 PATIENT_ID_REGEX = "[a-z]+/[0-9]+"
 
 class App (rapidsms.app.App):
@@ -37,7 +39,24 @@ class App (rapidsms.app.App):
             self._form_app.add_form_handler("weltel", formslogic)
             
             self.boostrapped = True
-        
+            
+            # we could also put this in the fixture
+            # set up automatic deregistration event
+            try:
+                EventSchedule.objects.get(callback="weltel.callbacks.automatic_deregistration")
+            except EventSchedule.DoesNotExist:
+                # automatically deregister users we haven't seen in 3 weeks
+                set_daily_event("weltel.callbacks.automatic_deregistration", \
+                                hour=0, minute=15, callback_args=3)
+                
+            # set up bi-weekly shida report
+            try:
+                EventSchedule.objects.get(callback="weltel.callbacks.shida_report")
+            except EventSchedule.DoesNotExist:
+                schedule = EventSchedule(callback="weltel.callbacks.shida_report", \
+                                         hours=set([8,15]), minutes=set([0]) )
+                schedule.save()
+
     def parse (self, message):
         """Parse and annotate messages in the parse phase."""
         pass
@@ -98,7 +117,7 @@ class App (rapidsms.app.App):
     def is_patient(f):
         def decorator(self, message, *args):
             if not isinstance(message.reporter,Patient):
-                message.respond( _("This number is not registered to a patient.") + \
+                message.respond( _("This number is not registered. ") + \
                                  REGISTER_COMMAND )
                 return
             f(self, message, *args)
@@ -132,14 +151,14 @@ class App (rapidsms.app.App):
             message.respond( _("Patient (%(id)s) not recognized.")%{'id':patient_id} )
             return
         try:
-            patient.register_event(outcome_code)
+            outcome = patient.register_event(outcome_code)
         except OutcomeType.DoesNotExist:
             message.respond( _("Outcome (%(code)s) not recognized.")%{'code':outcome_code} )
             return
-        patient.incomingmessages.add(message.persistent_msg)
+        patient.related_messages.add(message.persistent_msg)
         logging.info("Patient %s set to '%s'" % (message.reporter.alias, outcome_code))
-        message.respond( _("Patient %(id)s updated to %(code)s") % \
-                         {'id':patient_id, 'code':outcome_code} )
+        message.respond( _("Patient %(id)s updated to '%(code)s'") % \
+                         {'id':patient_id, 'code':outcome.name} )
 
     @kw("(%s)\s*(.*)" % PATIENT_ID_REGEX)
     def from_other_phone(self, message, patient_id, text):
@@ -156,7 +175,7 @@ class App (rapidsms.app.App):
     @is_patient
     def sawa(self, message, sawa, extra=None):
         message.reporter.register_event(SAWA_CODE)
-        message.reporter.incomingmessages.add(message.persistent_msg)
+        message.reporter.related_messages.add(message.persistent_msg)
         # Note that all messages are already logged in logger
         logging.info("Patient %s set to '%s'" % (message.reporter.alias, SAWA_CODE))
         message.respond( _("Asante") )
@@ -166,43 +185,93 @@ class App (rapidsms.app.App):
     def shida(self, message, shida, problem_code, extra=None):
         response = ''
         try:
-            message.reporter.register_event(problem_code)
+            problem = message.reporter.register_event(problem_code)
         except ProblemType.DoesNotExist:
             response = _("Problem %(code)s not recognized. ") % \
                         {'code':problem_code} 
-            message.reporter.register_event(SHIDA_CODE)
-        message.reporter.incomingmessages.add(message.persistent_msg)
+            problem = message.reporter.register_event(SHIDA_CODE)
+        message.reporter.related_messages.add(message.persistent_msg)
         logging.info("Patient %s set to '%s'" % (message.reporter.alias, SHIDA_CODE) )
-        message.respond( response + _("Pole %(code)s") % {'code':problem_code} )
+        message.respond( response + _("Pole for '%(code)s'") % {'code':problem.name} )
     
     @kw("(shida)(whatever)?")
     @is_patient
     def shida_new(self, message, shida, new_problem=None):
         message.reporter.register_event(SHIDA_CODE)
-        message.reporter.incomingmessages.add(message.persistent_msg)
+        message.reporter.related_messages.add(message.persistent_msg)
         logging.info("Patient %s set to '%s'" % (message.reporter.alias, SHIDA_CODE) )
         message.respond( _("Pole") )
 
-    @kw("(well subscribe.*)")
+    @kw("(%(well)s set phone.*)" % {'well':WELTEL_KEYWORD} )
+    @is_patient
+    def set_default_phone(self, message, shida, new_problem=None):
+        message.reporter.set_preferred_connection( message.persistant_connection )
+        message.reporter.related_messages.add(message.persistent_msg)
+        logging.info("Patient %(id)s default phone set to %(num)s" % \
+                         {"num": message.persistant_connection.identity, \
+                          "id":message.reporter.patient_id } )
+        message.respond( "Patient %(id)s default phone set to %(num)s" % \
+                         {"num": message.persistant_connection.identity, \
+                          "id":message.reporter.patient_id } )
+        
+    # for unit tests
+    @kw("(%(well)s get phone.*)" % {'well':WELTEL_KEYWORD} )
+    @is_patient
+    def get_default_phone(self, message, shida, new_problem=None):
+        message.reporter.related_messages.add(message.persistent_msg)
+        message.respond( "Patient %(id)s default phone is %(num)s" % \
+                         {"num": message.reporter.connection.identity, \
+                          "id": message.reporter.patient_id } )
+
+    @kw("(%(well)s subscribe.*)" % {'well':WELTEL_KEYWORD} )
     @is_weltel_user
     def subscribe(self, message, shida, new_problem=None):
         message.reporter.subscribe()
-        message.reporter.incomingmessages.add(message.persistent_msg)
+        if isinstance(message.reporter,Patient):
+            message.reporter.related_messages.add(message.persistent_msg)
         logging.info("Patient %s subscribed" % (message.reporter.alias) )
         message.respond( _("Karibu") )
 
-    @kw("(well unsubscribe.*)")
+    @kw("(%(well)s unsubscribe.*)" % {'well':WELTEL_KEYWORD} )
     @is_weltel_user
     def unsubscribe(self, message, shida, new_problem=None):
         message.reporter.unsubscribe()
-        message.reporter.incomingmessages.add(message.persistent_msg)
+        if isinstance(message.reporter,Patient):
+            message.reporter.related_messages.add(message.persistent_msg)
         logging.info("%s unsubscribed" % (message.reporter.alias) )
         message.respond( _("Kwaheri") )
+
+    @kw("%(well)s\s+phone\s+(%(id)s).*"  % {'well':WELTEL_KEYWORD, 'id':PATIENT_ID_REGEX} )
+    def add_phone(self, message, patient_id):
+        try:
+            patient = Patient.objects.get(alias=patient_id)
+        except Patient.DoesNotExist:
+            message.respond(_("Unknown patient %(id)s.") % {'id':patient_id})
+            return
+        patient.related_messages.add(message.persistent_msg)
+        conn, c_created = PersistantConnection.objects.get_or_create(\
+                              identity=message.persistant_connection.identity, \
+                              backend=message.persistant_connection.backend)
+        if conn.reporter != patient:
+            patient.connections.add(conn)
+            message.respond( "Phone number %(num)s has been registered to patient %(id)s" % \
+                             {"id":patient.patient_id, "num":conn.identity} )
+        else:
+            message.respond( "Phone number %(num)s is already registered with patient %(id)s" % \
+                             {"id":patient.patient_id, "num":conn.identity} )
+
+    @kw("%(well)s\s+phones.*" % {'well':WELTEL_KEYWORD} )
+    @is_patient
+    def list_phones(self, message):
+        message.reporter.related_messages.add(message.persistent_msg)
+        identities = [conn.identity for conn in message.reporter.connections.all()]
+        response = ', '.join(identities)
+        message.respond( response )
 
     @is_patient
     def other(self, message):
         message.reporter.register_event(OTHER_CODE)
-        message.reporter.incomingmessages.add(message.persistent_msg)
+        message.reporter.related_messages.add(message.persistent_msg)
         logging.info("Patient %s sent unrecognized command '%s'" % \
                      (message.reporter.alias, OTHER_CODE))
         message.respond( _("Command not recognized.") )
