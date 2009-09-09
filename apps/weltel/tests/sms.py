@@ -120,23 +120,37 @@ class TestApp (TestScript):
     testShidaReport = """
         1260 > well register tst/11 female
         1260 < Patient tst/11 registered with new number 1260
-        1260 > sawa
-        1260 < Asante
         1261 > well register tst/12 female
         1261 < Patient tst/12 registered with new number 1261
-        1261 > sawa
-        1261 < Asante
         1262 > well nurse tst
         1262 < Nurse registered with new number 1262
+        1262 > well report
+        1262 < tst/11 1260 default tst/12 1261 default
+        1260 > sawa
+        1260 < Asante
+        1262 > well report
+        1262 < tst/12 1261 default
+        1261 > sawa
+        1261 < Asante
         1262 > well report
         1262 < No problem patients
         1260 > shida
         1260 < Pole
+        1262 > well report
+        1262 < tst/11 1260 shida
         1261 > shida 2
         1261 < Pole for 'Disappeared'
         1262 > well report
         1262 < tst/11 1260 shida tst/12 1261 other
+        1261 > sawa
+        1261 < Asante
+        1262 > well report
+        1262 < tst/11 1260 shida
         """
+        
+        # We should also test what happens to the shida report
+        # after 'unsubscribe' and 'inactive' 
+        # (once we get clarification from ana)
     
     def test_mambo(self):
         wfl = WeltelFormsLogic()
