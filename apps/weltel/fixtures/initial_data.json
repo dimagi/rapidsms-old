@@ -1780,24 +1780,6 @@
         }
     }, 
     {
-        "pk": 5, 
-        "model": "weltel.patientstate", 
-        "fields": {
-            "code": "inactive", 
-            "name": "Inactive", 
-            "description": ""
-        }
-    }, 
-    {
-        "pk": 6, 
-        "model": "weltel.patientstate", 
-        "fields": {
-            "code": "unsubscribe", 
-            "name": "Unsubscribe", 
-            "description": ""
-        }
-    }, 
-    {
         "pk": 1, 
         "model": "weltel.eventtype", 
         "fields": {
@@ -1841,10 +1823,10 @@
         "pk": 5, 
         "model": "weltel.eventtype", 
         "fields": {
-            "next_state": 6, 
+            "next_state": 4, 
             "code": "2", 
-            "name": "Gone", 
-            "description": "Patient has left this site. "
+            "name": "Disappeared", 
+            "description": "Patient has disappeared. "
         }
     }, 
     {

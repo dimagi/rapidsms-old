@@ -56,11 +56,11 @@ def shida_report(router):
         sawa = PatientState.objects.get(code='sawa')
         patient_set = set()
         # get all patients who responded shida, 'other', or are in the default state
-        patients = Patient.objects.filter(location=site).exclude(state=sawa)
+        patients = Patient.objects.filter(site=site).exclude(state=sawa)
         for patient in patients:
             patient_set.add(patient)
         # get all patients in sawa state but from whom we haven't heard in 3 weeks
-        patients = Patient.objects.filter(location=site).filter(state=sawa, active=False)
+        patients = Patient.objects.filter(site=site).filter(state=sawa, active=False)
         for patient in patients:
             patient_set.add(patient)
         
@@ -75,5 +75,5 @@ def shida_report(router):
             if report:
                 be.message(nurse.connection.identity, report).send()
             else:
-                be.message(nurse.connection.identity, _("no problem patients")).send()
+                be.message(nurse.connection.identity, _("No problem patients")).send()
 

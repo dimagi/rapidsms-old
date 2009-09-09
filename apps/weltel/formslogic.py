@@ -50,9 +50,9 @@ class WeltelFormsLogic(FormsLogic):
                 phone_number = message.persistant_connection.identity
             gender = None
             if "gender" in form_entry.reg_data:
-                if form_entry.reg_data["gender"].startswith('m'):
+                if form_entry.reg_data["gender"].lower().startswith('m'):
                     gender = MALE
-                elif form_entry.reg_data["gender"].startswith('f'):
+                elif form_entry.reg_data["gender"].lower().startswith('f'):
                     gender = FEMALE
             #registered=message.date
             patient, response = self.get_or_create_patient(form_entry.reg_data["patient_id"], \
@@ -81,7 +81,7 @@ class WeltelFormsLogic(FormsLogic):
         except Site.DoesNotExist:
             return [_("Unknown sitecode %(code)s") % {"code" : site_code}]
         if len(gender) > 0:
-            if not gender.startswith('m') and not gender.startswith('f'):
+            if not gender.lower().startswith('m') and not gender.lower().startswith('f'):
                 return [_("Invalid gender %(gender)s") % {"gender" : gender}]
         if len(phone_number) > 0:
             if not re.match(r"^\+?\d+$", phone_number):
@@ -123,11 +123,11 @@ class WeltelFormsLogic(FormsLogic):
                           identity= phone_number, backend=backend)
         if conn.reporter is None:
             response = response + \
-                       _(" with new number %(num)s") % \
+                       _("with new number %(num)s") % \
                        {"num": phone_number}
         else:
             response = response + \
-                       _(" with existing number %(num)s") % \
+                       _("with existing number %(num)s") % \
                        {"num": phone_number }
             if conn.reporter.alias != patient.alias:
                 response = response + _(" (from patient %(old_id)s)") % \

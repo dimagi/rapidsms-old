@@ -160,6 +160,13 @@ class App (rapidsms.app.App):
         message.respond( _("Patient %(id)s updated to '%(code)s'") % \
                          {'id':patient_id, 'code':outcome.name} )
 
+    # for unit tests ONLY - sends messages to all nurses!
+    @kw("%(well)s report.*" % {'well':WELTEL_KEYWORD} )
+    @is_nurse
+    def shida_report(self, message):
+        from weltel.callbacks import shida_report
+        shida_report(self.router)
+
     @kw("(%s)\s*(.*)" % PATIENT_ID_REGEX)
     def from_other_phone(self, message, patient_id, text):
         message.reporter = Patient.objects.get(alias=patient_id)
@@ -171,18 +178,18 @@ class App (rapidsms.app.App):
             return
         func(self, message, groups)
 
-    @kw("(sawa|poa|nzuri|safi)(.*)")
+    @kw("(sawa|poa|nzuri|safi).*")
     @is_patient
-    def sawa(self, message, sawa, extra=None):
+    def sawa(self, message, sawa):
         message.reporter.register_event(SAWA_CODE)
         message.reporter.related_messages.add(message.persistent_msg)
         # Note that all messages are already logged in logger
         logging.info("Patient %s set to '%s'" % (message.reporter.alias, SAWA_CODE))
         message.respond( _("Asante") )
     
-    @kw("(shida)\s*([0-9]+)(.*)")
+    @kw("shida\s*([0-9]+).*")
     @is_patient
-    def shida(self, message, shida, problem_code, extra=None):
+    def shida(self, message, problem_code):
         response = ''
         try:
             problem = message.reporter.register_event(problem_code)
@@ -274,4 +281,4 @@ class App (rapidsms.app.App):
         message.reporter.related_messages.add(message.persistent_msg)
         logging.info("Patient %s sent unrecognized command '%s'" % \
                      (message.reporter.alias, OTHER_CODE))
-        message.respond( _("Command not recognized.") )
+        message.respond( _("Command not recognized") )
