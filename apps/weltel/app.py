@@ -97,9 +97,37 @@ class App (rapidsms.app.App):
     
     @kw("(%s)\s*(.*)" % PATIENT_ID_REGEX)
     def from_other_phone(self, message, patient_id, text):
-        message.reporter = Patient.objects.get(id=patient_id)
+        message.reporter = Patient.objects.get(alias=patient_id)
         func,groups = self.kw.match(None, text)
-        getattr(self,func)(message,groups)
+        func(self, message, groups)
+
+    def is_patient(f):
+        def decorator(self, message, *args):
+            if not isinstance(message.reporter,Patient):
+                message.respond( _("This number is not registered to a patient.") + \
+                                 REGISTER_COMMAND )
+                return
+            f(self, message, *args)
+        return decorator
+    
+    def is_nurse(f):
+        def decorator(self, message, *args):
+            if not isinstance(message.reporter,Nurse):
+                message.respond( _("This number is not registered to a nurse.") )
+                return
+            f(self, message, *args)
+        return decorator
+        
+    def is_weltel_user(f):
+        def decorator(self, message, *args):
+            if not isinstance(message.reporter,Patient) and \
+                not isinstance(message.reporter,Nurse):
+                    message.respond( _("This number is not registered.") + \
+                                     REGISTER_COMMAND )
+                    return
+            f(self, message, *args)
+        return decorator        
+
     
     @kw("(sawa|poa|nzuri|safi)(.*)")
     @is_patient
@@ -167,30 +195,3 @@ class App (rapidsms.app.App):
         logging.info("Patient %s set to '%s'" % (message.reporter.alias, outcome_code))
         message.respond( _("Patient %(id)s updated to %(code)s") % \
                          {'id':patient_id, 'code':outcome_code} )
-
-    def is_patient(f):
-        def decorator(self, message, *args):
-            if not instanceof(message.reporter,'Patient'):
-                message.respond( _("This number is not registered to a patient.") + \
-                                 REGISTER_COMMAND )
-                return
-            f(self, message, *args)
-        return decorator
-        
-    def is_nurse(f):
-        def decorator(self, message, *args):
-            if not instanceof(message.reporter,'Nurse'):
-                message.respond( _("This number is not registered to a nurse.") )
-                return
-            f(self, message, *args)
-        return decorator
-        
-    def is_weltel_user(f):
-        def decorator(self, message, *args):
-            if not instanceof(message.reporter,'Patient') and \
-                not instanceof(message.reporter,'Nurse'):
-                    message.respond( _("This number is not registered.") + \
-                                     REGISTER_COMMAND )
-                    return
-            f(self, message, *args)
-        return decorator

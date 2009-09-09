@@ -2,6 +2,7 @@ from datetime import datetime
 from django.db import models
 from reporters.models import Reporter, PersistantConnection, Location 
 from locations.models import Location
+from scheduler.models import EventSchedule, set_weekly_event
 
 class Site(Location):
     """ This model represents a WelTel site """
@@ -40,9 +41,12 @@ class Nurse(WeltelUser):
     
     def subscribe(self):
         super(Nurse, self).set_subscribe(True)
-        # set up weekly mambo schedule for friday @ 12:30 pm
-        set_weekly_event("weltel.callbacks.shida_report", day=5, hour=12, \
-                         minute=30, callback_args=self.id)
+        # set up weekly shida_report schedule for friday @ 12:30 pm
+        scheds = EventSchedule.objects.filter(callback="weltel.callbacks.shida_report", \
+                                  callback_args__contains=self.id)
+        if len(scheds) == 0:
+            set_weekly_event("weltel.callbacks.shida_report", day=5, hour=12, \
+                             minute=30, callback_args=self.id)
 
 MALE = 'm'
 FEMALE = 'f'
@@ -78,10 +82,13 @@ class Patient(WeltelUser):
         EventLog(event=event, patient=self, triggered_by=issuer).save()
 
     def subscribe(self):
-        super(Nurse, self).set_subscribe(True)
+        super(Patient, self).set_subscribe(True)
         # set up weekly mambo schedule for friday @ 12:30 pm
-        set_weekly_event("weltel.callbacks.send_mambo", day=5, hour=12, \
-                         minute=30, callback_args=self.id)
+        scheds = EventSchedule.objects.filter(callback="weltel.callbacks.send_mambo", \
+                                  callback_args__contains=str(self.id))
+        if len(scheds) == 0:
+            set_weekly_event("weltel.callbacks.send_mambo", day=5, hour=12, \
+                             minute=30, callback_args=self.id)
 
 class PatientState(models.Model):
     code = models.CharField(max_length=15)

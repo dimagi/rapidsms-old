@@ -122,7 +122,7 @@
         "pk": 1, 
         "model": "locations.location", 
         "fields": {
-            "code": "test_site", 
+            "code": "tst", 
             "name": "Test Site", 
             "parent": null, 
             "longitude": null, 
@@ -174,7 +174,7 @@
         "pk": 11, 
         "model": "patterns.pattern", 
         "fields": {
-            "regex": "([a-z0-9]+)", 
+            "regex": "([a-z]+/[0-9]+)", 
             "name": "patient_id"
         }
     }, 
@@ -239,7 +239,6 @@
         "fields": {
             "form_tokens": [
                 8, 
-                9, 
                 10, 
                 11
             ], 

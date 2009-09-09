@@ -8,8 +8,8 @@ from scheduler.models import set_weekly_event
 from weltel.models import Site, Patient, PatientState, Nurse, MALE, FEMALE
 from weltel.util import site_code_from_patient_id
 
-REGISTER_COMMAND = _("Correct format: 'well register patient_id gender (phone_number)")
-NURSE_COMMAND = _("Correct format: 'well nurse site_id")
+REGISTER_COMMAND = _("To register, text: 'well register patient_id gender (phone_number)")
+NURSE_COMMAND = _("To register, text: 'well nurse site_id")
 
 #TODO - add basic check for when people submit fields in wrong order
 #TODO - wrap the validation and actions in pretty wrapper functions
@@ -65,8 +65,7 @@ class WeltelFormsLogic(FormsLogic):
                 elif form_entry.reg_data["gender"].startswith('f'):
                     gender = FEMALE
             #registered=message.date
-            response = self.get_or_create_patient(form_entry.reg_data["site_code"], \
-                                       form_entry.reg_data["patient_id"], \
+            response = self.get_or_create_patient(form_entry.reg_data["patient_id"], \
                                        phone_number=phone_number, \
                                        backend= message.persistant_connection.backend, 
                                        gender=gender)
@@ -83,6 +82,7 @@ class WeltelFormsLogic(FormsLogic):
             nurse, n_created = Nurse.objects.get_or_create(alias= phone_number)
             nurse.sites.add(site)
             if n_created:
+                nurse.subscribe()
                 message.respond(_("Nurse %(id)s registered") % {"id": nurse.alias })
             
             # save connections
@@ -122,14 +122,14 @@ class WeltelFormsLogic(FormsLogic):
                 message.respond( "Phone %(num)s already registered with Patient %(id)s" % \
                                  {"id":patient.patient_id, "num":conn.identity} )
 
-    def is_patient_invalid(self, full_patient_id, gender=None, phone_number=None):
-        if len(full_patient_id) == 0:
+    def is_patient_invalid(self, patient_id, gender=None, phone_number=None):
+        if len(patient_id) == 0:
             return [_("Missing 'patient_id'.") + REGISTER_COMMAND ]
         try:
             site_code = site_code_from_patient_id(patient_id)
         except ValueError:
             return [_("Poorly formatted patient_id: %(code)s") % \
-                    {"code" : full_patient_id}]
+                    {"code" : patient_id}]
         try:
             Site.objects.get(code=site_code)
         except Site.DoesNotExist:
