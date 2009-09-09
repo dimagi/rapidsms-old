@@ -37,16 +37,6 @@ class WeltelFormsLogic(FormsLogic):
                 # form_entry, for "actions" to pick up again without re-fetching
                 form_entry.nurse_data = data
             return ret
-        elif form_entry.form.code.abbreviation == "set": 
-            return False
-        elif form_entry.form.code.abbreviation == "phone": 
-            patient_id = data["patient_id"]
-            try:
-                Patient.objects.get(alias=patient_id)
-            except Patient.DoesNotExist:
-                return [_("Unknown patient %(id)s.") % patient_id ]
-            form_entry.phone_data = data
-            return False
 
     def actions(self, *args, **kwargs):
         message = args[0]
@@ -65,62 +55,18 @@ class WeltelFormsLogic(FormsLogic):
                 elif form_entry.reg_data["gender"].startswith('f'):
                     gender = FEMALE
             #registered=message.date
-            response = self.get_or_create_patient(form_entry.reg_data["patient_id"], \
+            patient, response = self.get_or_create_patient(form_entry.reg_data["patient_id"], \
                                        phone_number=phone_number, \
                                        backend= message.persistant_connection.backend, 
                                        gender=gender)
+            patient.related_messages.add(message.persistent_msg)
             message.respond(response)
         elif form_entry.form.code.abbreviation == "nurse":
             site_code =  form_entry.nurse_data["site_code"]
-            try:
-                site = Site.objects.get(code=site_code)
-            except Site.DoesNotExist:
-                message.respond(_("Site %(code)s does not exist") % {"code": site_code })
-                return
             phone_number = message.persistant_connection.identity
-            # for now, set unique id to be phone number
-            nurse, n_created = Nurse.objects.get_or_create(alias= phone_number)
-            nurse.sites.add(site)
-            if n_created:
-                nurse.subscribe()
-                message.respond(_("Nurse %(id)s registered") % {"id": nurse.alias })
-            
-            # save connections
-            conn, c_created = PersistantConnection.objects.get_or_create(identity= phone_number, \
-                                                       backend= message.persistant_connection.backend)
-            if conn.reporter is None:
-                message.respond(_("Nurse %(id)s registered with new number %(num)s") % \
-                                {"id": nurse.alias, "num": phone_number})
-            else:
-                message.respond(_("Number %(num)s reregistered to nurse %(id)s from %(old_id)s") % \
-                                {"id": nurse.alias, "num": phone_number, "old_id": conn.reporter.alias })                    
-            conn.reporter = nurse
-            conn.save()
-        elif form_entry.form.code.abbreviation == "set":
-            # see who this phone is registered to
-            # set as their default
-            try:
-                patient = Patient.objects.get(id=message.persistant_connection.reporter.pk)
-            except Patient.DoesNotExist:
-                message.respond( "Phone number %(num)s is not registered" % \
-                                 {"num": message.persistant_connection.identity } )
-                return
-            patient.set_preferred_connection( message.persistant_connection )
-            message.respond( "Patient %(id)s default phone set to %(num)s" % \
-                             {"num": message.persistant_connection.identity, "id":patient.patient_id } )
-        elif form_entry.form.code.abbreviation == "phone":
-            patient_id = form_entry.phone_data["patient_id"]
-            patient = Patient.objects.get(alias = patient_id)
-
-            conn, c_created = PersistantConnection.objects.get_or_create(identity=message.persistant_connection.identity, \
-                                                       backend=message.persistant_connection.backend)
-            if c_created:
-                patient.connections.add(conn)
-                message.respond( "Patient %(id)s registered phone %(num)s" % \
-                                 {"id":patient.patient_id, "num":conn.identity} )
-            else:
-                message.respond( "Phone %(num)s already registered with Patient %(id)s" % \
-                                 {"id":patient.patient_id, "num":conn.identity} )
+            backend = message.persistant_connection.backend
+            nurse, response = self.get_or_create_nurse(site_code, phone_number, backend)
+            message.respond(response)
 
     def is_patient_invalid(self, patient_id, gender=None, phone_number=None):
         if len(patient_id) == 0:
@@ -156,15 +102,18 @@ class WeltelFormsLogic(FormsLogic):
         response = ''
         try:
             patient = Patient.objects.get(alias=patient_id)
+            response = _("Patient %(id)s reregistered ") % {"id": patient_id }
             p_created = False
         except Patient.DoesNotExist:
             patient = Patient(alias=patient_id)
-            response = _("Patient %(id)s registered. ") % {"id": patient_id }
+            response = _("Patient %(id)s registered ") % {"id": patient_id }
             p_created = True
         site_code = site_code_from_patient_id(patient_id)
         patient.site = Site.objects.get( code=site_code )
         if gender: patient.gender = gender
         patient.state = PatientState.objects.get(code='default')
+        if date_registered: 
+            patient.date_registered = date_registered
         patient.save()
 
         if phone_number is None:
@@ -174,16 +123,49 @@ class WeltelFormsLogic(FormsLogic):
                           identity= phone_number, backend=backend)
         if conn.reporter is None:
             response = response + \
-                       _("Patient %(id)s registered with new number %(num)s") % \
-                       {"id": patient.patient_id, "num": phone_number}
+                       _(" with new number %(num)s") % \
+                       {"num": phone_number}
         else:
             response = response + \
-                       _("Number %(num)s reregistered to patient %(id)s from %(old_id)s") % \
-                       {"id": patient.patient_id, "num": phone_number, "old_id": conn.reporter.alias }
+                       _(" with existing number %(num)s") % \
+                       {"num": phone_number }
+            if conn.reporter.alias != patient.alias:
+                response = response + _(" (from patient %(old_id)s)") % \
+                                      {"old_id": conn.reporter.alias }
         conn.reporter = patient
         conn.save()
         patient.set_preferred_connection( conn )        
         if p_created:
             patient.subscribe()
-        return response
+        return (patient, response)
 
+    def get_or_create_nurse(self, site_code, phone_number, backend):
+        try:
+            site = Site.objects.get(code=site_code)
+        except Site.DoesNotExist:
+            message.respond(_("Site %(code)s does not exist") % {"code": site_code })
+            return
+        # for now, set unique id to be phone number
+        nurse, n_created = Nurse.objects.get_or_create(alias= phone_number)
+        nurse.sites.add(site)
+        if n_created:
+            nurse.subscribe()
+            response = _("Nurse registered") % {"id": nurse.alias }
+        else:
+            response = _("Nurse reregistered") % {"id": nurse.alias }
+        
+        # save connections
+        conn, c_created = PersistantConnection.objects.get_or_create(identity= phone_number, \
+                                                   backend= backend)
+        if conn.reporter is None:
+            response = response + (_(" with new number %(num)s") % \
+                                   {"num": phone_number})
+        else:
+            response = response + (_(" with existing number %(num)s") % \
+                            {"num": phone_number})                    
+            if nurse.alias != conn.reporter.alias:
+                response = response + (_(" reregistered from %(old_id)s") % \
+                            {"id": nurse.alias, "old_id": conn.reporter.alias }) 
+        conn.reporter = nurse
+        conn.save()
+        return nurse, response
