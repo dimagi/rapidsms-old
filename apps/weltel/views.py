@@ -40,37 +40,58 @@ def site(request, pk, template="weltel/site.html"):
     return render_to_response(request, template, context)
 
 def patient(request, pk, template="weltel/patient.html"):
-    logs = get_history_for_patient(pk)
-    context = {}
     patient = get_object_or_404(Patient, id=pk)
+    context = {}
     context['patient'] = patient
-    context['logs'] = paginated(request, logs)    
+    logs = get_history_for_patient(patient)
+    context['history'] = paginated(request, logs)
+    return render_to_response(request, template, context )
+
+def patient_messages(request, pk, template="weltel/patient.html"):
+    patient = get_object_or_404(Patient, id=pk)
+    context = {}
+    context['patient'] = patient
+    logs = get_messages_for_patient(patient)
+    context['messages'] = paginated(request, logs)    
     return render_to_response(request, template, context )
 
 def nurse(request, pk, template="weltel/nurse.html"):
     context = {}
     nurse = get_object_or_404(Nurse, id=pk)
     context['nurse'] = nurse
-    filters = None
-    for conn in nurse.connections.all():
-        if filters is None:
-            filters = Q(identity=conn.identity, backend=conn.backend)
-        else:
-            filters = filters | Q(identity=conn.identity, \
-                                  backend=conn.backend)
-    if filters is not None:
-        logs = IncomingMessage.objects.filter(filters).order_by('-received')
+    logs = nurse.messages(order_by='-received')
+    if logs:
         context['logs'] = paginated(request, logs)
     context['phone_numbers'] = [c.identity for c in nurse.connections.all()]
     return render_to_response(request, template, context )
 
-# currently unused. debug later and use as necessary.
-def get_history_for_patient(patient_id):
+@login_required
+def edit_klass(request, klass, klass_form, pk, template="weltel/edit.html"):
+    context = {}
+    awbject = get_object_or_404(klass, id=pk)
+    if request.method == "POST":
+        form = klass_form(request.POST, awbject)
+        if form.is_valid():
+            form.save()
+            context['status'] = _("'%(name)s' successfully updated" % \
+                                {'name':unicode(awbject)} )
+        else:
+            context['error'] = form.errors
+    else:
+        form = klass_form(instance=awbject)
+    context['form'] = form
+    context['title'] = _("Edit %(name)s") % \
+                       {'name':unicode(awbject)}
+    return render_to_response(request, template, context)
+
+def get_history_for_patient(patient):
+    """ this mother of all SQL statements is designed to get a patient's
+    history, meaning a list of all messages that they sent from any
+    of their registered phones, as well as all logged events that 
+    had to do with them. 
+    
+    """
     cursor = connection.cursor()
-    # this mother of all SQL statements is designed to get a patient's
-    # history, meaning a list of all messages that they sent from any
-    # of their registered phones, as well as all logged events that 
-    # had to do with them
     cursor.execute('''
         (SELECT 
             m.identity AS sender, 
@@ -105,25 +126,18 @@ def get_history_for_patient(patient_id):
             'reporter':Reporter._meta.db_table,
             'event_log':EventLog._meta.db_table,
             'event_type':EventType._meta.db_table,
-            'patient_id':patient_id,
+            'patient_id':patient.pk,
         })
     return cursor.fetchall()
 
-@login_required
-def edit_klass(request, klass, klass_form, pk, template="weltel/edit.html"):
-    context = {}
-    awbject = get_object_or_404(klass, id=pk)
-    if request.method == "POST":
-        form = klass_form(request.POST, awbject)
-        if form.is_valid():
-            form.save()
-            context['status'] = _("'%(name)s' successfully updated" % \
-                                {'name':unicode(awbject)} )
-        else:
-            context['error'] = form.errors
-    else:
-        form = klass_form(instance=awbject)
-    context['form'] = form
-    context['title'] = _("Edit %(name)s") % \
-                       {'name':unicode(awbject)}
-    return render_to_response(request, template, context)
+def get_messages_for_patient(patient):
+    """ the difference between this and get_history_for_patient
+    is that get_history_for_patient attempts to show only messages
+    from a patient as well as state changes, while this function shows
+    messages from a patient as well as all messages from anyone
+    having anything to do with that patient.
+    
+    """
+    # reverse search the manytomany relationship
+    return patient.messages(Q(patient__id=patient.pk), order_by='-received')
+ 

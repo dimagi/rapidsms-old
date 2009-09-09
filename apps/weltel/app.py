@@ -95,12 +95,6 @@ class App (rapidsms.app.App):
                   (regex, function.im_class, function.im_func.func_name))
         self.kw.regexen.append((re.compile(regex, re.IGNORECASE), function))
     
-    @kw("(%s)\s*(.*)" % PATIENT_ID_REGEX)
-    def from_other_phone(self, message, patient_id, text):
-        message.reporter = Patient.objects.get(alias=patient_id)
-        func,groups = self.kw.match(None, text)
-        func(self, message, groups)
-
     def is_patient(f):
         def decorator(self, message, *args):
             if not isinstance(message.reporter,Patient):
@@ -128,56 +122,6 @@ class App (rapidsms.app.App):
             f(self, message, *args)
         return decorator        
 
-    
-    @kw("(sawa|poa|nzuri|safi)(.*)")
-    @is_patient
-    def sawa(self, message, sawa, extra=None):
-        message.reporter.register_event(SAWA_CODE)
-        # Note that all messages are already logged in logger
-        logging.info("Patient %s set to '%s'" % (message.reporter.alias, SAWA_CODE))
-        message.respond( _("Asante") )
-    
-    @kw("(shida)\s*([0-9]+)(.*)")
-    @is_patient
-    def shida(self, message, shida, problem_code, extra=None):
-        response = ''
-        try:
-            message.reporter.register_event(problem_code)
-        except ProblemType.DoesNotExist:
-            response = _("Problem %(code)s not recognized. ") % \
-                        {'code':problem_code} 
-            message.reporter.register_event(SHIDA_CODE)
-        logging.info("Patient %s set to '%s'" % (message.reporter.alias, SHIDA_CODE) )
-        message.respond( response + _("Pole %(code)s") % {'code':problem_code} )
-    
-    @kw("(shida)(whatever)?")
-    @is_patient
-    def shida_new(self, message, shida, new_problem=None):
-        message.reporter.register_event(SHIDA_CODE)
-        logging.info("Patient %s set to '%s'" % (message.reporter.alias, SHIDA_CODE) )
-        message.respond( _("Pole") )
-
-    @is_patient
-    def other(self, message):
-        message.reporter.register_event(OTHER_CODE)
-        logging.info("Patient %s sent unrecognized command '%s'" % \
-                     (message.reporter.alias, OTHER_CODE))
-        message.respond( _("Command not recognized.") )
-
-    @kw("(well subscribe.*)")
-    @is_weltel_user
-    def subscribe(self, message, shida, new_problem=None):
-        message.reporter.subscribe()
-        logging.info("Patient %s subscribed" % (message.reporter.alias) )
-        message.respond( _("Karibu") )
-
-    @kw("(well unsubscribe.*)")
-    @is_weltel_user
-    def unsubscribe(self, message, shida, new_problem=None):
-        message.reporter.unsubscribe()
-        logging.info("%s unsubscribed" % (message.reporter.alias) )
-        message.respond( _("Kwaheri") )
-
     @kw("(%s)\s+(numbers)" % PATIENT_ID_REGEX)
     @is_nurse
     def outcome(self, message, patient_id, outcome_code):
@@ -192,6 +136,73 @@ class App (rapidsms.app.App):
         except OutcomeType.DoesNotExist:
             message.respond( _("Outcome (%(code)s) not recognized.")%{'code':outcome_code} )
             return
+        patient.incomingmessages.add(message.persistent_msg)
         logging.info("Patient %s set to '%s'" % (message.reporter.alias, outcome_code))
         message.respond( _("Patient %(id)s updated to %(code)s") % \
                          {'id':patient_id, 'code':outcome_code} )
+
+    @kw("(%s)\s*(.*)" % PATIENT_ID_REGEX)
+    def from_other_phone(self, message, patient_id, text):
+        message.reporter = Patient.objects.get(alias=patient_id)
+        try:
+            func,groups = self.kw.match(None, text)
+        except TypeError:
+            # no matches found
+            self.other(message)
+            return
+        func(self, message, groups)
+
+    @kw("(sawa|poa|nzuri|safi)(.*)")
+    @is_patient
+    def sawa(self, message, sawa, extra=None):
+        message.reporter.register_event(SAWA_CODE)
+        message.reporter.incomingmessages.add(message.persistent_msg)
+        # Note that all messages are already logged in logger
+        logging.info("Patient %s set to '%s'" % (message.reporter.alias, SAWA_CODE))
+        message.respond( _("Asante") )
+    
+    @kw("(shida)\s*([0-9]+)(.*)")
+    @is_patient
+    def shida(self, message, shida, problem_code, extra=None):
+        response = ''
+        try:
+            message.reporter.register_event(problem_code)
+        except ProblemType.DoesNotExist:
+            response = _("Problem %(code)s not recognized. ") % \
+                        {'code':problem_code} 
+            message.reporter.register_event(SHIDA_CODE)
+        message.reporter.incomingmessages.add(message.persistent_msg)
+        logging.info("Patient %s set to '%s'" % (message.reporter.alias, SHIDA_CODE) )
+        message.respond( response + _("Pole %(code)s") % {'code':problem_code} )
+    
+    @kw("(shida)(whatever)?")
+    @is_patient
+    def shida_new(self, message, shida, new_problem=None):
+        message.reporter.register_event(SHIDA_CODE)
+        message.reporter.incomingmessages.add(message.persistent_msg)
+        logging.info("Patient %s set to '%s'" % (message.reporter.alias, SHIDA_CODE) )
+        message.respond( _("Pole") )
+
+    @kw("(well subscribe.*)")
+    @is_weltel_user
+    def subscribe(self, message, shida, new_problem=None):
+        message.reporter.subscribe()
+        message.reporter.incomingmessages.add(message.persistent_msg)
+        logging.info("Patient %s subscribed" % (message.reporter.alias) )
+        message.respond( _("Karibu") )
+
+    @kw("(well unsubscribe.*)")
+    @is_weltel_user
+    def unsubscribe(self, message, shida, new_problem=None):
+        message.reporter.unsubscribe()
+        message.reporter.incomingmessages.add(message.persistent_msg)
+        logging.info("%s unsubscribed" % (message.reporter.alias) )
+        message.respond( _("Kwaheri") )
+
+    @is_patient
+    def other(self, message):
+        message.reporter.register_event(OTHER_CODE)
+        message.reporter.incomingmessages.add(message.persistent_msg)
+        logging.info("Patient %s sent unrecognized command '%s'" % \
+                     (message.reporter.alias, OTHER_CODE))
+        message.respond( _("Command not recognized.") )

@@ -1,8 +1,10 @@
 from datetime import datetime
 from django.db import models
+from django.db.models import Q
 from reporters.models import Reporter, PersistantConnection, Location 
 from locations.models import Location
 from scheduler.models import EventSchedule, set_weekly_event
+from logger.models import IncomingMessage
 
 class Site(Location):
     """ This model represents a WelTel site """
@@ -25,6 +27,23 @@ class WeltelUser(Reporter):
             if not self.subscribed:
                 # delete all scheduled alerts for this user
                 schedules = EventSchedule.objects.filter(callback_args__contains=self.id).delete()
+                
+    def messages(self, or_query=None, order_by=None):
+        filters = None
+        for conn in self.connections.all():
+            if filters is None:
+                filters = Q(identity=conn.identity, backend=conn.backend)
+            else:
+                filters = filters | Q(identity=conn.identity, \
+                                      backend=conn.backend)
+        if filters is None: return None
+        if or_query is None:
+            messages = IncomingMessage.objects.filter(filters)
+        else: 
+            messages = IncomingMessage.objects.filter(filters|or_query)
+        if order_by is not None:
+            return messages.order_by(order_by)
+        return messages
 
 class Nurse(WeltelUser):
     """ This model represents a nurse for WelTel. 
@@ -61,6 +80,10 @@ class Patient(WeltelUser):
     state = models.ForeignKey("PatientState")
     active = models.BooleanField(default=True)
     site = models.ForeignKey(Site)
+    # a db table to tag all incoming messages having to do with this patient
+    # note that this is both messages sent by this patient as well as
+    # messages *about* this patient
+    incomingmessages = models.ManyToManyField(IncomingMessage, null=True)
     
     def __unicode__(self):
         if self.alias: return self.alias
@@ -127,7 +150,7 @@ class EventLog(models.Model):
     date = models.DateTimeField(null=False, default=datetime.now() )
     patient = models.ForeignKey(Patient)
     # can be triggered by patient, nurse, admin, IT, etc.
-    # through sms, webui, etc. 
+    # through sms, webui, etc.
     triggered_by = models.CharField(max_length=63, null=True)
     notes = models.CharField(max_length=255, null=True)
     active = models.BooleanField(default=True)
@@ -135,3 +158,4 @@ class EventLog(models.Model):
     
     def __unicode__(self):
         return self.name if self.name else self.code
+
