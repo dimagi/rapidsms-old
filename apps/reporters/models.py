@@ -3,6 +3,7 @@
 
 
 import re
+import logging
 from datetime import datetime
 from django.db import models
 from django.core.urlresolvers import reverse
@@ -238,7 +239,8 @@ class Reporter(models.Model):
             return self.connections.get(preferred=True)
         except PersistantConnection.MultipleObjectsReturned:
             # this should never happen
-            return None
+            logging.error("Reporter has multiple preferred connections!")
+            pass
         except PersistantConnection.DoesNotExist:
             pass
         
