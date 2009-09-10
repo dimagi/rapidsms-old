@@ -105,7 +105,7 @@ class Patient(WeltelUser):
         super(Patient, self).set_subscribe(True)
         # set up weekly mambo schedule for friday @ 12:30 pm
         scheds = EventSchedule.objects.filter(callback="weltel.callbacks.send_mambo", \
-                                  callback_args__contains=str(self.id))
+                                              callback_args__contains=str(self.id))
         if len(scheds) == 0:
             set_weekly_event("weltel.callbacks.send_mambo", day=5, hour=12, \
                              minute=30, callback_args=self.id)
