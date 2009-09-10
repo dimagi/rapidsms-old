@@ -45,6 +45,7 @@ def patient(request, pk, template="weltel/patient.html"):
     context['patient'] = patient
     logs = get_history_for_patient(patient)
     context['history'] = paginated(request, logs)
+    context['phone_numbers'] = [c.identity for c in patient.connections.all()]
     return render_to_response(request, template, context )
 
 def patient_messages(request, pk, template="weltel/patient.html"):
@@ -117,7 +118,7 @@ def get_history_for_patient(patient):
                 ON t.id = e.event_id
             WHERE e.patient_id=%(patient_id)s
             )
-        ORDER BY date 
+        ORDER BY date DESC 
         ''' % {
             # useful in case we ever change the model names
             'msg_log':IncomingMessage._meta.db_table,

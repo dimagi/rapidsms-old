@@ -151,7 +151,7 @@ class App (rapidsms.app.App):
             message.respond( _("Patient (%(id)s) not recognized.")%{'id':patient_id} )
             return
         try:
-            outcome = patient.register_event(outcome_code)
+            outcome = patient.register_event(outcome_code, message.reporter)
         except OutcomeType.DoesNotExist:
             message.respond( _("Outcome (%(code)s) not recognized.")%{'code':outcome_code} )
             return

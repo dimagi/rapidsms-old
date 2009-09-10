@@ -16,6 +16,11 @@ class TestApp (TestScript):
     
     def setUp(self):
         TestScript.setUp(self)
+        
+    test_unregistered = """
+        1233 > asdf
+        1233 < This number is not registered. To register, text: 'well register patient_id gender (phone_number)
+    """
 
     test_patient_registration = """
         # new patient new number

@@ -75,7 +75,7 @@ class Patient(WeltelUser):
     active = models.BooleanField(default=True)
     site = models.ForeignKey(Site)
     # this is rather crude. TODO - change into some sort of dynamic logging system
-    date_registered = models.DateTimeField(null=False, default=datetime.now() )
+    date_registered = models.DateTimeField(null=False, default=datetime.now )
     # a db table to tag all incoming messages having to do with this patient
     # note that this is both messages sent by this patient as well as
     # messages *about* this patient
@@ -97,7 +97,7 @@ class Patient(WeltelUser):
         event = EventType.objects.get(code=code)
         self.state = event.next_state
         self.save()
-        if issuer is None: issuer = self
+        if issuer is None: issuer = self.alias
         EventLog(event=event, patient=self, triggered_by=issuer).save()
         return event
 
@@ -141,7 +141,7 @@ class OutcomeType(EventType):
 
 class EventLog(models.Model):
     event = models.ForeignKey(EventType)
-    date = models.DateTimeField(null=False, default=datetime.now() )
+    date = models.DateTimeField(null=False, default=datetime.now )
     patient = models.ForeignKey(Patient)
     # can be triggered by patient, nurse, admin, IT, etc.
     # through sms, webui, etc.

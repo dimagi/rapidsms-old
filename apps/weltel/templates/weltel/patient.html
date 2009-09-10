@@ -14,7 +14,7 @@
 				<th scope="col">{% trans "First Name" %}</th>
 				<th scope="col">{% trans "Last Name" %}</th>
 				<th scope="col">{% trans "Gender" %}</th>
-				<th scope="col">{% trans "Phone Number" %}</th>
+				<th scope="col">{% trans "Phone Number(s)" %}</th>
 				<th scope="col">{% trans "State" %}</th>
 				<th scope="col">{% trans "Active" %}</th>
 				<th scope="col">{% trans "Subscribed" %}</th>
@@ -27,7 +27,7 @@
                 <td>{% if patient.first_name %}{{ patient.first_name }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if patient.last_name %}{{ patient.last_name }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if patient.gender %}{{ patient.gender }}{% else %}<span class="na">n/a</span>{% endif %}</td>
-                <td>{% if patient.connection %}{{ patient.connection.identity }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>{% if phone_numbers %}{{ phone_numbers|join:", " }}{% else %}<span class="na">n/a</span>{% endif %}
                 <td>{% if patient.state %}{{ patient.state }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if patient.active %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</td>
                 <td>{% if patient.subscribed %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</td>
