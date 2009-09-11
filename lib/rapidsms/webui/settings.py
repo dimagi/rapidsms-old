@@ -20,7 +20,7 @@ TIME_ZONE = time.tzname[0]
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'sw'
 
 SITE_ID = 1
 
@@ -55,12 +55,12 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.load_template_source',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-)
+]
 
 ROOT_URLCONF = "rapidsms.webui.urls"
 
@@ -181,3 +181,12 @@ INSTALLED_APPS = [
     'django.contrib.admindocs',
     'django.contrib.markup'
 ] + [app["module"] for app in RAPIDSMS_APPS.values()]
+
+# ====================
+# INJECT RAPIDSMS MIDDLEWARES IF PRESENT
+# ====================
+ 
+if "customdjango" in RAPIDSMS_CONF and "middlewares" in RAPIDSMS_CONF["customdjango"]:
+   MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES +\
+                          [middleware for middleware in RAPIDSMS_CONF["customdjango"]["middlewares"]]
+
