@@ -186,7 +186,11 @@ INSTALLED_APPS = [
 # INJECT RAPIDSMS MIDDLEWARES IF PRESENT
 # ====================
  
-if "customdjango" in RAPIDSMS_CONF and "middlewares" in RAPIDSMS_CONF["customdjango"]:
-   MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES +\
+if "customdjango" in RAPIDSMS_CONF:
+    if "middlewares" in RAPIDSMS_CONF["customdjango"]:
+        MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES +\
                           [middleware for middleware in RAPIDSMS_CONF["customdjango"]["middlewares"]]
+    if "authentications" in RAPIDSMS_CONF["customdjango"]:
+        AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend'] +\
+                          [backend for backend in RAPIDSMS_CONF["customdjango"]["authentications"]]
 

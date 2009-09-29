@@ -194,8 +194,11 @@ class Config (object):
     def parse_customdjango_section(self, raw_section):
         '''Process custom django, if present.  Currently just looks
            for a set of additional middlewares'''
-        middleware_names = to_list(raw_section["middlewares"])
-        return { "middlewares": middleware_names }
+        if "middlewares" in raw_section:
+            middleware_names = to_list(raw_section["middlewares"])
+        if "authentications" in raw_section:
+            authentication_names = to_list(raw_section["authentications"])
+        return { "middlewares": middleware_names, "authentications":authentication_names }
     
     def __getitem__ (self, key):
         return self.data[key]
