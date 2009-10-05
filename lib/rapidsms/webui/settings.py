@@ -137,7 +137,18 @@ if "i18n" in RAPIDSMS_CONF:
     # allow you to specify the static paths for translation files
     if "locale_paths" in RAPIDSMS_CONF["i18n"]:
         LOCALE_PATHS = RAPIDSMS_CONF["i18n"]["locale_paths"]
-        
+
+# DATABASE SETTINGS
+# 'This sets the default storage engine upon connecting to the database. 
+# After your tables have been created, you should remove this option.'
+# (from http://docs.djangoproject.com/en/dev/ref/databases/)
+# (this solution is only for testing - the correct way to make sure
+# that the engine is innodb going forward is to configure my.conf appropriately)
+# 
+# DATABASE_OPTIONS = {
+#    "init_command": "SET storage_engine=INNODB",
+# }
+
 # ==========================
 # LOAD OTHER DJANGO SETTINGS
 # ==========================
