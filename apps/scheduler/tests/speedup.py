@@ -20,7 +20,7 @@ class TestApp (TestScript):
         self.router.start()
         # speedup the scheduler so that 1 second == 1 minute
         self.router.get_app('scheduler').schedule_thread._debug_speedup(minutes=1)
-        schedule = EventSchedule(callback="scheduler.tests.callback_func", 
+        schedule = EventSchedule(callback="scheduler.tests.realtime.callback_func", 
                                  minutes=ALL, callback_args=([3]), count=1)
         schedule.save()
         time.sleep(3.0)
@@ -32,7 +32,7 @@ class TestApp (TestScript):
         global callback_counter
         self.router.start()
         self.router.get_app('scheduler').schedule_thread._debug_speedup(minutes=1)
-        schedule = EventSchedule(callback="scheduler.tests.callback_func", 
+        schedule = EventSchedule(callback="scheduler.tests.realtime.callback_func", 
                                  minutes=ALL, callback_args=([3]))
         schedule.save()
         time.sleep(3.0)
@@ -46,7 +46,7 @@ class TestApp (TestScript):
         self.router.get_app('scheduler').schedule_thread._debug_speedup(minutes=1)
         start_time = datetime.now() + timedelta(minutes=2)
         end_time = datetime.now() + timedelta(minutes=4)
-        schedule = EventSchedule(callback="scheduler.tests.callback_func", 
+        schedule = EventSchedule(callback="scheduler.tests.realtime.callback_func", 
                                  minutes=ALL, callback_args=([3]), \
                                  start_time = start_time, end_time = end_time)
         schedule.save()
@@ -54,7 +54,7 @@ class TestApp (TestScript):
         self.assertEquals(callback_counter,6)
         self.router.stop()
          
-def callback_func(arg):
+def callback_func(router, arg):
     global callback_counter
     logging.info("adding %s to global_var (%s)" % (arg, callback_counter))
     callback_counter = callback_counter + arg
