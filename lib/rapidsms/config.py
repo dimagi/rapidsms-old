@@ -163,7 +163,7 @@ class Config (object):
         return { "apps":     [self.app_section(n) for n in app_names],
                  "backends": [self.backend_section(n) for n in backend_names] }
 
-
+    
     def parse_log_section (self, raw_section):
         output = {"level": log.LOG_LEVEL, "file": log.LOG_FILE}
         output.update(raw_section)
@@ -190,7 +190,17 @@ class Config (object):
             output["locale_paths"] = to_list(raw_section["locale_paths"], ",")
         
         return output
-
+    
+    def parse_customdjango_section(self, raw_section):
+        '''Process custom django, if present.  Currently just looks
+           for a set of additional middlewares'''
+        parsed = {}
+        if "middlewares" in raw_section:
+            parsed['middlewares'] = to_list(raw_section["middlewares"])
+        if "authentications" in raw_section:
+            parsed['authentications'] = to_list(raw_section["authentications"])
+        return parsed
+    
     def __getitem__ (self, key):
         return self.data[key]
         

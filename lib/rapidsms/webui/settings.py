@@ -20,7 +20,7 @@ TIME_ZONE = time.tzname[0]
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'sw'
 
 SITE_ID = 1
 
@@ -55,12 +55,12 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.load_template_source',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-)
+]
 
 ROOT_URLCONF = "rapidsms.webui.urls"
 
@@ -137,7 +137,18 @@ if "i18n" in RAPIDSMS_CONF:
     # allow you to specify the static paths for translation files
     if "locale_paths" in RAPIDSMS_CONF["i18n"]:
         LOCALE_PATHS = RAPIDSMS_CONF["i18n"]["locale_paths"]
-        
+
+# DATABASE SETTINGS
+# 'This sets the default storage engine upon connecting to the database. 
+# After your tables have been created, you should remove this option.'
+# (from http://docs.djangoproject.com/en/dev/ref/databases/)
+# (this solution is only for testing - the correct way to make sure
+# that the engine is innodb going forward is to configure my.conf appropriately)
+# 
+# DATABASE_OPTIONS = {
+#    "init_command": "SET storage_engine=INNODB",
+# }
+
 # ==========================
 # LOAD OTHER DJANGO SETTINGS
 # ==========================
@@ -181,3 +192,16 @@ INSTALLED_APPS = [
     'django.contrib.admindocs',
     'django.contrib.markup'
 ] + [app["module"] for app in RAPIDSMS_APPS.values()]
+
+# ====================
+# INJECT RAPIDSMS MIDDLEWARES IF PRESENT
+# ====================
+ 
+if "customdjango" in RAPIDSMS_CONF:
+    if "middlewares" in RAPIDSMS_CONF["customdjango"]:
+        MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES +\
+                          [middleware for middleware in RAPIDSMS_CONF["customdjango"]["middlewares"]]
+    if "authentications" in RAPIDSMS_CONF["customdjango"]:
+        AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend'] +\
+                          [backend for backend in RAPIDSMS_CONF["customdjango"]["authentications"]]
+
