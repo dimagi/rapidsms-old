@@ -17,7 +17,7 @@ hour = timedelta(hours=1)
 day = timedelta(days=1)
 week = timedelta(weeks=1)
 
-class TestApp (TestScript):
+class TestFakeTime (TestScript):
     apps = ([scheduler_app.App])
     
     def setUp(self):
