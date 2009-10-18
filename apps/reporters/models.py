@@ -269,7 +269,10 @@ class Reporter(models.Model):
         # return the latest, or none, if they've
         # has never been seen on ANY connection
         return max(timedates) if timedates else None
-
+    
+    def send_message(self, router, msg):
+        be = router.get_backend(self.connection.backend.slug)
+        be.message(self.connection.identity, msg).send()
 
 class PersistantBackend(models.Model):
     """This class exists to provide a primary key for each
