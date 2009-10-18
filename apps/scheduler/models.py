@@ -25,13 +25,21 @@ class EventSchedule(models.Model):
     description = models.CharField(max_length=255, null=True)
     # how many times do we want this event to fire? optional
     count = models.IntegerField(null=True)
+    # whether this schedule is active or not
+    active = models.BooleanField(default=True)
     callback = models.CharField(max_length=255)
 
     # pickled set
     callback_args = PickledObjectField(null=True)
     # pickled dictionary
     callback_kwargs = PickledObjectField(null=True)
-
+    
+    # knowing which fields are related to time is useful
+    # for a bunch of operations below
+    # TIME_FIELDS should always reflect the names of 
+    # the sets of numbers which determine the scheduled time
+    TIME_FIELDS = ['minutes', 'hours', 'days_of_week', 
+                   'days_of_month', 'months']
     # the following are pickled sets of numbers
     minutes = PickledObjectField(null=True)
     hours = PickledObjectField(null=True)
@@ -77,14 +85,17 @@ class EventSchedule(models.Model):
             ( self.callback, months, days_of_month, days_of_week, hours, minutes )
             
     def __init__(self, *args, **kwargs):
+        # these 3 lines allow users to create eventschedules from arrays
+        # and not just sets (since lots of people don't know sets)
+        for time in self.TIME_FIELDS:
+            if time in kwargs and isinstance(kwargs[time],list):
+                kwargs[time] = set( kwargs[time] )
         super(EventSchedule, self).__init__(*args, **kwargs)
         if self.callback_args is None: self.callback_args = []
         if self.callback_kwargs is None: self.callback_kwargs = {}
-        if self.minutes is None: self.minutes = set()
-        if self.hours is None: self.hours = set()
-        if self.days_of_week is None: self.days_of_week = set()
-        if self.days_of_month is None: self.days_of_month = set()
-        if self.months is None: self.months = set()
+        for time in self.TIME_FIELDS:
+            if getattr(self, time) is None: 
+                setattr(self,time, set())
     
     # TODO: define these helper functions
     # def set_daily(self):
@@ -168,6 +179,14 @@ class EventSchedule(models.Model):
                 ((when.day       in days_of_month) or
                 (when.weekday()  in days_of_week)) and
                 (when.month      in months))
+
+    def activate(self):
+        self.active = True
+        self.save()
+        
+    def deactivate(self):
+        self.active = False
+        self.save()
 
     def _valid(self, timespan):
         if isinstance(timespan, set) or timespan == '*':

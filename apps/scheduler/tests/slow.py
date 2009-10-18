@@ -11,7 +11,7 @@ from rapidsms.tests.scripted import TestScript
 import scheduler.app as scheduler_app
 from scheduler.models import EventSchedule, ALL
 
-class TestApp (TestScript):
+class TestSlow (TestScript):
     apps = ([scheduler_app.App])
     
     def setUp(self):
