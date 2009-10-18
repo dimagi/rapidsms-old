@@ -83,7 +83,7 @@ class SchedulerThread (threading.Thread):
     def scheduler_loop(self, interval=60):
         now = datetime.now()
         while not self.stopped():
-            event_schedules = EventSchedule.objects.all()
+            event_schedules = EventSchedule.objects.filter(active=True)
             for schedule in event_schedules:
                 if schedule.should_fire(now):
                     # call the callback function
@@ -96,12 +96,13 @@ class SchedulerThread (threading.Thread):
                     if schedule.count:
                         schedule.count = schedule.count - 1
                         # should we delete expired schedules? we do now.
-                        if schedule.count <= 0: schedule.delete()
+                        if schedule.count <= 0: 
+                            schedule.deactivate()
                         else: schedule.save()
                     # should we delete expired schedules? we do now.
                     if schedule.end_time:
                         if now > schedule.end_time:
-                            schedule.delete()
+                            schedule.deactivate()
             if self._speedup is not None: # debugging/testing only!
                 now = now + self._speedup
                 time.sleep(1)
