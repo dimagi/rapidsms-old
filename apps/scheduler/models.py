@@ -22,17 +22,19 @@ class EventSchedule(models.Model):
     callback - all callback function must take as the first 
         argument a reference to a 'router' object
     """
-    description = models.CharField(max_length=255, null=True)
+    # blank: ensure django validation doesn't force a value
+    # null: set db value to be Null
+    description = models.CharField(max_length=255, null=True, blank=True)
     # how many times do we want this event to fire? optional
-    count = models.IntegerField(null=True)
+    count = models.IntegerField(null=True, blank=True)
     # whether this schedule is active or not
     active = models.BooleanField(default=True)
     callback = models.CharField(max_length=255)
 
     # pickled set
-    callback_args = PickledObjectField(null=True)
+    callback_args = PickledObjectField(null=True, blank=True)
     # pickled dictionary
-    callback_kwargs = PickledObjectField(null=True)
+    callback_kwargs = PickledObjectField(null=True, blank=True)
     
     # knowing which fields are related to time is useful
     # for a bunch of operations below
@@ -41,14 +43,14 @@ class EventSchedule(models.Model):
     TIME_FIELDS = ['minutes', 'hours', 'days_of_week', 
                    'days_of_month', 'months']
     # the following are pickled sets of numbers
-    minutes = PickledObjectField(null=True)
-    hours = PickledObjectField(null=True)
-    days_of_week = PickledObjectField(null=True)
-    days_of_month = PickledObjectField(null=True)
-    months = PickledObjectField(null=True)
+    minutes = PickledObjectField(null=True, blank=True)
+    hours = PickledObjectField(null=True, blank=True)
+    days_of_week = PickledObjectField(null=True, blank=True)
+    days_of_month = PickledObjectField(null=True, blank=True)
+    months = PickledObjectField(null=True, blank=True)
     
-    start_time = models.DateTimeField(null=True)
-    end_time = models.DateTimeField(null=True)
+    start_time = models.DateTimeField(null=True, blank=True)
+    end_time = models.DateTimeField(null=True, blank=True)
     
     # First, we must define some utility classes
     class AllMatch(set):
@@ -105,8 +107,8 @@ class EventSchedule(models.Model):
         if not self._valid(self.minutes) or not self._valid(self.hours) or \
             not self._valid(self.days_of_week) or not self._valid(self.days_of_month) or \
             not self._valid(self.months):
-            raise TypeError("Minutes/hours/dow/dom/months must specified as sets of numbers")
-                
+            raise TypeError("Minutes/hours/dow/dom/months must be specified as " + 
+                            "sets of numbers, or an empty set, or '*'")
         # when a timespan is set, all sub-timespans must also be set
         # i.e. when a weekly schedule is set, one must also specify day, hour, and minute.
         if len(self.minutes)==0 and len(self.hours)==0 and len(self.days_of_week)==0 and \
