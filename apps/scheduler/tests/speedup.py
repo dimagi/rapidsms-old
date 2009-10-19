@@ -35,7 +35,7 @@ class TestSpeedup (TestScript):
         schedule = EventSchedule(callback="scheduler.tests.speedup.callback_func", 
                                  minutes=ALL, callback_args=([3]))
         schedule.save()
-        time.sleep(3.0)
+        time.sleep(2.9)
         self.assertEquals(callback_counter,9)
         self.router.stop()
     
