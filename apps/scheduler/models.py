@@ -26,10 +26,12 @@ class EventSchedule(models.Model):
     # null: set db value to be Null
     description = models.CharField(max_length=255, null=True, blank=True)
     # how many times do we want this event to fire? optional
-    count = models.IntegerField(null=True, blank=True)
+    count = models.IntegerField(null=True, blank=True, 
+                                help_text="How many times do you want this to fire? Leave blank for 'continuously'")
     # whether this schedule is active or not
     active = models.BooleanField(default=True)
-    callback = models.CharField(max_length=255)
+    callback = models.CharField(max_length=255, 
+                                help_text="Name of Python callback function")
 
     # pickled set
     callback_args = PickledObjectField(null=True, blank=True)
@@ -43,14 +45,16 @@ class EventSchedule(models.Model):
     TIME_FIELDS = ['minutes', 'hours', 'days_of_week', 
                    'days_of_month', 'months']
     # the following are pickled sets of numbers
-    minutes = PickledObjectField(null=True, blank=True)
-    hours = PickledObjectField(null=True, blank=True)
-    days_of_week = PickledObjectField(null=True, blank=True)
-    days_of_month = PickledObjectField(null=True, blank=True)
-    months = PickledObjectField(null=True, blank=True)
+    minutes = PickledObjectField(null=True, blank=True, help_text="'0,1,2' for X:00, X:01, X:02 - '*' for all")
+    hours = PickledObjectField(null=True, blank=True, help_text="'0,1,2' for midnight, 1 o'clock, 2 - '*' for all")
+    days_of_week = PickledObjectField(null=True, blank=True, help_text="'0,1,2' for mon, tue, wed - '*' for all")
+    days_of_month = PickledObjectField(null=True, blank=True, help_text="'1,2,3' for 1st, 2nd, 3rd - '*' for all")
+    months = PickledObjectField(null=True, blank=True, help_text="'1,2,3' for jan, feb, march - '*' for all")
     
-    start_time = models.DateTimeField(null=True, blank=True)
-    end_time = models.DateTimeField(null=True, blank=True)
+    start_time = models.DateTimeField(null=True, blank=True, 
+                                      help_text="When do you want alerts to start? Leave blank for 'now'.")
+    end_time = models.DateTimeField(null=True, blank=True, 
+                                      help_text="When do you want alerts to end? Leave blank for 'never'.")
     
     # First, we must define some utility classes
     class AllMatch(set):
@@ -104,11 +108,35 @@ class EventSchedule(models.Model):
     # def set_weekly(self): etc.
     
     def save(self, force_insert=False, force_update=False):
-        if not self._valid(self.minutes) or not self._valid(self.hours) or \
-            not self._valid(self.days_of_week) or not self._valid(self.days_of_month) or \
-            not self._valid(self.months):
-            raise TypeError("Minutes/hours/dow/dom/months must be specified as " + 
-                            "sets of numbers, or an empty set, or '*'")
+        """ TODO - still need to fix this so that creating a schedule
+        in the ui, saving it, editing it, saving it, editing it continues to work
+        with callback_args, kwargs, and different timespans
+        (currently fails because set([1,2]) -> a string)
+        """
+        for time in self.TIME_FIELDS:
+            val = getattr(self, time)
+            if val is None or len(val)==0:
+                setattr(self,time,set())
+            if isinstance( val, basestring) and len(val)>1:
+                # The following is necessary to support creating schedules
+                # from the admin ui
+                if val == "set([])":
+                    # django admin annoyingly translates
+                    # its own python object as string
+                    val = set([])
+                else:
+                    # we accept the strings of the form '1,2,3'
+                    # which we get from the admin ui
+                    val = val.strip(',').split(',')
+                    val = set([int(i) for i in val])
+                setattr(self,time,set(val))
+            if isinstance(val,list):
+                # accept either lists or sets, but turn all lists into sets
+                val = set(val)
+                setattr(self,time,val)
+            if not self._valid(getattr(self,time)):
+                raise TypeError("%s must be specified as " % time + 
+                                "sets of numbers, an empty set, or '*'")
         # when a timespan is set, all sub-timespans must also be set
         # i.e. when a weekly schedule is set, one must also specify day, hour, and minute.
         if len(self.minutes)==0 and len(self.hours)==0 and len(self.days_of_week)==0 and \
@@ -135,6 +163,12 @@ class EventSchedule(models.Model):
         _check_bounds('Days of Week', self.days_of_week, 0, 6)
         _check_bounds('Days of Month', self.days_of_month, 1, 31)
         _check_bounds('Months', self.months, 1, 12)
+        
+        # The following 4 lines is also to support creating schedules from the admin ui
+        if len(self.callback_args)>0 and isinstance(self.callback_args, basestring):
+            self.callback_args = _string_to_array(self.callback_args)
+        if len(self.callback_kwargs)>0 and isinstance(self.callback_kwargs, basestring):
+            self.callback_kwargs = _string_to_dictionary(self.callback_kwargs)
 
         super(EventSchedule, self).save(force_insert, force_update)
     
@@ -194,6 +228,15 @@ class EventSchedule(models.Model):
         if isinstance(timespan, set) or timespan == '*':
             return True
         return False
+
+def _string_to_array(string):
+    return string.strip(',').split(',')
+
+def _string_to_set(string):
+    return set(_string_to_array(string))
+
+def _string_to_dictionary(string):
+    raise NotImplementedError
 
 ############################
 # global utility functions #

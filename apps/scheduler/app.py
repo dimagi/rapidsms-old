@@ -91,8 +91,14 @@ class SchedulerThread (threading.Thread):
                     module, callback = schedule.callback.rsplit(".", 1)
                     module = __import__(module, globals(), locals(), [callback])
                     callback = getattr(module, callback)
-                    callback(self._router, *schedule.callback_args, **schedule.callback_kwargs)
-
+                    if schedule.callback_args and schedule.callback_kwargs:
+                        callback(self._router, *schedule.callback_args, **schedule.callback_kwargs)
+                    elif schedule.callback_args:
+                        callback(self._router, *schedule.callback_args)
+                    elif schedule.callback_kwargs:
+                        callback(self._router, **schedule.callback_kwargs)
+                    else:
+                        callback(self._router)
                     if schedule.count:
                         schedule.count = schedule.count - 1
                         # should we delete expired schedules? we do now.
