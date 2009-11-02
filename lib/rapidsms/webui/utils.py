@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 
-
-import os, re, traceback
+import os, re, traceback, sys
 from rapidsms.webui import settings
 from django.template import RequestContext
 from django.shortcuts import render_to_response as django_r_to_r
@@ -13,8 +12,16 @@ def render_to_response(req, template_name, dictionary=None, **kwargs):
        to include the global variables in every request. This is a giant hack,
        and there's probably a much better solution."""
     
+    def _tab_order_sorter(app1, app2):
+        """Sort apps, based on the tab_order property in the config, if it exists.
+           Anything with a value specified comes before everything else, which
+           is arbitrarily sorted at the end.""" 
+        app1_order = int(app1["taborder"]) if "taborder" in app1 else sys.maxint
+        app2_order = int(app2["taborder"]) if "taborder" in app2 else sys.maxint
+        return app1_order - app2_order 
+    
     rs_dict = {
-        "apps":  settings.RAPIDSMS_APPS.values(),
+        "apps":  sorted(settings.RAPIDSMS_APPS.values(), _tab_order_sorter),
         "debug": settings.DEBUG,
         "javascripts": []
     }
