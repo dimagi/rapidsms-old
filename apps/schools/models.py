@@ -36,9 +36,6 @@ class Report(models.Model):
     date = models.DateTimeField()
     reporter = models.ForeignKey(Headmaster)
     
-    def __unicode__(self):
-        return "%s (%s) %s" % (self.identity, self.backend, self.text)
-    
     class Meta:
         abstract = True
 
