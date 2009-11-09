@@ -3,7 +3,39 @@
 
 import django
 from django.db import models
+from reporters.models import PersistantConnection
 
+class Message(models.Model):
+    """A Message being logged"""
+    # A new way of logging!  This feels cleaner than the separate
+    # models below and makes it significantly easier to build 
+    # views/applications on top of both incoming and outgoing 
+    # messages.  The old classes are left as legacy
+    
+    connection = models.ForeignKey(PersistantConnection)
+    is_incoming = models.BooleanField()
+    text = models.CharField(max_length=160)
+    date = models.DateTimeField(auto_now_add=True)
+    
+    @classmethod
+    def outgoing(cls):
+        """Gets a query set of outgoing messages"""
+        return cls.objects.Filter(is_incoming=False)
+    
+    @classmethod
+    def incoming(cls):
+        """Gets a query set of incoming messages"""
+        return cls.objects.Filter(is_incoming=True)
+    
+    def __unicode__(self):
+        return "%s: %s" % (self.connection, self.text)
+    
+    class Meta:
+        get_latest_by = 'date'
+        # the permission required for this tab to display in the UI
+        permissions = (
+            ("can_view", "Can view message logs"),
+        )
 
 class MessageBase(models.Model):
     text = models.CharField(max_length=140)
@@ -38,10 +70,7 @@ class IncomingMessage(MessageBase):
 
     class Meta:
         get_latest_by = 'received'
-        # the permission required for this tab to display in the UI
-        permissions = (
-            ("can_view", "Can view message logs"),
-        )
+        
     
 class OutgoingMessage(MessageBase):
     sent = models.DateTimeField(auto_now_add=True)
