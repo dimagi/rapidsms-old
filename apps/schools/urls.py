@@ -7,6 +7,8 @@ import schools.views as views
 
     
 urlpatterns = patterns('',
-    url(r'^schools/?$', views.schools)
+    url(r'^schools/?$', views.schools),
+    url(r'^schools/map/?$', views.map),
+    url(r'^schools/xml/?$', views.xml)
 )
 
