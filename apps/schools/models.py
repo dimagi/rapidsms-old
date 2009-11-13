@@ -1,10 +1,24 @@
+from __future__ import absolute_import
+
+from xml.etree import ElementTree
+from xml.etree.ElementTree import Element, SubElement
+
 from django.db import models
 
 from reporters.models import Reporter
+from schools.xml import SerializableModel
 
-class School(models.Model):
+
+class School(models.Model,SerializableModel):
     """A basic model for a school."""
-    
+    # these two fields determine how the model is displayed as XML
+    # the key is the name of the attribute/element, the value is
+    # the field/property used to display it.  
+    ATTRS = {"latitude": "latitude",
+             "longitude": "longitude"}
+    ELEMS = {"Name": "name", 
+             "Teachers": "teachers" }
+        
     latitude  = models.DecimalField(max_digits=8, decimal_places=6, 
                                     blank=True, null=True, 
                                     help_text="The physical latitude of this location")
@@ -16,6 +30,8 @@ class School(models.Model):
     
     teachers = models.PositiveIntegerField(help_text="The number of teachers at the school")
     
+    
+        
 class Headmaster(Reporter):
     """A headmaster of a school"""
     
@@ -71,6 +87,12 @@ class GirlsAttendenceReport(Report):
 class SchoolReport(Report):
     """Any other (unanticipated) report having to do with a school"""     
     school = models.ForeignKey(School)
+    question = models.CharField(max_length=200) # todo: foreign key question 
+    answer = models.CharField(max_length=200) # todo: foreign key answer
+    
+class GradeReport(Report):
+    """Any other (unanticipated) report having to do with a school"""     
+    grade = models.ForeignKey(Grade)
     question = models.CharField(max_length=200) # todo: foreign key question 
     answer = models.CharField(max_length=200) # todo: foreign key answer
     
