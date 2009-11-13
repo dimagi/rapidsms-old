@@ -1,0 +1,1002 @@
+[
+  {
+    "pk": 1, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.5323", 
+      "name": "Demo School 0", 
+      "longitude": "30.355455", 
+      "teachers": 15
+    }
+  }, 
+  {
+    "pk": 2, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.030321", 
+      "name": "Demo School 1", 
+      "longitude": "32.735458", 
+      "teachers": 27
+    }
+  }, 
+  {
+    "pk": 3, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "2.616303", 
+      "name": "Demo School 2", 
+      "longitude": "32.079617", 
+      "teachers": 98
+    }
+  }, 
+  {
+    "pk": 4, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "3.347408", 
+      "name": "Demo School 3", 
+      "longitude": "34.675954", 
+      "teachers": 23
+    }
+  }, 
+  {
+    "pk": 5, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "2.287438", 
+      "name": "Demo School 4", 
+      "longitude": "33.539435", 
+      "teachers": 69
+    }
+  }, 
+  {
+    "pk": 6, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "3.141482", 
+      "name": "Demo School 5", 
+      "longitude": "33.643485", 
+      "teachers": 58
+    }
+  }, 
+  {
+    "pk": 7, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.675928", 
+      "name": "Demo School 6", 
+      "longitude": "34.650625", 
+      "teachers": 88
+    }
+  }, 
+  {
+    "pk": 8, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "0.000988", 
+      "name": "Demo School 7", 
+      "longitude": "34.046969", 
+      "teachers": 45
+    }
+  }, 
+  {
+    "pk": 9, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "0.522989", 
+      "name": "Demo School 8", 
+      "longitude": "33.94035", 
+      "teachers": 28
+    }
+  }, 
+  {
+    "pk": 10, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.745219", 
+      "name": "Demo School 9", 
+      "longitude": "30.423934", 
+      "teachers": 65
+    }
+  }, 
+  {
+    "pk": 11, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.641393", 
+      "name": "Demo School 10", 
+      "longitude": "32.01746", 
+      "teachers": 85
+    }
+  }, 
+  {
+    "pk": 12, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "0.824767", 
+      "name": "Demo School 11", 
+      "longitude": "33.686197", 
+      "teachers": 51
+    }
+  }, 
+  {
+    "pk": 13, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.912326", 
+      "name": "Demo School 12", 
+      "longitude": "30.679986", 
+      "teachers": 46
+    }
+  }, 
+  {
+    "pk": 14, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.311619", 
+      "name": "Demo School 13", 
+      "longitude": "32.480266", 
+      "teachers": 44
+    }
+  }, 
+  {
+    "pk": 15, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.575892", 
+      "name": "Demo School 14", 
+      "longitude": "32.78364", 
+      "teachers": 72
+    }
+  }, 
+  {
+    "pk": 16, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.117022", 
+      "name": "Demo School 15", 
+      "longitude": "34.381818", 
+      "teachers": 27
+    }
+  }, 
+  {
+    "pk": 17, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "3.55818", 
+      "name": "Demo School 16", 
+      "longitude": "31.249751", 
+      "teachers": 0
+    }
+  }, 
+  {
+    "pk": 18, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "2.986489", 
+      "name": "Demo School 17", 
+      "longitude": "31.202325", 
+      "teachers": 75
+    }
+  }, 
+  {
+    "pk": 19, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "0.110306", 
+      "name": "Demo School 18", 
+      "longitude": "33.064108", 
+      "teachers": 91
+    }
+  }, 
+  {
+    "pk": 20, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "2.19345", 
+      "name": "Demo School 19", 
+      "longitude": "34.539769", 
+      "teachers": 48
+    }
+  }, 
+  {
+    "pk": 21, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.98498", 
+      "name": "Demo School 20", 
+      "longitude": "32.884106", 
+      "teachers": 66
+    }
+  }, 
+  {
+    "pk": 22, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.978139", 
+      "name": "Demo School 21", 
+      "longitude": "30.06181", 
+      "teachers": 99
+    }
+  }, 
+  {
+    "pk": 23, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "0.245707", 
+      "name": "Demo School 22", 
+      "longitude": "30.838454", 
+      "teachers": 49
+    }
+  }, 
+  {
+    "pk": 24, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.97995", 
+      "name": "Demo School 23", 
+      "longitude": "31.29727", 
+      "teachers": 19
+    }
+  }, 
+  {
+    "pk": 25, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "0.471248", 
+      "name": "Demo School 24", 
+      "longitude": "30.449596", 
+      "teachers": 13
+    }
+  }, 
+  {
+    "pk": 26, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.545011", 
+      "name": "Demo School 25", 
+      "longitude": "30.649028", 
+      "teachers": 98
+    }
+  }, 
+  {
+    "pk": 27, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.910826", 
+      "name": "Demo School 26", 
+      "longitude": "32.4769", 
+      "teachers": 49
+    }
+  }, 
+  {
+    "pk": 28, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "2.203214", 
+      "name": "Demo School 27", 
+      "longitude": "30.460542", 
+      "teachers": 36
+    }
+  }, 
+  {
+    "pk": 29, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.006993", 
+      "name": "Demo School 28", 
+      "longitude": "30.322442", 
+      "teachers": 41
+    }
+  }, 
+  {
+    "pk": 30, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.872523", 
+      "name": "Demo School 29", 
+      "longitude": "33.180509", 
+      "teachers": 88
+    }
+  }, 
+  {
+    "pk": 31, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.005486", 
+      "name": "Demo School 30", 
+      "longitude": "33.364906", 
+      "teachers": 34
+    }
+  }, 
+  {
+    "pk": 32, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.759557", 
+      "name": "Demo School 31", 
+      "longitude": "31.994703", 
+      "teachers": 71
+    }
+  }, 
+  {
+    "pk": 33, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.551928", 
+      "name": "Demo School 32", 
+      "longitude": "31.278621", 
+      "teachers": 9
+    }
+  }, 
+  {
+    "pk": 34, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "2.924055", 
+      "name": "Demo School 33", 
+      "longitude": "31.344692", 
+      "teachers": 10
+    }
+  }, 
+  {
+    "pk": 35, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.091544", 
+      "name": "Demo School 34", 
+      "longitude": "33.863975", 
+      "teachers": 40
+    }
+  }, 
+  {
+    "pk": 36, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "3.274989", 
+      "name": "Demo School 35", 
+      "longitude": "31.744826", 
+      "teachers": 54
+    }
+  }, 
+  {
+    "pk": 37, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "3.110314", 
+      "name": "Demo School 36", 
+      "longitude": "32.389495", 
+      "teachers": 70
+    }
+  }, 
+  {
+    "pk": 38, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "0.842754", 
+      "name": "Demo School 37", 
+      "longitude": "32.787052", 
+      "teachers": 63
+    }
+  }, 
+  {
+    "pk": 39, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.88927", 
+      "name": "Demo School 38", 
+      "longitude": "30.683201", 
+      "teachers": 75
+    }
+  }, 
+  {
+    "pk": 40, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "2.299946", 
+      "name": "Demo School 39", 
+      "longitude": "33.664785", 
+      "teachers": 82
+    }
+  }, 
+  {
+    "pk": 41, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "2.809426", 
+      "name": "Demo School 40", 
+      "longitude": "31.440522", 
+      "teachers": 73
+    }
+  }, 
+  {
+    "pk": 42, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.335277", 
+      "name": "Demo School 41", 
+      "longitude": "30.671576", 
+      "teachers": 73
+    }
+  }, 
+  {
+    "pk": 43, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.693975", 
+      "name": "Demo School 42", 
+      "longitude": "30.557954", 
+      "teachers": 35
+    }
+  }, 
+  {
+    "pk": 44, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.653839", 
+      "name": "Demo School 43", 
+      "longitude": "31.640652", 
+      "teachers": 17
+    }
+  }, 
+  {
+    "pk": 45, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.229851", 
+      "name": "Demo School 44", 
+      "longitude": "34.668774", 
+      "teachers": 97
+    }
+  }, 
+  {
+    "pk": 46, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.44148", 
+      "name": "Demo School 45", 
+      "longitude": "32.20537", 
+      "teachers": 24
+    }
+  }, 
+  {
+    "pk": 47, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "0.196131", 
+      "name": "Demo School 46", 
+      "longitude": "30.3573", 
+      "teachers": 48
+    }
+  }, 
+  {
+    "pk": 48, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.674815", 
+      "name": "Demo School 47", 
+      "longitude": "33.108642", 
+      "teachers": 34
+    }
+  }, 
+  {
+    "pk": 49, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.111276", 
+      "name": "Demo School 48", 
+      "longitude": "34.156191", 
+      "teachers": 7
+    }
+  }, 
+  {
+    "pk": 50, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "0.433635", 
+      "name": "Demo School 49", 
+      "longitude": "30.364419", 
+      "teachers": 44
+    }
+  }, 
+  {
+    "pk": 51, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.24123", 
+      "name": "Demo School 50", 
+      "longitude": "33.487236", 
+      "teachers": 100
+    }
+  }, 
+  {
+    "pk": 52, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.002925", 
+      "name": "Demo School 51", 
+      "longitude": "32.815243", 
+      "teachers": 50
+    }
+  }, 
+  {
+    "pk": 53, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "3.249091", 
+      "name": "Demo School 52", 
+      "longitude": "31.910279", 
+      "teachers": 34
+    }
+  }, 
+  {
+    "pk": 54, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.183706", 
+      "name": "Demo School 53", 
+      "longitude": "34.019569", 
+      "teachers": 18
+    }
+  }, 
+  {
+    "pk": 55, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "3.666376", 
+      "name": "Demo School 54", 
+      "longitude": "34.419538", 
+      "teachers": 55
+    }
+  }, 
+  {
+    "pk": 56, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "0.355951", 
+      "name": "Demo School 55", 
+      "longitude": "33.267248", 
+      "teachers": 6
+    }
+  }, 
+  {
+    "pk": 57, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "3.193687", 
+      "name": "Demo School 56", 
+      "longitude": "31.478796", 
+      "teachers": 64
+    }
+  }, 
+  {
+    "pk": 58, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.927231", 
+      "name": "Demo School 57", 
+      "longitude": "34.588151", 
+      "teachers": 11
+    }
+  }, 
+  {
+    "pk": 59, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "0.204278", 
+      "name": "Demo School 58", 
+      "longitude": "31.375992", 
+      "teachers": 86
+    }
+  }, 
+  {
+    "pk": 60, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.83659", 
+      "name": "Demo School 59", 
+      "longitude": "33.638519", 
+      "teachers": 61
+    }
+  }, 
+  {
+    "pk": 61, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.482013", 
+      "name": "Demo School 60", 
+      "longitude": "32.516414", 
+      "teachers": 45
+    }
+  }, 
+  {
+    "pk": 62, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "0.084972", 
+      "name": "Demo School 61", 
+      "longitude": "32.519264", 
+      "teachers": 31
+    }
+  }, 
+  {
+    "pk": 63, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "0.113129", 
+      "name": "Demo School 62", 
+      "longitude": "33.553824", 
+      "teachers": 35
+    }
+  }, 
+  {
+    "pk": 64, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "0.430794", 
+      "name": "Demo School 63", 
+      "longitude": "33.921086", 
+      "teachers": 54
+    }
+  }, 
+  {
+    "pk": 65, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "3.404055", 
+      "name": "Demo School 64", 
+      "longitude": "32.638502", 
+      "teachers": 47
+    }
+  }, 
+  {
+    "pk": 66, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "2.939408", 
+      "name": "Demo School 65", 
+      "longitude": "30.726811", 
+      "teachers": 88
+    }
+  }, 
+  {
+    "pk": 67, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "0.214802", 
+      "name": "Demo School 66", 
+      "longitude": "31.526179", 
+      "teachers": 55
+    }
+  }, 
+  {
+    "pk": 68, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "2.873726", 
+      "name": "Demo School 67", 
+      "longitude": "32.765057", 
+      "teachers": 57
+    }
+  }, 
+  {
+    "pk": 69, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "0.704041", 
+      "name": "Demo School 68", 
+      "longitude": "31.569324", 
+      "teachers": 94
+    }
+  }, 
+  {
+    "pk": 70, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "0.794302", 
+      "name": "Demo School 69", 
+      "longitude": "33.287331", 
+      "teachers": 37
+    }
+  }, 
+  {
+    "pk": 71, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.253964", 
+      "name": "Demo School 70", 
+      "longitude": "32.711023", 
+      "teachers": 62
+    }
+  }, 
+  {
+    "pk": 72, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.087216", 
+      "name": "Demo School 71", 
+      "longitude": "32.232333", 
+      "teachers": 32
+    }
+  }, 
+  {
+    "pk": 73, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "3.084821", 
+      "name": "Demo School 72", 
+      "longitude": "30.247943", 
+      "teachers": 45
+    }
+  }, 
+  {
+    "pk": 74, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.052446", 
+      "name": "Demo School 73", 
+      "longitude": "32.778792", 
+      "teachers": 51
+    }
+  }, 
+  {
+    "pk": 75, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.447882", 
+      "name": "Demo School 74", 
+      "longitude": "31.178294", 
+      "teachers": 77
+    }
+  }, 
+  {
+    "pk": 76, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.683029", 
+      "name": "Demo School 75", 
+      "longitude": "31.61139", 
+      "teachers": 56
+    }
+  }, 
+  {
+    "pk": 77, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.382628", 
+      "name": "Demo School 76", 
+      "longitude": "34.502585", 
+      "teachers": 51
+    }
+  }, 
+  {
+    "pk": 78, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "2.850356", 
+      "name": "Demo School 77", 
+      "longitude": "33.399163", 
+      "teachers": 33
+    }
+  }, 
+  {
+    "pk": 79, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.43856", 
+      "name": "Demo School 78", 
+      "longitude": "32.751921", 
+      "teachers": 30
+    }
+  }, 
+  {
+    "pk": 80, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.890845", 
+      "name": "Demo School 79", 
+      "longitude": "34.198459", 
+      "teachers": 0
+    }
+  }, 
+  {
+    "pk": 81, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.794953", 
+      "name": "Demo School 80", 
+      "longitude": "32.824227", 
+      "teachers": 11
+    }
+  }, 
+  {
+    "pk": 82, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "3.635281", 
+      "name": "Demo School 81", 
+      "longitude": "30.758008", 
+      "teachers": 70
+    }
+  }, 
+  {
+    "pk": 83, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "0.642624", 
+      "name": "Demo School 82", 
+      "longitude": "34.371179", 
+      "teachers": 70
+    }
+  }, 
+  {
+    "pk": 84, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "0.893477", 
+      "name": "Demo School 83", 
+      "longitude": "30.375859", 
+      "teachers": 60
+    }
+  }, 
+  {
+    "pk": 85, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "2.668548", 
+      "name": "Demo School 84", 
+      "longitude": "32.768057", 
+      "teachers": 52
+    }
+  }, 
+  {
+    "pk": 86, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.445665", 
+      "name": "Demo School 85", 
+      "longitude": "33.114058", 
+      "teachers": 73
+    }
+  }, 
+  {
+    "pk": 87, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.028632", 
+      "name": "Demo School 86", 
+      "longitude": "31.557039", 
+      "teachers": 94
+    }
+  }, 
+  {
+    "pk": 88, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "3.060031", 
+      "name": "Demo School 87", 
+      "longitude": "33.199025", 
+      "teachers": 96
+    }
+  }, 
+  {
+    "pk": 89, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.582237", 
+      "name": "Demo School 88", 
+      "longitude": "30.27937", 
+      "teachers": 62
+    }
+  }, 
+  {
+    "pk": 90, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.78419", 
+      "name": "Demo School 89", 
+      "longitude": "31.572721", 
+      "teachers": 82
+    }
+  }, 
+  {
+    "pk": 91, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "2.738628", 
+      "name": "Demo School 90", 
+      "longitude": "31.634572", 
+      "teachers": 46
+    }
+  }, 
+  {
+    "pk": 92, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "0.675074", 
+      "name": "Demo School 91", 
+      "longitude": "34.066831", 
+      "teachers": 58
+    }
+  }, 
+  {
+    "pk": 93, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.667252", 
+      "name": "Demo School 92", 
+      "longitude": "31.800931", 
+      "teachers": 60
+    }
+  }, 
+  {
+    "pk": 94, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "2.292594", 
+      "name": "Demo School 93", 
+      "longitude": "32.369669", 
+      "teachers": 10
+    }
+  }, 
+  {
+    "pk": 95, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "3.428564", 
+      "name": "Demo School 94", 
+      "longitude": "30.184335", 
+      "teachers": 9
+    }
+  }, 
+  {
+    "pk": 96, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "-0.394527", 
+      "name": "Demo School 95", 
+      "longitude": "31.299787", 
+      "teachers": 91
+    }
+  }, 
+  {
+    "pk": 97, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.955683", 
+      "name": "Demo School 96", 
+      "longitude": "33.492417", 
+      "teachers": 14
+    }
+  }, 
+  {
+    "pk": 98, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.574517", 
+      "name": "Demo School 97", 
+      "longitude": "31.355094", 
+      "teachers": 41
+    }
+  }, 
+  {
+    "pk": 99, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.659668", 
+      "name": "Demo School 98", 
+      "longitude": "31.193412", 
+      "teachers": 97
+    }
+  }, 
+  {
+    "pk": 100, 
+    "model": "schools.school", 
+    "fields": {
+      "latitude": "1.218586", 
+      "name": "Demo School 99", 
+      "longitude": "30.595252", 
+      "teachers": 57
+    }
+  }
+]
