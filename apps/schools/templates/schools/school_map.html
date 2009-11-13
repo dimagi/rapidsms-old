@@ -1,7 +1,10 @@
 {% extends base_template %}
-
+{% block javascripts %}
+<!--[if lt IE 7]>
+    <script src="http://ie7-js.googlecode.com/svn/version/2.0(beta3)/IE7.js" type="text/javascript"></script>
+<![endif]-->
+{% endblock %}
 {% block content %}
-    <div style="background: url(_images/bg-sidebar.gif) repeat-y;">
         <div id="slogan">
             <p class="slogan">Visualizing the Data</p>
         </div><!--End Slogan--> 
@@ -51,5 +54,4 @@
         </div><!--End 2/3-->
         
         <div class="clear"></div>
-    </div><!--End style-->
 {% endblock %}
