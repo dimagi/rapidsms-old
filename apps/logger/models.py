@@ -3,7 +3,7 @@
 
 import django
 from django.db import models
-from reporters.models import PersistantConnection
+from reporters.models import PersistantConnection, PersistantBackend
 
 class Message(models.Model):
     """A Message being logged"""
@@ -26,6 +26,27 @@ class Message(models.Model):
     def incoming(cls):
         """Gets a query set of incoming messages"""
         return cls.objects.Filter(is_incoming=True)
+    
+    @classmethod
+    def from_outgoing(cls, outgoing):
+        """Create a Message object from the IncomingMessage model"""
+        return cls._from_old(outgoing, False)
+    
+    @classmethod
+    def from_incoming(cls, incoming):
+        """Create a Message object from the IncomingMessage model"""
+        return cls._from_old(outgoing, False)
+    
+    @classmethod
+    def from_incoming(cls, incoming):
+        backend = PersistantBackend.objects.get(slug=incoming.backend)
+        conn, created = PersistantConnection.objects.get_or_create(backend  = backend,
+                                                                  identity = incoming.identity)
+        if created:
+            conn.save()
+        to_return = Message(text=incoming.text, date=incoming.date, 
+                            is_incoming=True, connection=conn)
+        return to_return
     
     def __unicode__(self):
         return "%s: %s" % (self.connection, self.text)
