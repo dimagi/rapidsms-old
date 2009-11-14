@@ -5,6 +5,10 @@
 <link type="text/css" rel="stylesheet" href="/static/logger/stylesheets/logger.css" />
 {% endblock %}
 {% block content %}
+<form method="get">
+  <label for="search_string">Search:</label>
+  <input id="search_string" name="search_string" type="text" />
+</form>
 <h2>All Messages</h2> 
 <table width="100%"> 
     <thead>
