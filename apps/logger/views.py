@@ -2,7 +2,8 @@ from rapidsms.webui.utils import render_to_response, paginated
 from models import *
 from datetime import datetime, timedelta
 from django.contrib.auth.decorators import login_required, permission_required
-
+from django.http import HttpResponse
+from django.db import transaction
 
 @login_required
 @permission_required("logger.can_view")
@@ -16,13 +17,51 @@ def index(req):
     sort_column, sort_descending = _get_sort_info(req, default_sort_column="date", 
                                                   default_sort_descending=True)
     sort_desc_string = "-" if sort_descending else ""
-    
+        
     all = Message.objects.all().order_by("%s%s" % (sort_desc_string, sort_column))
     messages = paginated(req, all)
     return render_to_response(req, template_name, {"columns": columns,
                                                    "messages": messages,
                                                    "sort_column": sort_column,
                                                    "sort_descending": sort_descending})
+
+@login_required
+@permission_required("logger.can_view")
+def migrate(req):
+    
+    def get(req):
+        template_name="logger/migrate.html"
+        incoming = IncomingMessage.objects.all()
+        outgoing = OutgoingMessage.objects.all()
+        return render_to_response(req, template_name, {"incoming": incoming,
+                                                       "outgoing": outgoing})
+    
+    
+    @transaction.commit_manually
+    def post(req):
+        # the UI for this leaves something to be desired, but it's pretty
+        # much a one time function
+        if "confirmed" in req.POST and req.POST["confirmed"]=="True":
+            try:
+                for incoming in IncomingMessage.objects.all():
+                    msg = Message.from_incoming(incoming)
+                    msg.save()
+                for outgoing in OutgoingMessage.objects.all():
+                    msg = Message.from_outgoing(outgoing)
+                    msg.save()
+                transaction.commit()
+                return HttpResponse("Success!")
+            except Exception, e:
+                transaction.rollback()
+                return HttpResponse("Error! %s" % e)
+        else:
+            return HttpResponse("Canceled!")
+
+    # invoke the correct function...
+    # this should be abstracted away
+    if   req.method == "GET":  return get(req)
+    elif req.method == "POST": return post(req)
+    
 
 def _get_sort_info(request, default_sort_column, default_sort_descending):
     sort_column = default_sort_column
