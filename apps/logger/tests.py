@@ -55,3 +55,15 @@ class TestApp (TestScript):
         self.assertEqual(200, response.status_code)
         self.assertContains(response, "the expected message")
         self.assertNotContains(response, "the unexpected message")
+
+    def testSearchIsCaseInsensitive(self):
+        self.client.login(username='brian', password='test')
+        self.runScript("""
+            sample_1 > this is the EXPECTED message
+            sample_1 > this is the unexpected message
+        """)
+        response = self.client.get('/logger', {'search_string': 'the expected'})
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, "the EXPECTED message")
+        self.assertNotContains(response, "the unexpected message")
+

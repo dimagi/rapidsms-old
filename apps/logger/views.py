@@ -21,7 +21,7 @@ def index(req):
     search_string = req.REQUEST.get("search_string", "")
     
     query = Message.objects.order_by("%s%s" % (sort_desc_string, sort_column)).filter(
-        Q(text__contains=search_string) | Q(connection__identity__contains=search_string))
+        Q(text__icontains=search_string) | Q(connection__identity__icontains=search_string))
     
     messages = paginated(req, query)
     return render_to_response(req, template_name, {"columns": columns,
