@@ -17,16 +17,16 @@ def index(req):
     sort_column, sort_descending = _get_sort_info(req, default_sort_column="date", 
                                                   default_sort_descending=True)
     sort_desc_string = "-" if sort_descending else ""
+    search_string = req.REQUEST.get("search_string", "")
     
-    query = Message.objects.all().order_by("%s%s" % (sort_desc_string, sort_column))
-    if "search_string" in req.REQUEST:
-        query = query.filter(text__contains=req.REQUEST["search_string"])
+    query = Message.objects.filter(text__contains=search_string).order_by("%s%s" % (sort_desc_string, sort_column))
     
     messages = paginated(req, query)
     return render_to_response(req, template_name, {"columns": columns,
                                                    "messages": messages,
                                                    "sort_column": sort_column,
-                                                   "sort_descending": sort_descending})
+                                                   "sort_descending": sort_descending,
+                                                   "search_string": search_string})
 
 @login_required
 @permission_required("logger.can_view")
