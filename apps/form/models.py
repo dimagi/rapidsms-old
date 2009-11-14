@@ -182,7 +182,8 @@ class TokenValidator(models.Model):
         
 class TokenExistanceValidator(TokenValidator):
     '''Validator that can ensure a token exists in some other model.name db column'''
-    lookup_type = models.ForeignKey(ContentType, "model", verbose_name='type to check against')
+    # rO - change 'model' to 'id' since 'model' is not constrained unique (and innodb complains)
+    lookup_type = models.ForeignKey(ContentType, "id", verbose_name='type to check against')
     field_name = models.CharField(max_length = 100)
     
     def __unicode__(self):
