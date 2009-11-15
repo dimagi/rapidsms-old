@@ -41,42 +41,42 @@ class Backend(backend.Backend):
     '''
     _title = "Email"
     _connection = None
-    POLL_INTERVAL = 10
     
     def configure(self, smtp_host="localhost", smtp_port=25,  
                   imap_host="localhost", imap_port=143,
                   username="demo-user@domain.com",
                   password="secret", 
-                  use_tls=True):
+                  use_tls=True, poll_interval=60):
         # the default information will not work, users need to configure this
         # in their settings
         
-        self._smtp_host = smtp_host
-        self._smtp_port = smtp_port
-        self._imap_host = imap_host
-        self._imap_port = imap_port
-        self._username = username 
-        self._password = password
-        self._use_tls = use_tls 
+        self.smtp_host = smtp_host
+        self.smtp_port = smtp_port
+        self.imap_host = imap_host
+        self.imap_port = imap_port
+        self.username = username 
+        self.password = password
+        self.use_tls = use_tls 
+        self.poll_interval = poll_interval
         
     def send(self, email_message):
         # Create a text/plain message for now
         msg = MIMEText(email_message.text)
 
         msg['Subject'] = getattr(email_message, "subject", None)
-        msg['From'] = self._username 
+        msg['From'] = self.username 
         msg['To'] = email_message.peer
         
-        print "sending mail: %s" % email_message.text
-        if self._use_tls:
-            s = smtplib.SMTP_SSL(host=self._smtp_host, port=self._smtp_port)
+        self.debug("sending mail to %s: %s" % (email_message.peer, 
+                                               email_message.text))
+        if self.use_tls:
+            s = smtplib.SMTP_SSL(host=self.smtp_host, port=self.smtp_port)
         else:
-            s = smtplib.SMTP(host=self._smtp_host, port=self._smtp_port)
+            s = smtplib.SMTP(host=self.smtp_host, port=self.smtp_port)
             
-        s.login(self._username, self._password)
-        s.sendmail(self._username, [email_message.peer], msg.as_string())
+        s.login(self.username, self.password)
+        s.sendmail(self.username, [email_message.peer], msg.as_string())
         s.quit()
-        print "finished sending mail"
         
         
     def start(self):
@@ -94,12 +94,11 @@ class Backend(backend.Backend):
             if messages:
                 for message in messages:
                     self.router.send(message)
-            time.sleep(self.POLL_INTERVAL)
+            time.sleep(self.poll_interval)
             
     def _get_new_messages(self):
-        print "fetching mail"
-        imap_connection = imaplib.IMAP4_SSL(self._imap_host, self._imap_port)
-        imap_connection.login(self._username, self._password)
+        imap_connection = imaplib.IMAP4_SSL(self.imap_host, self.imap_port)
+        imap_connection.login(self.username, self.password)
         imap_connection.select()
         all_msgs = []
         # this assumes any unread message is a new message
@@ -107,16 +106,17 @@ class Backend(backend.Backend):
         for num in data[0].split():
             typ, data = imap_connection.fetch(num, '(RFC822)')
             # get a rapidsms message from the data
-            email_message = self._message_from_imap(data[0][1])
+            email_message = self.message_from_imap(data[0][1])
             all_msgs.append(email_message)
             # mark it read
             imap_connection.store(num, "+FLAGS", "\\Seen")
         imap_connection.close()
         imap_connection.logout()
-        print "finished fetching mail"
         return all_msgs
     
-    def _message_from_imap(self, imap_mail):
+    
+    def message_from_imap(self, imap_mail):
+        """From an IMAP message object, get a rapidsms message object"""
         parsed = message_from_string(imap_mail)
         from_user = parsed["From"] 
         subject = parsed["Subject"]
@@ -127,30 +127,36 @@ class Backend(backend.Backend):
         # date = datetime.strptime(truncated_date, "%a, %d %b %Y %H:%M:%S")
         date = datetime.now()
         connection = Connection(self, from_user)
-        message_body = self._get_message_body(parsed)
-        msg = EmailMessage(connection=connection, text=message_body, 
-                           date=date, subject=subject)
-        return msg
+        message_body = get_message_body(parsed)
+        if not message_body:
+            self.error("Got a poorly formed email.  Couldn't find any part with content-type text")
+            # TODO: not sure how to handle this.  For now still route it with empty body
+            return EmailMessage(connection=connection, text="", 
+                                date=date, subject=subject)
+        return EmailMessage(connection=connection, text=message_body.get_payload(), 
+                            date=date, subject=subject, mime_type=message_body.get_content_type())
     
-    def _is_plaintext(self, email_message):
-        return re.match("text/plain", email_message.get_content_type(), re.IGNORECASE)
-    
-    def _is_text(self, email_message):
-        return re.match("text/*", email_message.get_content_type(), re.IGNORECASE)
-    
-    def _get_message_body(self, email_message):
-        """Walk through the message parts, taking the first text/plain.
-           if no text/plain (is this allowed?) will return the first
-           text/html"""
-        candidate = None
-        if email_message.is_multipart():
-            for message_part in email_message.walk():
-                if self._is_plaintext(message_part):
-                    return message_part.get_payload()
-                elif self._is_text(message_part):
-                    candidate = message_part
-        if candidate == None:
-            # what to do?  
-            self.error("Got a poorly formed email")
-            return ""
-        return candidate.get_payload()
+
+def is_plaintext(email_message):
+    """Whether a message is plaintext"""
+    return re.match("text/plain", email_message.get_content_type(), re.IGNORECASE)
+
+def is_text(email_message):
+    """Whether a message is text"""
+    return re.match("text/*", email_message.get_content_type(), re.IGNORECASE)
+
+def get_message_body(email_message):
+    """Walk through the message parts, taking the first text/plain.
+       if no text/plain (is this allowed?) will return the first
+       text/html"""
+    candidate = None
+    if email_message.is_multipart():
+        for message_part in email_message.walk():
+            if is_plaintext(message_part):
+                return message_part
+            elif is_text(message_part):
+                candidate = message_part
+    else:
+        # we don't really have a choice here
+        return email_message
+    return candidate
