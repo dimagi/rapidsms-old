@@ -272,8 +272,7 @@ a.info{
 }
 
 #branding h1 a span {
-                position: absolute;
-                left: -9999px;
+	display: none;
 }
         
 #branding h1 a {
@@ -283,8 +282,9 @@ a.info{
             background: url("../images/rapidsms-logo.png") no-repeat 0 50%;
 
             /* float the RapidSMS logo, in case any
-             * app would like to append anything */
-            float: left;
+             * app would like to append anything 
+             * float: left;*/
+            margin-left: 50px;
 }
 
         
