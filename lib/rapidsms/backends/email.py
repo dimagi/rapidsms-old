@@ -3,12 +3,17 @@
 
 
 from __future__ import absolute_import
-from rapidsms.message import Message
+from rapidsms.message import Message, EmailMessage
 from rapidsms.connection import Connection
 from . import backend
-from email import message_from_string
+import imaplib
+import time
+import smtplib
+import re
 
-from django.core.mail import *
+from datetime import datetime
+from email import message_from_string
+from email.mime.text import MIMEText
 
 class Backend(backend.Backend):
     '''Uses the django mail object utilities to send outgoing messages
@@ -36,36 +41,43 @@ class Backend(backend.Backend):
     '''
     _title = "Email"
     _connection = None
+    POLL_INTERVAL = 10
     
-    def configure(self, host="localhost", port=25, username="demo-user@domain.com", 
-                  password="secret", use_tls=True, fail_silently=False):
+    def configure(self, smtp_host="localhost", smtp_port=25,  
+                  imap_host="localhost", imap_port=143,
+                  username="demo-user@domain.com",
+                  password="secret", 
+                  use_tls=True):
         # the default information will not work, users need to configure this
         # in their settings
         
-        # this is some commented out code that doesn't call django email packages
+        self._smtp_host = smtp_host
+        self._smtp_port = smtp_port
+        self._imap_host = imap_host
+        self._imap_port = imap_port
         self._username = username 
-        self._host = host
-        self._port = port
         self._password = password
         self._use_tls = use_tls 
-        self._fail_silently = fail_silently
-        self._connection = SMTPConnection(username=username,
-                                          port=port,
-                                          host=host,
-                                          password=password,
-                                          use_tls=use_tls,
-                                          fail_silently=fail_silently)
-    
-    def send(self, message):
-        destination = "%s" % (message.connection.identity)
-        subject, from_email, to_email, text = self._get_email_params(message)
-        email_message = EmailMessage(subject, text, from_email, to_email,
-                                     connection=self._connection)
         
-        # this is a fairly ugly hack to get html emails working properly
-        if text.startswith("<html>"):
-            email_message.content_subtype = "html"
-        result = email_message.send(fail_silently=self._fail_silently)
+    def send(self, email_message):
+        # Create a text/plain message for now
+        msg = MIMEText(email_message.text)
+
+        msg['Subject'] = getattr(email_message, "subject", None)
+        msg['From'] = self._username 
+        msg['To'] = email_message.peer
+        
+        print "sending mail: %s" % email_message.text
+        if self._use_tls:
+            s = smtplib.SMTP_SSL(host=self._smtp_host, port=self._smtp_port)
+        else:
+            s = smtplib.SMTP(host=self._smtp_host, port=self._smtp_port)
+            
+        s.login(self._username, self._password)
+        s.sendmail(self._username, [email_message.peer], msg.as_string())
+        s.quit()
+        print "finished sending mail"
+        
         
     def start(self):
         backend.Backend.start(self)
@@ -74,51 +86,71 @@ class Backend(backend.Backend):
         backend.Backend.stop(self)
         self.info("Shutting down...")
 
-    def _get_email_params(self, message):
-        """Get the parameters needed by the Django email client
-           from a rapidsms message object. What is returned is a 
-           4-element tuple containing: 
-           (subject: a string
-            from_email: a string
-            to_email: a tuple
-            text: the message body ) 
-        """
-        # todo: parsing of the subject/other params
-        # check CRLFs and USE THEM! if there are only newlines.
-        # this assumes that the message contains all or no CRLFs.
-        # see: http://tools.ietf.org/html/rfc2822.html
-        
-        # another thing to note: this format doesn't like unicode
-        text = str(message.text)
-        if not "\r\n" in text:
-            text = text.replace("\n", "\r\n")
-        email_message = message_from_string(text)
-        
-        # amazingly these keys are actually not case sensitive
-        if email_message.has_key("subject"):
-            subject = email_message["subject"]
-        else: 
-            subject = ""
-        
-        # todo: Django email doesn't appear to honor this.
-        # Maybe that's a good thing, as it prevents easy spoofing.
-        if email_message.has_key("from"):
-            from_string = email_message["from"]
-        else: 
-            from_string = self._username
-        
-        # always use the identity in the message for "to",
-        # even if they specified one in the headers
-        to_string = message.connection.identity
-        if "," in to_string:
-            to_ple = to_string.split(",") 
-        else:
-            to_ple = (to_string, )
-            
-        # todo: honor dates?  other params?  would all be 
-        # made much easier by moving to standard python email
-        # instead of django.  left as a future decision.
-        return (subject, from_string, to_ple, email_message.get_payload())
-     
     
-        
+    def run(self):
+        while self._running:
+            # check for new messages
+            messages = self._get_new_messages()
+            if messages:
+                for message in messages:
+                    self.router.send(message)
+            time.sleep(self.POLL_INTERVAL)
+            
+    def _get_new_messages(self):
+        print "fetching mail"
+        imap_connection = imaplib.IMAP4_SSL(self._imap_host, self._imap_port)
+        imap_connection.login(self._username, self._password)
+        imap_connection.select()
+        all_msgs = []
+        # this assumes any unread message is a new message
+        typ, data = imap_connection.search(None, 'UNSEEN')
+        for num in data[0].split():
+            typ, data = imap_connection.fetch(num, '(RFC822)')
+            # get a rapidsms message from the data
+            email_message = self._message_from_imap(data[0][1])
+            all_msgs.append(email_message)
+            # mark it read
+            imap_connection.store(num, "+FLAGS", "\\Seen")
+        imap_connection.close()
+        imap_connection.logout()
+        print "finished fetching mail"
+        return all_msgs
+    
+    def _message_from_imap(self, imap_mail):
+        parsed = message_from_string(imap_mail)
+        from_user = parsed["From"] 
+        subject = parsed["Subject"]
+        date_string = parsed["Date"]
+        # until we figure out how to generically parse dates, just use
+        # the current time
+        # truncated_date = date_string[0:len(date_string) - 12]
+        # date = datetime.strptime(truncated_date, "%a, %d %b %Y %H:%M:%S")
+        date = datetime.now()
+        connection = Connection(self, from_user)
+        message_body = self._get_message_body(parsed)
+        msg = EmailMessage(connection=connection, text=message_body, 
+                           date=date, subject=subject)
+        return msg
+    
+    def _is_plaintext(self, email_message):
+        return re.match("text/plain", email_message.get_content_type(), re.IGNORECASE)
+    
+    def _is_text(self, email_message):
+        return re.match("text/*", email_message.get_content_type(), re.IGNORECASE)
+    
+    def _get_message_body(self, email_message):
+        """Walk through the message parts, taking the first text/plain.
+           if no text/plain (is this allowed?) will return the first
+           text/html"""
+        candidate = None
+        if email_message.is_multipart():
+            for message_part in email_message.walk():
+                if self._is_plaintext(message_part):
+                    return message_part.get_payload()
+                elif self._is_text(message_part):
+                    candidate = message_part
+        if candidate == None:
+            # what to do?  
+            self.error("Got a poorly formed email")
+            return ""
+        return candidate.get_payload()

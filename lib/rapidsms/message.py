@@ -17,6 +17,7 @@ class StatusCodes:
     GENERIC_ERROR = "Generic error" # generic errors - e.g. a catch all responder
     
     
+
 class Message(object):
     def __init__(self, connection=None, text=None, person=None, date=None):
         if connection == None and person == None:
@@ -95,3 +96,18 @@ class Message(object):
         else:
             return False
 
+
+class EmailMessage(Message):
+    """Email version of a message object, with some extra stuff that can 
+       be consumed by email backends/apps."""
+
+    def __init__(self, connection=None, text=None, person=None, date=None, 
+                 subject=None, mime_type="text/plain"):
+        super(EmailMessage, self).__init__(connection=connection, text=text,
+                                           person=person, date=date)
+        self.subject = subject
+        self.mime_type = mime_type
+        
+        
+                
+    
