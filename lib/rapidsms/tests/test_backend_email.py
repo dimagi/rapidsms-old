@@ -67,25 +67,28 @@ class TestBackendEmail(unittest.TestCase):
         self.router.start()
         to_send = "hello world!"
         msg_to = CONF["username"]
-        self._send_mail(text=to_send, to_addr=msg_to, conf=CONF2)
+        subject = "hello"
+        self._send_mail(text=to_send, to_addr=msg_to, conf=CONF2,
+                        subject=subject)
         # on each iteration, sleep for a while to let the email 
         # traverse the internets
         time.sleep(15)
-        self._check_response(msg_to, CONF2["username"], to_send)
+        self._check_response(msg_to, CONF2["username"], subject, to_send)
         self._read_all(CONF2)
         
         to_send = "empty subject!"
+        subject = ""
         self._send_mail(text=to_send, to_addr=msg_to, conf=CONF2,
-                        subject="")
+                        subject=subject)
         time.sleep(15)
-        self._check_response(msg_to, CONF2["username"], to_send)
+        self._check_response(msg_to, CONF2["username"], subject, to_send)
         self._read_all(CONF2)
         
-        # test an empty body
         to_send = ""
-        self._send_mail(text=to_send, to_addr=msg_to, conf=CONF2)
+        subject = "empty body!"
+        self._send_mail(text=to_send, to_addr=msg_to, conf=CONF2, subject=subject)
         time.sleep(15)
-        self._check_response(msg_to, CONF2["username"], to_send)
+        self._check_response(msg_to, CONF2["username"], subject, to_send)
             
         
     
@@ -134,12 +137,14 @@ class TestBackendEmail(unittest.TestCase):
          self.assertEqual(expected.lower().strip(), 
                           message_back.lower().strip())
          
-    def _check_response(self, msg_to, msg_from, msg_body):
+    def _check_response(self, msg_to, msg_from, subject, msg_body):
         msgs = self._get_mail()
-        self.assertEqual(1, len(msgs))
+        self.assertEqual(1, len(msgs), "Expected exactly 1 response but got %s." % len(msgs))
         msg = msgs[0]
-        self.assertEqual(msg_to, msg["From"])
+        self.assertEqual(msg_to, msg["From"], "From address matched")
         self._check_echo(msg_from, msg_body, msg.get_payload())
+        expected_subject = "re: %s".strip()
+        self.assertEqual(expected_subject, msg["Subject"].strip())
         
 
 if __name__ == "__main__":
