@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-# vim: ai ts=4 sts=4 et sw=4
+# vim: ai ts=4 sts=4 et sw=4 encoding=utf-8
 
 import os, time
+import i18n
 
 
 DEBUG = True
@@ -19,13 +20,16 @@ TIME_ZONE = time.tzname[0]
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'sw'
 
 SITE_ID = 1
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
 USE_I18N = True
+
+# Django i18n searches for translation files (django.po) within this dir
+LOCALE_PATHS=['contrib/locale']
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
@@ -51,11 +55,12 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.load_template_source',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-)
+]
 
 ROOT_URLCONF = "rapidsms.webui.urls"
 
@@ -77,6 +82,10 @@ TEMPLATE_DIRS = [
 # rapidsms pages.  if you want to totally restyle your pages
 # you should change this in your configuration .ini file
 BASE_TEMPLATE = "layout.html"
+# This is a similar concept, but for templating the login
+# and logout screens 
+LOGIN_TEMPLATE = "webapp/login.html"
+LOGGEDOUT_TEMPLATE = "webapp/loggedout.html"
 
 
 
@@ -107,7 +116,38 @@ RAPIDSMS_APPS = dict([
     for app in RAPIDSMS_CONF["rapidsms"]["apps"]])
 
 
+# this code bootstraps the i18n logic configuration, if 
+# it is in the settings
 
+def _i18n_to_django_setting(language_settings):
+    languages = []
+    for language in language_settings:
+        if len(language) >= 2:
+            languages.append( (language[0],language[1]) )
+    return tuple(languages)
+    
+# Import i18n settings from rapidsms.ini for sms
+if "i18n" in RAPIDSMS_CONF:
+    RAPIDSMS_I18N = True
+    if "web_languages" in RAPIDSMS_CONF["i18n"]:
+        LANGUAGES = _i18n_to_django_setting( RAPIDSMS_CONF["i18n"]["web_languages"] )
+    elif "languages" in RAPIDSMS_CONF["i18n"]:
+        LANGUAGES = _i18n_to_django_setting( RAPIDSMS_CONF["i18n"]["languages"] )
+    
+    # allow you to specify the static paths for translation files
+    if "locale_paths" in RAPIDSMS_CONF["i18n"]:
+        LOCALE_PATHS = RAPIDSMS_CONF["i18n"]["locale_paths"]
+
+# DATABASE SETTINGS
+# 'This sets the default storage engine upon connecting to the database. 
+# After your tables have been created, you should remove this option.'
+# (from http://docs.djangoproject.com/en/dev/ref/databases/)
+# (this solution is only for testing - the correct way to make sure
+# that the engine is innodb going forward is to configure my.conf appropriately)
+# 
+# DATABASE_OPTIONS = {
+#    "init_command": "SET storage_engine=INNODB",
+# }
 
 # ==========================
 # LOAD OTHER DJANGO SETTINGS
@@ -149,5 +189,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
-    'django.contrib.admindocs'
+    'django.contrib.admindocs',
+    'django.contrib.markup'
 ] + [app["module"] for app in RAPIDSMS_APPS.values()]
+
+# ====================
+# INJECT RAPIDSMS MIDDLEWARES IF PRESENT
+# ====================
+ 
+if "customdjango" in RAPIDSMS_CONF:
+    if "middlewares" in RAPIDSMS_CONF["customdjango"]:
+        MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES +\
+                          [middleware for middleware in RAPIDSMS_CONF["customdjango"]["middlewares"]]
+    if "authentications" in RAPIDSMS_CONF["customdjango"]:
+        AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend'] +\
+                          [backend for backend in RAPIDSMS_CONF["customdjango"]["authentications"]]
+
