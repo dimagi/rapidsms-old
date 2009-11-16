@@ -67,3 +67,7 @@ class TestApp (TestScript):
         self.assertContains(response, "the EXPECTED message")
         self.assertNotContains(response, "the unexpected message")
 
+    def testSortingRetainsSearch(self):
+        self.client.login(username='brian', password='test')
+        response = self.client.get('/logger', {'search_string': 'foo'})
+        self.assertContains(response, "?search_string=foo", 6) # 5 from the columns + 1 from a pagination link
