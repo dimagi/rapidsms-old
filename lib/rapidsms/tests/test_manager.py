@@ -2,8 +2,6 @@ import unittest
 import os
 
 from rapidsms.manager import Manager, import_local_settings
-from rapidsms.manager import import_i18n_web_settings
-from rapidsms.manager import import_i18n_sms_settings
 from rapidsms.config import Config
 from django.conf import settings
 import rapidsms.i18n as i18n
