@@ -108,7 +108,7 @@ class Patient(WeltelUser):
                                               callback_args__contains=str(self.id))
         if len(scheds) == 0:
             set_weekly_event("weltel.callbacks.send_mambo", day=5, hour=12, \
-                             minute=30, callback_args=self.id)
+                             minute=30, callback_args=[self.id])
 
 class PatientState(models.Model):
     code = models.CharField(max_length=15)

@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse
 from django.db import transaction
+from django.db.models import Q
 
 @login_required
 @permission_required("logger.can_view")
@@ -17,13 +18,17 @@ def index(req):
     sort_column, sort_descending = _get_sort_info(req, default_sort_column="date", 
                                                   default_sort_descending=True)
     sort_desc_string = "-" if sort_descending else ""
-        
-    all = Message.objects.all().order_by("%s%s" % (sort_desc_string, sort_column))
-    messages = paginated(req, all)
+    search_string = req.REQUEST.get("search_string", "")
+    
+    query = Message.objects.order_by("%s%s" % (sort_desc_string, sort_column)).filter(
+        Q(text__icontains=search_string) | Q(connection__identity__icontains=search_string))
+    
+    messages = paginated(req, query)
     return render_to_response(req, template_name, {"columns": columns,
                                                    "messages": messages,
                                                    "sort_column": sort_column,
-                                                   "sort_descending": sort_descending})
+                                                   "sort_descending": sort_descending,
+                                                   "search_string": search_string})
 
 @login_required
 @permission_required("logger.can_view")
