@@ -1,0 +1,38 @@
+{% extends base_template %}
+{% block content %}
+<h1>{{ school.name }}</h1>
+{% if headmasters %}
+<h2>Headmaster(s)</h2>
+<ul>
+{% for headmaster in headmasters %}
+    <li>{{ headmaster }}</li>
+{% endfor %}
+</ul>
+{% else %}
+<p><b>No Headmasters Registered</b></p>
+{% endif %}
+<h2>Summary Data</h2>
+<table>
+    <thead>
+        <th>Item</th>
+        <th>Value</th>
+        <th>Submitted</th>
+        <th>Submitted By</th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Teacher Attendance</td>
+        {% if teacher_attendance %}
+            {# we assume the list is sorted, descending #}
+            {% with teacher_attendance.0 as most_recent %}
+            <td>{{ most_recent.percent }}% ({{ most_recent.actual }} / {{ most_recent.estimated }})</td>
+            <td>{{ most_recent.date }}</td>
+            <td>{{ most_recent.reporter }}</td>
+            {% endwith %}
+        {% else %}
+            <td colspan=3 class="no_data">No attendance records found</td>
+        {% endif %}
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

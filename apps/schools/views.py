@@ -4,6 +4,7 @@ from xml.etree import ElementTree
 from xml.etree.ElementTree import Element, SubElement
 
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from rapidsms.webui.utils import render_to_response
 
 from schools.models import School
@@ -23,3 +24,7 @@ def xml(req, template_name="schools/demo.xml"):
         school_elem = school.to_element()
         root.append(school_elem)
     return HttpResponse(ElementTree.tostring(root), mimetype="text/xml")
+
+def single_school(req, id, template_name="schools/single_school.html"):
+    school = get_object_or_404(School, id=id)
+    return render_to_response(req, template_name, { "school": school })

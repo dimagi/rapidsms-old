@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+import math
+
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element, SubElement
 
@@ -37,7 +39,8 @@ class Headmaster(Reporter):
     
     school = models.ForeignKey(School)
     
-
+    def __unicode__(self):
+        return Reporter.__unicode__(self)
     
 class Grade(models.Model):
     """A Grade (class) in a school"""
@@ -62,6 +65,12 @@ class SchoolTeacherReport(Report):
     # to allow that to change over time
     expected = models.PositiveIntegerField()
     actual = models.PositiveIntegerField()
+    
+    def percent(self):
+        if self.expected != 0:
+            return self.actual / self.expected
+        return "N/A"
+        
     
 class SchoolWaterReport(Report):
     """Report of school water information on a particular day"""
