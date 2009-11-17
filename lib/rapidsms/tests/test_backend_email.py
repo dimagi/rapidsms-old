@@ -143,8 +143,8 @@ class TestBackendEmail(unittest.TestCase):
         msg = msgs[0]
         self.assertEqual(msg_to, msg["From"], "From address matched")
         self._check_echo(msg_from, msg_body, msg.get_payload())
-        expected_subject = "re: %s".strip()
-        self.assertEqual(expected_subject, msg["Subject"].strip())
+        expected_subject = "re: %s" % subject
+        self.assertEqual(expected_subject.strip(), msg["Subject"].strip())
         
 
 if __name__ == "__main__":
