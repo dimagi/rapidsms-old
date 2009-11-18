@@ -32,6 +32,18 @@ class School(models.Model,SerializableModel):
     
     teachers = models.PositiveIntegerField(help_text="The number of teachers at the school")
     
+    def __unicode__(self):
+        return self.name
+    
+    @property
+    def headmaster(self):
+        try:
+            return Headmaster.objects.get(school=self)
+        except Headmaster.DoesNotExist:
+            return None
+        except Headmaster.MultipleObjectsReturned:
+            # todo: determine if we want to handle this better.
+            return Headmaster.objects.filter(school=self)[0]
     
         
 class Headmaster(Reporter):
@@ -96,12 +108,12 @@ class GirlsAttendenceReport(Report):
 class SchoolReport(Report):
     """Any other (unanticipated) report having to do with a school"""     
     school = models.ForeignKey(School)
-    question = models.CharField(max_length=200) # todo: foreign key question 
-    answer = models.CharField(max_length=200) # todo: foreign key answer
+    question = models.CharField(max_length=160) # todo: foreign key question 
+    answer = models.CharField(max_length=160) # todo: foreign key answer
     
 class GradeReport(Report):
     """Any other (unanticipated) report having to do with a school"""     
     grade = models.ForeignKey(Grade)
-    question = models.CharField(max_length=200) # todo: foreign key question 
-    answer = models.CharField(max_length=200) # todo: foreign key answer
+    question = models.CharField(max_length=160) # todo: foreign key question 
+    answer = models.CharField(max_length=160) # todo: foreign key answer
     
