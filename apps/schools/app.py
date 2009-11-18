@@ -81,7 +81,20 @@ class App (rapidsms.app.App):
                 msg.respond("Sorry %s, I didn't understand %s. Just send the number of teachers who attended school today." %\
                             (msg.headmaster, msg.text))
                 
-
+    # there has got to be a better way to do this
+    def grade_attendance_1(self, msg):  return self.grade_attendance(msg, 1)
+    def grade_attendance_2(self, msg):  return self.grade_attendance(msg, 2)
+    def grade_attendance_3(self, msg):  return self.grade_attendance(msg, 3)
+    def grade_attendance_4(self, msg):  return self.grade_attendance(msg, 4)
+    def grade_attendance_5(self, msg):  return self.grade_attendance(msg, 5)
+    def grade_attendance_6(self, msg):  return self.grade_attendance(msg, 6)
+    def grade_attendance_7(self, msg):  return self.grade_attendance(msg, 7)
+    def grade_attendance_8(self, msg):  return self.grade_attendance(msg, 8)
+    def grade_attendance_9(self, msg):  return self.grade_attendance(msg, 9)
+    def grade_attendance_10(self, msg): return self.grade_attendance(msg, 10)
+    def grade_attendance_11(self, msg): return self.grade_attendance(msg, 11)
+    def grade_attendance_12(self, msg): return self.grade_attendance(msg, 12)
+        
     def grade_attendance(self, msg, grade_year=1):
         """Handles teacher attendance"""
         headmaster = self.get_headmaster_or_respond(msg)
@@ -131,19 +144,20 @@ class App (rapidsms.app.App):
                                                    
     def water_availability(self, msg):
         """Handles water availability"""
-        
         headmaster = self.get_headmaster_or_respond(msg)
         if not headmaster: return 
         
-        def fail(msg, headmaster):
-            """This message gets sent if anything goes wrong""" 
-            msg.respond("Sorry, %s, we couldn't understand that. Please send a message like: 4 boys 5 girls." %\
-                        headmaster)
-        
-        if self.TRUE.match(text):    water = True  
-        elif self.FALSE.match(text): water = False
+        if self.TRUE.match(msg.text):    water = True  
+        elif self.FALSE.match(msg.text): water = False
         else:                        
-            fail()
-            return
-        
+            msg.respond("Sorry, %s, we couldn't understand that. Please send either 'yes' or 'no'." %\
+                        headmaster)
+        SchoolWaterReport.objects.create(reporter=headmaster,
+                                         date=msg.date,
+                                         school=headmaster.school,
+                                         water_working=water)
+        summary = " that the water supply is working" if water else " that the water supply is not working"
+        msg.respond("Thank you for your report %s at %s, %s!" %\
+                    (summary, headmaster.school, headmaster))
+        return True
             
