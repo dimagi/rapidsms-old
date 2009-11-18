@@ -37,13 +37,13 @@ class Backend(backend.Backend):
         # the default information will not work, users need to configure this
         # in their settings
         self.smtp_host = smtp_host
-        self.smtp_port = smtp_port
+        self.smtp_port = int(smtp_port)
         self.imap_host = imap_host
-        self.imap_port = imap_port
+        self.imap_port = int(imap_port)
         self.username = username 
         self.password = password
         self.use_tls = use_tls 
-        self.poll_interval = poll_interval
+        self.poll_interval = int(poll_interval)
         
     def _send(self, email_message):
         # Create a text/plain message for now
