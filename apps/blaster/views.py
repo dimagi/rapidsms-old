@@ -63,7 +63,7 @@ def new(req, template_name="blaster/new.html"):
                 thread.start()
                                     
             transaction.commit()
-            return HttpResponse("thanks!")
+            return single_blast(req, blast.id)
         except Exception, e:
             transaction.rollback()
             raise e
