@@ -33,7 +33,6 @@ def new(req, template_name="blaster/new.html"):
     @transaction.commit_manually
     def post(req):
         try:
-            print req.POST
             message = req.POST["message"]
             errors = []
             if not message:
@@ -55,20 +54,17 @@ def new(req, template_name="blaster/new.html"):
                 
             # no errors
             reporter_ids = req.POST.getlist("select_reporter")
-            print reporter_ids
             now = datetime.now()
             blast = MessageBlast.objects.create(message=question,date=now)
             for id in reporter_ids:
                 reporter = Reporter.objects.get(id=id)
                 instance = BlastedMessage.objects.create(blast=blast, reporter=reporter)
-                print "starting thread" 
-                thread = Thread(target=_send_message,args=(reporter.id, question.text))
+                thread = Thread(target=_send_message,args=(req, reporter.id, question.text))
                 thread.start()
                                     
             transaction.commit()
             return HttpResponse("thanks!")
         except Exception, e:
-            print e
             transaction.rollback()
             raise e
         
@@ -77,7 +73,7 @@ def new(req, template_name="blaster/new.html"):
     if   req.method == "GET":  return get(req, template_name)
     elif req.method == "POST": return post(req)
     
-def _send_message(id, text):
+def _send_message(req, id, text):
     # also send the message, by hitting the ajax url of the messaging app
     data = {"uid":  id,
             "text": text
@@ -85,11 +81,7 @@ def _send_message(id, text):
     encoded = urllib.urlencode(data)
     headers = {"Content-type": "application/x-www-form-urlencoded",
                "Accept": "text/plain"}
-    
-    conn = httplib.HTTPConnection("localhost:8000")
+    conn = httplib.HTTPConnection(req.META["HTTP_HOST"])
     conn.request("POST", "/ajax/messaging/send_message", encoded, headers)
-    print "getting response request"
     response = conn.getresponse()
-    print "done"
-    print response.read()
-        
+    
