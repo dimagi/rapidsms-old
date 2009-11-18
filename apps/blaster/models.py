@@ -36,6 +36,17 @@ class BlastedMessage(models.Model):
     reporter = models.ForeignKey(Reporter)
     
     
+    @classmethod
+    def current(cls, reporter):
+        reporter_msgs = cls.objects.filter(reporter=reporter)
+        if reporter_msgs:
+            latest = reporter_msgs.order_by("-blast__date")[0]
+            # it's only current if it doesn't yet have a successful
+            # response.  All other paths return nothing.
+            if not latest.successfully_responded:
+                return latest
+        
+        
     @property 
     def school(self):
         try:

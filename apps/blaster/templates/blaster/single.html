@@ -20,7 +20,7 @@
             <td>{{ recip.status }}</td>
             {% if recip.responded %}
             <td>{{ recip.response.text }}</td>
-            <td>{{ recip.response.date }}</td>
+            <td>{{ recip.response.date|date }} - {{ recip.response.date|time }}</td>
             {% else %}
             <td>N/A</td>
             <td>N/A</td>

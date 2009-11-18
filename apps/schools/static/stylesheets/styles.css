@@ -8,6 +8,10 @@
     background-color:#FFC5C5;
 }
 
+.success {
+    background-color:#C5FFCA;
+}
+
 
 .prompt_value {
     font-weight:bold;
