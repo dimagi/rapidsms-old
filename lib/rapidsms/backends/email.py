@@ -52,12 +52,9 @@ class Backend(backend.Backend):
         msg['Subject'] = getattr(email_message, "subject", None)
         msg['From'] = self.username 
         msg['To'] = email_message.peer
-
+        s = smtplib.SMTP(host=self.smtp_host, port=self.smtp_port)
         if self.use_tls:
-            s = smtplib.SMTP_SSL(host=self.smtp_host, port=self.smtp_port)
-        else:
-            s = smtplib.SMTP(host=self.smtp_host, port=self.smtp_port)
-            
+            s.starttls()
         s.login(self.username, self.password)
         s.sendmail(self.username, [email_message.peer], msg.as_string())
         s.quit()
