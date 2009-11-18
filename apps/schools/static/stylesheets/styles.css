@@ -17,6 +17,9 @@
     font-weight:bold;
 }
 
+.no_data {
+    color:red;	
+}
 
 /* modal dialogs */
 /* jqModal base Styling courtesy of;

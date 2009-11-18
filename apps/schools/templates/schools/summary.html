@@ -18,7 +18,7 @@
     <tbody>
         {% for school in schools %}
         <tr>
-            <td>{{ school.name }}</td>
+            <td><a href="{% url schools.views.single_school school.id %}">{{ school.name }}</a></td>
             <td>{% if school.headmaster %}
                 <div class="messagetrigger js_link" onclick="new_message({{school.headmaster.id}}, '#dialog');">
                     {{ school.headmaster }}

@@ -11,7 +11,7 @@ urlpatterns = patterns('',
     url(r'^schools/map/?$', views.map),
     url(r'^schools/xml/?$', views.xml),
     url(r'^schools/headmasters/?$', views.headmasters),
-    url(r'^schools/(?P<id>\d*)/?$', views.single_school),
+    url(r'^schools/(?P<id>\d*)/?$', "schools.views.single_school", name="single_school"),
     url(r'^schools/message/(?P<id>\d*)/?$', views.message),
     
 )
