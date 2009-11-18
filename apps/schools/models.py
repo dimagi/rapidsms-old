@@ -98,7 +98,9 @@ class Grade(models.Model):
     year = models.PositiveIntegerField(help_text="1-12")
     boys = models.PositiveIntegerField(help_text="Number of boys in the class")
     girls = models.PositiveIntegerField(help_text="Number of girls in the class")
-
+    
+    def __unicode__(self):
+        return "%s - Grade %s" % (self.school, self.year)
 
 class Report(models.Model):
     """A reporting of some information"""
