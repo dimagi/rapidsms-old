@@ -97,5 +97,14 @@
       "handling_method": "grade_attendance_6", 
       "handling_app": "schools"
     }
+  },
+  {
+    "pk": 12, 
+    "model": "blaster.blastablemessage", 
+    "fields": {
+      "text": "A new instruction has been posted. Call to Listen.", 
+      "handling_method": "", 
+      "handling_app": ""
+    }
   }
 ]
