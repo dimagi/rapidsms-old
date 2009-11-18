@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import math
+import random
 
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element, SubElement
@@ -19,7 +20,14 @@ class School(models.Model,SerializableModel):
     ATTRS = {"latitude": "latitude",
              "longitude": "longitude"}
     ELEMS = {"Name": "name", 
-             "Teachers": "teachers" }
+             "Teachers": "teachers",
+             "Headmaster": "headmaster",
+             "TeacherAttendance": "teacher_attendance",
+             "StudentAttendance": "student_attendance",
+             "BoysAttendance": "boys_attendance",
+             "GirlsAttendance": "girls_attendance",
+             "WaterAvailability": "water_availability"
+              }
         
     latitude  = models.DecimalField(max_digits=8, decimal_places=6, 
                                     blank=True, null=True, 
@@ -45,7 +53,36 @@ class School(models.Model,SerializableModel):
             # todo: determine if we want to handle this better.
             return Headmaster.objects.filter(school=self)[0]
     
-        
+    @property
+    def teacher_attendance(self):
+        """Get total teacher attendance rate"""
+        #todo
+        return random.randint(0, 100)
+    
+    @property
+    def student_attendance(self):
+        """Get total student attendance rate"""
+        #todo
+        return random.randint(0, 100)
+    
+    @property
+    def boys_attendance(self):
+        """Get total boys attendance rate"""
+        #todo
+        return random.randint(0, 100)
+    
+    @property
+    def girls_attendance(self):
+        """Get total girls attendance rate"""
+        #todo
+        return random.randint(0, 100)
+    
+    @property
+    def water_availability(self):
+        """Get total girls attendance rate"""
+        #todo
+        return random.randint(0, 100)
+            
 class Headmaster(Reporter):
     """A headmaster of a school"""
     
