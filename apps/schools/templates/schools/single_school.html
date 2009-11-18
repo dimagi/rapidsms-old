@@ -1,13 +1,15 @@
 {% extends "schools/school_base.html" %}
+{% block javascripts %}
+    <script type="text/javascript" src="/static/schools/javascripts/jqModal.js"></script>
+    <script type="text/javascript" src="/static/schools/javascripts/jquery.blockUI.js"></script>
+    <script type="text/javascript" src="/static/schools/javascripts/message.js"></script>
+{% endblock %}
 {% block pagecontent %}
 <h1>{{ school.name }}</h1>
-{% if headmasters %}
-<h2>Headmaster(s)</h2>
-<ul>
-{% for headmaster in headmasters %}
-    <li>{{ headmaster }}</li>
-{% endfor %}
-</ul>
+{% if school.headmaster %}
+<p><span class="prompt">Headmaster: </span><span class="prompt_value">{{ school.headmaster }}</span></p>
+<div class="messagetrigger js_link" onclick="new_message({{school.headmaster.id}}, '#dialog');">send a message </div>
+<br>
 {% else %}
 <p><b>No Headmasters Registered</b></p>
 {% endif %}
@@ -18,6 +20,7 @@
         <th>Value</th>
         <th>Submitted</th>
         <th>Submitted By</th>
+        <th>Overall %</th>
     </thead>
     <tbody>
         <tr>
@@ -28,9 +31,10 @@
             <td>{{ most_recent.percent }}% ({{ most_recent.actual }} / {{ most_recent.estimated }})</td>
             <td>{{ most_recent.date }}</td>
             <td>{{ most_recent.reporter }}</td>
+            <td>{{ school.teacher_attendance }}</td>
             {% endwith %}
         {% else %}
-            <td colspan=3 class="no_data">No attendance records found</td>
+            <td colspan=4 class="no_data">No attendance records found</td>
         {% endif %}
         </tr>
         <tr>
@@ -41,9 +45,10 @@
             <td>{{ most_recent.percent }}% ({{ most_recent.actual }} / {{ most_recent.estimated }})</td>
             <td>{{ most_recent.date }}</td>
             <td>{{ most_recent.reporter }}</td>
+            <td>{{ school.student_attendance }}</td>
             {% endwith %}
         {% else %}
-            <td colspan=3 class="no_data">No attendance records found</td>
+            <td colspan=4 class="no_data">No attendance records found</td>
         {% endif %}
         </tr>
         <tr>
@@ -54,13 +59,15 @@
             <td>{{ most_recent.percent }}% ({{ most_recent.actual }} / {{ most_recent.estimated }})</td>
             <td>{{ most_recent.date }}</td>
             <td>{{ most_recent.reporter }}</td>
+            <td>{{ school.water_availability }}</td>
             {% endwith %}
         {% else %}
-            <td colspan=3 class="no_data">No water records found</td>
+            <td colspan=4 class="no_data">No water records found</td>
         {% endif %}
         </tr>
         
         </tr>
     </tbody>
 </table>
+{% include "schools/partials/message_div.html" %}
 {% endblock %}
