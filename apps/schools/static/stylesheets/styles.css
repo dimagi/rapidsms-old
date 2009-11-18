@@ -5,6 +5,10 @@
 
 /* the status of folks from the blaster */
 .pending {
+    background-color:#FEFFBD;
+}
+
+.failed {
     background-color:#FFC5C5;
 }
 
@@ -12,6 +16,7 @@
     background-color:#E0FFE3;
 }
 
+/* end status */
 
 .prompt_value {
     font-weight:bold;

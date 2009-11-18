@@ -19,6 +19,7 @@ class School(models.Model,SerializableModel):
     # the field/property used to display it.  
     ATTRS = {"latitude": "latitude",
              "longitude": "longitude"}
+    
     ELEMS = {"Name": "name", 
              "Teachers": "teachers",
              "Headmaster": "headmaster",
@@ -149,7 +150,7 @@ class SchoolReport(Report):
     answer = models.CharField(max_length=160) # todo: foreign key answer
     
 class GradeReport(Report):
-    """Any other (unanticipated) report having to do with a school"""     
+    """Any other (unanticipated) report having to do with a grade"""     
     grade = models.ForeignKey(Grade)
     question = models.CharField(max_length=160) # todo: foreign key question 
     answer = models.CharField(max_length=160) # todo: foreign key answer
