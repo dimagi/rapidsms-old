@@ -1,5 +1,6 @@
 {% extends "schools/school_base.html" %}
 {% block javascripts %}
+<script type="text/javascript" src="/static/schools/javascripts/flashlinks.js" ></script>
 <!--[if lt IE 7]>
     <script src="http://ie7-js.googlecode.com/svn/version/2.0(beta3)/IE7.js" type="text/javascript"></script>
 <![endif]-->
@@ -12,9 +13,9 @@
         <div id="one_third">
             <div id="buttons">
                 <ul>
-                    <li>Teachers Attendence</li>
-                    <li>Boys Attendence</li>
-                    <li>Girls Attendence</li>
+			<li><div onclick="javascript:trigger('A')">Teachers Attendence</div></li>
+			<li><div onclick="javascript:trigger('B')">Boys Attendence</div></li>
+			<li><div onclick="javascript:trigger('C')">Girls Attendence</div></li>
                     <li>Water Quality</li>
                 </ul>
             </div>
@@ -41,7 +42,8 @@
                     <param name="flashVars" value="key=your_api_key">
                     <embed
                         width="630px"
-                        height="400px"
+			height="400px"
+			name="map_test"
                         src="/static/schools/prototype/map_test.swf"
                         quality="high"
                         flashVars="key=your_api_key"
