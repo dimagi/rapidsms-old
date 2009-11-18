@@ -113,6 +113,15 @@ class Backend(backend.Backend):
         """From an IMAP message object, get a rapidsms message object"""
         parsed = message_from_string(imap_mail)
         from_user = parsed["From"] 
+        # if the from format was something like:
+        # "Bob User" <bob@users.com>
+        # just pull out the relevant address part.
+        match = re.match(r".*<(.*@.*\..*)>", from_user) 
+        if match:
+            new_addr = match.groups()[0]
+            self.debug("converting %s to %s" % (from_user, new_addr))
+            from_user = new_addr
+            
         subject = parsed["Subject"]
         date_string = parsed["Date"]
         # TODO: until we figure out how to generically parse dates, just use
