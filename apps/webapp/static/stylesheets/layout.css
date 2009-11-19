@@ -346,3 +346,46 @@ input.small {
 		margin: 0;
 	}
 
+	#top{
+		background-color: #333333;
+	}
+
+	#middle{
+		width: 1030px;
+		margin-right: auto;
+		margin-left: auto;
+		background-color: #FFF;
+		padding-top: 10px;
+		min-height: 600px;
+	}
+
+	#bottom{
+		background-color: #FFF;
+	}
+
+	#one_third{
+		float: left;
+		margin-left: 10px;
+		width: 310px;
+	}
+	#two_thirds{
+		float: left;
+		margin-left: 10px;
+		width: 630px;
+	}
+
+
+	/* --- Footer --- */
+
+	#footer{
+		padding: 20px 0;
+		color: #ccc;
+		background-color: #333;
+	}
+
+	#footer ul li{
+		padding: 0 20px 0 0;
+		display: inline;
+	}
+
+
