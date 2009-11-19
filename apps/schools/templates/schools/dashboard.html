@@ -1,0 +1,224 @@
+{% extends "schools/school_base.html" %}
+{% block page_stylesheets %}
+    <link type="text/css" rel="stylesheet" href="/static/schools/stylesheets/styles.css" />
+    <link rel="stylesheet" href="/static/schools/stylesheets/blueprint/screen.css" type="text/css" media="screen, projection">
+    <link rel="stylesheet" href="/static/schools/stylesheets/blueprint/print.css" type="text/css" media="print">    
+<!--[if lt IE 8]><link rel="stylesheet" href="css/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
+{% endblock %}
+{% block pagecontent %}
+    <div class="container showgrid">
+      <div class="span-18">
+          <H1>School Activity Dashboard</h1>
+      </div>
+      <div class="span-6 last">
+           <p style="text-align:right;">Monday, November 23, 2009</p>
+      </div>
+      <hr>
+      <div class="span-8 border">
+        <div class="dashboard-module">
+            <h2>Latest School Reports</h2>
+            <ul class="school-reports">
+                <li>Bob User from Kampala Secondary School reports that the water IS working</li>    
+                <li>Alice User from Luwero Primary School reports that 7 of 10 teachers are present today</li>    
+                <li>Charlie User from Luwero Primary School reports that 8 of 12 boys and 11 of 13 girls are present in P1 today.</li>    
+            </ul>
+            <a class="dashboard-link" href="#">see all</a>
+        </div>
+      </div>
+      <div class="span-8 border">
+        <div class="dashboard-module">
+            <h2>Today's Stats</h2>
+            <ul class="global-stats">
+                <li><span class="global-number">153 of 450</span> Schools Reporting</li>    
+                <li><span class="global-number">20352 of 25014</span> Reported Students</li>
+                <li><span class="global-number">752 of 1023</span> Reported Teachers</li>
+                <li><span class="global-number">135 of 152</span> Water Supplies Working</li>
+            </ul>
+            <a class="dashboard-link" href="#">view today's stats</a>
+        </div>
+      </div>
+      <div class="span-8 last">
+        <div class="dashboard-module">
+            <h2>Global Stats</h2>
+            <ul class="global-stats">
+                <li><span class="global-number">1034</span> Schools Reporting</li>    
+                <li><span class="global-number">2709</span> Known Teachers</li>    
+                <li><span class="global-number">45043</span> Known Students</li>    
+                <li><span class="global-number">87%</span> Overall Teacher Attendance Rate</li>
+                <li><span class="global-number">72%</span> Overall Student Attendance Rate</li>
+                <li><span class="global-number">91%</span> Water Supplies Working</li>
+            </ul>
+            <a class="dashboard-link" href="#">view all stats</a>
+        </div>
+      </div>
+      <hr>
+      <div class="span-16">
+            <h2>Schools Reporting Problems</h2>
+            <div id="map">
+        `     <!--<embed map here>-->
+              <div id="map_canvas" name="map_canvas">
+                <object
+                    classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
+                    codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,29,0"
+                    width="630px"
+                    height="400px">
+                    <param name="movie" value="MapSimple.swf">
+                    <param name="quality" value="high">
+                    <param name="flashVars" value="key=your_api_key">
+                    <embed
+                        width="630px"
+                        height="400px"
+                        name="map_test"
+                        src="/static/schools/prototype/map_test.swf"
+                        quality="high"
+                        flashVars="key=your_api_key"
+                        pluginspage="http://www.macromedia.com/go/getflashplayer"
+                        type="application/x-shockwave-flash">
+                    </embed>
+                </object>
+               </div>
+            </div>  
+      </div>
+      <div class="span-8 last">
+        <div class="dashboard-module">
+            <h2>Problems</h2>
+            <ul class="problems">
+                <li>The water is NOT working at Olila High School!</li>    
+                <li>No teachers attended Rhema Primary School Today!</li>    
+                <li>The water is NOT working at Teso Secondary School!</li>    
+                <li>The water is NOT working at St. Joseph Secondary School!</li>    
+                <li>The water is NOT working at Seroma Primary School!</li>
+            </ul>
+            <a class="dashboard-link" href="#">see all</a>
+        </div>
+      </div>
+      <div class="span-12">
+      <h2>Recent Questions</h2>
+<table>
+    <thead>
+        <th>Date</th>
+        <th>Text</th>
+        <th># Sent</th>
+
+        <th># Responded</th>
+    </thead>
+    <tbody>
+    
+        <tr>
+            <td>Nov. 18, 2009 - 3:17 p.m.</td>
+            <td><a href="/blaster/7">Is the school water point currently working?</a></td>
+            <td>3</td>
+
+            <td>1</td>
+        </tr>
+    
+        <tr>
+            <td>Nov. 18, 2009 - 3:15 p.m.</td>
+            <td><a href="/blaster/6">Is the school water point currently working?</a></td>
+            <td>3</td>
+            <td>1</td>
+
+        </tr>
+    
+        <tr>
+            <td>Nov. 18, 2009 - 3:13 p.m.</td>
+            <td><a href="/blaster/5">Is the school water point currently working?</a></td>
+            <td>3</td>
+            <td>0</td>
+        </tr>
+
+    
+        <tr>
+            <td>Nov. 18, 2009 - 3:10 p.m.</td>
+            <td><a href="/blaster/4">How many boys and girls attended P3 today?</a></td>
+            <td>3</td>
+            <td>1</td>
+        </tr>
+    
+        <tr>
+
+            <td>Nov. 18, 2009 - 3:09 p.m.</td>
+            <td><a href="/blaster/3">How many boys and girls attended P2 today?</a></td>
+            <td>3</td>
+            <td>0</td>
+        </tr>
+    
+        <tr>
+            <td>Nov. 18, 2009 - 2:33 p.m.</td>
+
+            <td><a href="/blaster/2">How many teachers were present today?</a></td>
+            <td>3</td>
+            <td>1</td>
+        </tr>
+    
+        <tr>
+            <td>Nov. 18, 2009 - 1:05 p.m.</td>
+            <td><a href="/blaster/1">Is the school water point currently working?</a></td>
+
+            <td>3</td>
+            <td>1</td>
+        </tr>
+    
+    </tbody>
+</table>
+
+      
+      </div>
+      <div class="span-12 last">
+        <div class="dashboard-module">
+        <h2>Last Question</h2>
+        <p><span class="prompt">Message: </span><span class="prompt_value">Is the school water point currently working?</span></p>
+        <p><span class="prompt">Sent: </span><span class="prompt_value">Nov. 18, 2009 - 3:17 p.m.</span></p>
+        
+<table>
+
+    <thead>
+        <th>Name</th>
+        <th>School</th>
+        <th>Status</th>
+        <th>Last Response</th>
+        <th>Date</th>
+
+    </thead>
+    <tbody>
+    
+        <tr class="pending">
+            <td>John Headmaster</td>
+            <td>Demo School 16</td>
+            <td>pending</td>
+            
+            <td>N/A</td>
+
+            <td>N/A</td>
+            
+        </tr>
+    
+        <tr class="success">
+            <td>Cory Web</td>
+            <td>Demo School 10</td>
+            <td>success</td>
+            
+            <td>yessm</td>
+
+            <td>Nov. 18, 2009 - 3:20 p.m.</td>
+            
+        </tr>
+    
+        <tr class="pending">
+            <td>Cory Zue</td>
+            <td>Demo School 0</td>
+            <td>pending</td>
+            
+            <td>N/A</td>
+
+            <td>N/A</td>
+            
+        </tr>
+    
+    </tbody>
+</table>
+      </div>
+    </div>
+    
+{% endblock %}
+
