@@ -164,7 +164,6 @@ class App(rapidsms.app.App):
                         environ = {
                             "REQUEST_METHOD": "POST",
                             "CONTENT_TYPE": content_type })
-                    
                     # extract the charset from the content-type header,
                     # which should have been passed along in views.py
                     charset = self.__charset(content_type)
@@ -178,10 +177,13 @@ class App(rapidsms.app.App):
                         # convert each of the values with this key into
                         # unicode, respecting the content-type that the
                         # request _claims_ to be currently encoded with
-                        val = [
-                            unicode(v, charset)
-                            for v in storage.getlist(key)]
-                        
+                        if charset:
+                            val = [
+                                unicode(v, charset)
+                                for v in storage.getlist(key)]
+                        else:
+                            val = [unicode(v) for v in storage.getlist(key)]
+                                
                         # where possible, just store the values as singular,
                         # to avoid CGIs usual post["id"][0] verbosity
                         form[key] = val[0] if(len(val) == 1) else val

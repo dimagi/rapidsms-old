@@ -1,0 +1,1 @@
+﻿package{	import flash.display.Sprite;	import flash.events.*;		public class CustomIcon extends Sprite{		//private variables		private var color:uint;				//constructor		public function CustomIcon(c:uint) {			color = c;		}			private function drawIcon():void {			graphics.beginFill(color);			graphics.drawCircle(0,0, 10);			graphics.endFill();		}	}}

@@ -1,0 +1,15 @@
+{% extends base_template %}
+{% block page_stylesheets %}
+<link type="text/css" rel="stylesheet" href="/static/schools/stylesheets/styles.css" />
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript" src="static/schools/javascripts/jquery.blockUI.js"></script>
+{% endblock %}
+{% block content %}
+<p>
+<a href="/schools/">School Summary</a> | 
+<a href="/schools/map/">View Maps</a> | 
+</p>
+{% block pagecontent %}
+{% endblock %}
+{% endblock %}

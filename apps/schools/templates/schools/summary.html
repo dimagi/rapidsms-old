@@ -1,0 +1,37 @@
+{% extends "schools/school_base.html" %}
+{% block javascripts %}
+    <script type="text/javascript" src="/static/schools/javascripts/jqModal.js"></script>
+    <script type="text/javascript" src="/static/schools/javascripts/jquery.blockUI.js"></script>
+    <script type="text/javascript" src="/static/schools/javascripts/message.js"></script>
+{% endblock %}
+{% block pagecontent %}
+<h2>School Summary</h2>
+<table>
+    <thead>
+        <th>Name</th>
+        <th>Headmaster (click to message)</th>
+        <th>Response Rate</th>
+        <th>Teacher Attendance</th>
+        <th>Student Attendance</th>
+        <th>Water Availability</th>
+    </thead>
+    <tbody>
+        {% for school in schools %}
+        <tr>
+            <td><a href="{% url schools.views.single_school school.id %}">{{ school.name }}</a></td>
+            <td>{% if school.headmaster %}
+                <div class="messagetrigger js_link" onclick="new_message({{school.headmaster.id}}, '#dialog');">
+                    {{ school.headmaster }}
+                </div>
+                {% else %}None{% endif %}
+            </td>
+            <td>{{ school.headmaster.response_rate }}</td>
+            <td>{{ school.teacher_attendance }}</td>
+            <td>{{ school.student_attendance }}</td>
+            <td>{{ school.water_availability }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% include "schools/partials/message_div.html" %}
+{% endblock %}

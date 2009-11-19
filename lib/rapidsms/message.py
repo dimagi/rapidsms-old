@@ -78,14 +78,18 @@ class Message(object):
         """Send the given text back to the original caller of this
            message on the same route that it came in on"""
         if self.connection:
-            response = copy.copy(self)
-            response.text = text
-            response.status = status
+            response = self.get_response(text, status)
             self.responses.append(response)
             return True
         else: 
             return False
 
+    def get_response(self, text, status):
+        response = copy.copy(self)
+        response.text = text
+        response.status = status
+        return response
+            
     def forward (self, identity, text=None):
         if self.connection:
             target = self.connection.fork(identity)
@@ -108,6 +112,8 @@ class EmailMessage(Message):
         self.subject = subject
         self.mime_type = mime_type
         
-        
-                
+    def get_response(self, text, status):
+        response = Message.get_response(self, text, status)
+        response.subject = "re: %s" % self.subject
+        return response
     

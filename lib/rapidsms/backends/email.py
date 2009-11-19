@@ -10,37 +10,24 @@ import imaplib
 import time
 import smtplib
 import re
+import Queue
+
 
 from datetime import datetime
 from email import message_from_string
 from email.mime.text import MIMEText
 
 class Backend(backend.Backend):
-    '''Uses the django mail object utilities to send outgoing messages
-       via email.  Messages can be formatted in standard smtp, and these
-       parameters will end up going into the subject/to/from of the
-       email.  E.g.
-       ==
+    '''Backend to interact with email.  Link this to an smtp and imap account.
+       The account will be polled and every unread message will be sent (the 
+       body) to the router as if it was an SMS.  As soon as messages are found
+       they are marked read.  
        
-       Subject: Test message
-
-       Hello Alice.
-       This is a test message with 5 header fields and 4 lines in the message body.
-       Your friend,
-       Bob
-       
-       ==
-       
-       The following defaults are currently used in place of the expected
-       fields from smtp:
-       
-       From: <configured login>
-       To: <connection identity>
-       Date: <datetime.now()>
-       
+       This backend creates EmailMessage messages, which are an extension of 
+       messages that include a subject and mime_type.  Currently we do not
+       do anything smart with attachments.
     '''
     _title = "Email"
-    _connection = None
     
     def configure(self, smtp_host="localhost", smtp_port=25,  
                   imap_host="localhost", imap_port=143,
@@ -49,31 +36,26 @@ class Backend(backend.Backend):
                   use_tls=True, poll_interval=60):
         # the default information will not work, users need to configure this
         # in their settings
-        
         self.smtp_host = smtp_host
-        self.smtp_port = smtp_port
+        self.smtp_port = int(smtp_port)
         self.imap_host = imap_host
-        self.imap_port = imap_port
+        self.imap_port = int(imap_port)
         self.username = username 
         self.password = password
         self.use_tls = use_tls 
-        self.poll_interval = poll_interval
+        self.poll_interval = int(poll_interval)
         
-    def send(self, email_message):
+    def _send(self, email_message):
         # Create a text/plain message for now
+        # TODO: support html formatted messages?
         msg = MIMEText(email_message.text)
-
         msg['Subject'] = getattr(email_message, "subject", None)
         msg['From'] = self.username 
         msg['To'] = email_message.peer
-        
-        self.debug("sending mail to %s: %s" % (email_message.peer, 
-                                               email_message.text))
+        s = smtplib.SMTP(host=self.smtp_host, port=self.smtp_port)
+        s.ehlo()
         if self.use_tls:
-            s = smtplib.SMTP_SSL(host=self.smtp_host, port=self.smtp_port)
-        else:
-            s = smtplib.SMTP(host=self.smtp_host, port=self.smtp_port)
-            
+            s.starttls()
         s.login(self.username, self.password)
         s.sendmail(self.username, [email_message.peer], msg.as_string())
         s.quit()
@@ -88,12 +70,22 @@ class Backend(backend.Backend):
 
     
     def run(self):
-        while self._running:
-            # check for new messages
+        while self.running:
+            # check for messages, if we find them, ship them off to the
+            # router and go back to sleep
             messages = self._get_new_messages()
             if messages:
                 for message in messages:
                     self.router.send(message)
+                    
+            # also process all outbound messages
+            while True:
+                try:
+                    self._send(self._queue.get_nowait())
+                except Queue.Empty:
+                    # break out of while
+                    break
+                
             time.sleep(self.poll_interval)
             
     def _get_new_messages(self):
@@ -119,11 +111,20 @@ class Backend(backend.Backend):
         """From an IMAP message object, get a rapidsms message object"""
         parsed = message_from_string(imap_mail)
         from_user = parsed["From"] 
+        # if the from format was something like:
+        # "Bob User" <bob@users.com>
+        # just pull out the relevant address part.
+        match = re.match(r".*<(.*@.*\..*)>", from_user) 
+        if match:
+            new_addr = match.groups()[0]
+            self.debug("converting %s to %s" % (from_user, new_addr))
+            from_user = new_addr
+            
         subject = parsed["Subject"]
         date_string = parsed["Date"]
-        # until we figure out how to generically parse dates, just use
-        # the current time
-        # truncated_date = date_string[0:len(date_string) - 12]
+        # TODO: until we figure out how to generically parse dates, just use
+        # the current time.  This appears to be the standard date format, but
+        # currently timezone information is optional.
         # date = datetime.strptime(truncated_date, "%a, %d %b %Y %H:%M:%S")
         date = datetime.now()
         connection = Connection(self, from_user)
@@ -139,11 +140,11 @@ class Backend(backend.Backend):
 
 def is_plaintext(email_message):
     """Whether a message is plaintext"""
-    return re.match("text/plain", email_message.get_content_type(), re.IGNORECASE)
+    return re.match(r"^text/plain", email_message.get_content_type(), re.IGNORECASE)
 
 def is_text(email_message):
     """Whether a message is text"""
-    return re.match("text/*", email_message.get_content_type(), re.IGNORECASE)
+    return re.match(r"^text/.*", email_message.get_content_type(), re.IGNORECASE)
 
 def get_message_body(email_message):
     """Walk through the message parts, taking the first text/plain.
@@ -154,7 +155,7 @@ def get_message_body(email_message):
         for message_part in email_message.walk():
             if is_plaintext(message_part):
                 return message_part
-            elif is_text(message_part):
+            elif is_text(message_part) and candidate is not None:
                 candidate = message_part
     else:
         # we don't really have a choice here

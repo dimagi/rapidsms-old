@@ -11,7 +11,7 @@ import form.app as form_app
 from weltel.formslogic import WeltelFormsLogic
 from weltel.app import SAWA_CODE, SHIDA_CODE
 
-class TestApp (TestScript):
+class TestSMS (TestScript):
     apps = (logger_app.App, reporters_app.App, form_app.App, scheduler_app.App, weltel_app.App )
     
     def setUp(self):
@@ -156,86 +156,5 @@ class TestApp (TestScript):
         # We should also test what happens to the shida report
         # after 'unsubscribe' and 'inactive' 
         # (once we get clarification from ana)
-    
-    def test_mambo(self):
-        wfl = WeltelFormsLogic()
-        backend = PersistantBackend.objects.get_or_create(slug=self.backend.slug)[0]
-        patient, response = wfl.get_or_create_patient("tst/8", \
-                                                      phone_number="1250", \
-                                                      backend=backend, 
-                                                      gender="f", 
-                                                      date_registered=datetime.now())
-        schedule = EventSchedule(callback="weltel.callbacks.send_mambo", \
-                                 minutes='*', callback_args=[patient.id] )
-        schedule.save()
-        # speedup the scheduler so that 1 second == 1 minute
-        self.router.start()
-        self.router.get_app('scheduler').schedule_thread._debug_speedup(minutes=1)
-        time.sleep(3.0)
-        script = """
-            1250 < Mambo?
-            1250 < Mambo?
-            1250 < Mambo?
-        """
-        self.runScript(script)
-        self.router.stop()
-        schedule.delete()
-        
-    def test_automatic_deregistration(self):
-        # create patient
-        wfl = WeltelFormsLogic()
-        backend = PersistantBackend.objects.get_or_create(slug=self.backend.slug)[0]
-        delta = timedelta(weeks=3)
-        registered = datetime.now() - delta
-        patient, response = wfl.get_or_create_patient("tst/9", \
-                                                      phone_number="1251", \
-                                                      backend=backend, 
-                                                      gender="m", 
-                                                      date_registered=registered)
-        # setup timeout after one week
-        schedule = EventSchedule(callback="weltel.callbacks.automatic_deregistration", \
-                                 days_of_week='*', hours='*', minutes='*', callback_args=[1] )
-        schedule.save()
-        self.router.start()
-        # speedup the scheduler so that 1 second == 7 days
-        self.router.get_app('scheduler').schedule_thread._debug_speedup(days=7)
 
-        # test tst/9 is inactive
-        time.sleep(3.0)
-        updated_patient = Patient.objects.get(id=patient.id)
-        self.assertTrue(updated_patient.active==False)
-
-        # reactivate
-        patient.register_event(SAWA_CODE)
-        time.sleep(1.0)
-        updated_patient = Patient.objects.get(id=patient.id)
-        self.assertTrue(updated_patient.active==True)
-        
-        #wrap up
-        self.router.stop()
-        schedule.delete()
-            
-    def test_shida_report(self):
-        wfl = WeltelFormsLogic()
-        backend = PersistantBackend.objects.get_or_create(slug=self.backend.slug)[0]
-        nurse, response = wfl.get_or_create_nurse(site_code="tst", \
-                                                  phone_number="1252", \
-                                                  backend=backend)
-        # timeout after one week
-        schedule = EventSchedule(callback="weltel.callbacks.shida_report", \
-                                 minutes='*')
-        schedule.save()
-        # speedup the scheduler so that 1 second == 7 days
-        self.router.start()
-        self.router.get_app('scheduler').schedule_thread._debug_speedup(minutes=1)
-        time.sleep(1.0)
-        # test regular report
-        script = """
-            1252 < No problem patients
-        """
-        self.runScript(script)
-        
-        # wrap up
-        self.router.stop()
-        schedule.delete()
         

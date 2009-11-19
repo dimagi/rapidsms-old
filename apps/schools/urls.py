@@ -9,6 +9,10 @@ import schools.views as views
 urlpatterns = patterns('',
     url(r'^schools/?$', views.schools),
     url(r'^schools/map/?$', views.map),
-    url(r'^schools/xml/?$', views.xml)
+    url(r'^schools/xml/?$', views.xml),
+    url(r'^schools/headmasters/?$', views.headmasters),
+    url(r'^schools/(?P<id>\d*)/?$', "schools.views.single_school", name="single_school"),
+    url(r'^schools/message/(?P<id>\d*)/?$', views.message),
+    
 )
 
