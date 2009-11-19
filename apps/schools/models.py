@@ -26,7 +26,8 @@ class School(models.Model,SerializableModel):
              "StudentAttendance": "student_attendance",
              "BoysAttendance": "boys_attendance",
              "GirlsAttendance": "girls_attendance",
-             "WaterAvailability": "water_availability"
+             "WaterAvailability": "water_availability",
+             "ResponseRate": "response_rate"
               }
         
     latitude  = models.DecimalField(max_digits=8, decimal_places=6, 
