@@ -66,7 +66,7 @@ class App (rapidsms.app.App):
         """Handles teacher attendance"""
         headmaster = self.get_headmaster_or_respond(msg)
         if headmaster:
-            if msg.text.isdigit():
+            if msg.text.strip().isdigit():
                 teacher_count = int(msg.text)
                 school = headmaster.school
                 SchoolTeacherReport.objects.create(reporter=headmaster,
