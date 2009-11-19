@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 import math
 import random
@@ -10,7 +10,6 @@ from django.db import models
 
 from reporters.models import Reporter
 from schools.xml import SerializableModel
-
 
 class School(models.Model,SerializableModel):
     """A basic model for a school."""
@@ -27,7 +26,8 @@ class School(models.Model,SerializableModel):
              "StudentAttendance": "student_attendance",
              "BoysAttendance": "boys_attendance",
              "GirlsAttendance": "girls_attendance",
-             "WaterAvailability": "water_availability"
+             "WaterAvailability": "water_availability",
+             "ResponseRate": "response_rate"
               }
         
     latitude  = models.DecimalField(max_digits=8, decimal_places=6, 
@@ -55,34 +55,72 @@ class School(models.Model,SerializableModel):
             return Headmaster.objects.filter(school=self)[0]
     
     @property
+    def response_rate(self):
+        """Get response rate for this schools headmaster."""
+        headmaster = self.headmaster
+        if headmaster:
+            # too lazy to clean the circular imports now
+            from blaster.models import BlastResponse, BlastedMessage
+            success = BlastResponse.\
+                        objects.filter(message__reporter=headmaster,
+                                       success=True).count()
+            tried = BlastedMessage.\
+                        objects.filter(reporter=headmaster).count()
+            if tried != 0:
+                return success/tried
+        return "No data"
+        
+    @property
     def teacher_attendance(self):
         """Get total teacher attendance rate"""
-        #todo
-        return random.randint(0, 100)
-    
+        reports = SchoolTeacherReport.objects.filter(school=self)
+        if not reports: return "No data"
+        return self._percent_expected_actual(reports)
+        
     @property
     def student_attendance(self):
         """Get total student attendance rate"""
-        #todo
-        return random.randint(0, 100)
+        boys_reports = BoysAttendenceReport.objects.filter(grade__school=self)
+        girls_reports = GirlsAttendenceReport.objects.filter(grade__school=self)
+        if not boys_reports and not girls_reports: return "No data"
+        return self._percent_expected_actual(boys_reports, girls_reports)
     
     @property
     def boys_attendance(self):
         """Get total boys attendance rate"""
-        #todo
-        return random.randint(0, 100)
+        reports = BoysAttendenceReport.objects.filter(grade__school=self)
+        if not reports: return "No data"
+        return self._percent_expected_actual(reports)
+    
     
     @property
     def girls_attendance(self):
         """Get total girls attendance rate"""
-        #todo
-        return random.randint(0, 100)
-    
+        reports = GirlsAttendenceReport.objects.filter(grade__school=self)
+        if not reports: return "No data"
+        return self._percent_expected_actual(reports)
+        
     @property
     def water_availability(self):
         """Get total girls attendance rate"""
-        #todo
-        return random.randint(0, 100)
+        reports = SchoolWaterReport.objects.filter(school=self)
+        if not reports: return "No data"
+        return self._percent_expected_actual(reports)
+        
+    
+    def _percent_expected_actual(self, *args):
+        expected = 0
+        actual = 0
+        for arg in args:
+            print arg
+            expected = expected + sum([report.expected for report in arg])
+            actual = actual + sum([report.actual for report in arg])
+        if expected != 0:
+            print "%s / %s" % (actual, expected)
+            return actual / expected * 100
+        else:
+            return "Error, divide by 0?"
+        
             
 class Headmaster(Reporter):
     """A headmaster of a school"""
@@ -98,7 +136,9 @@ class Grade(models.Model):
     year = models.PositiveIntegerField(help_text="1-12")
     boys = models.PositiveIntegerField(help_text="Number of boys in the class")
     girls = models.PositiveIntegerField(help_text="Number of girls in the class")
-
+    
+    def __unicode__(self):
+        return "%s - Grade %s" % (self.school, self.year)
 
 class Report(models.Model):
     """A reporting of some information"""
@@ -121,11 +161,24 @@ class SchoolTeacherReport(Report):
             return self.actual / self.expected
         return "N/A"
         
+    def __unicode__(self):
+        return "%s of %s teachers at %s" % (self.actual, self.expected, self.school)
     
 class SchoolWaterReport(Report):
     """Report of school water information on a particular day"""
     school = models.ForeignKey(School)
     water_working = models.BooleanField()
+    
+    @property
+    def expected(self):
+        # allows us to fake treat these like everything else
+        return 100
+    
+    @property
+    def actual(self):
+        # allows us to fake treat these like everything else
+        return 100 if self.water_working else 0
+    
     
 class BoysAttendenceReport(Report):
     """Report of grade/classroom attendance on a particular day"""
