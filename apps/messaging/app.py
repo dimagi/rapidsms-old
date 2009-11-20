@@ -67,7 +67,7 @@ class App (rapidsms.app.App):
         # abort if we don't know where to send the message to
         # (if the device the reporter registed with has been
         # taken by someone else, or was created in the WebUI)
-        pconn = rep.connection()
+        pconn = rep.connection
         if pconn is None:
             raise Exception("%s is unreachable (no connection)" % rep)
 

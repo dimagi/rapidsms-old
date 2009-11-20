@@ -1,0 +1,73 @@
+{% extends "schools/school_base.html" %}
+{% block javascripts %}
+    <script type="text/javascript" src="/static/schools/javascripts/jqModal.js"></script>
+    <script type="text/javascript" src="/static/schools/javascripts/jquery.blockUI.js"></script>
+    <script type="text/javascript" src="/static/schools/javascripts/message.js"></script>
+{% endblock %}
+{% block pagecontent %}
+<h1>{{ school.name }}</h1>
+{% if school.headmaster %}
+<p><span class="prompt">Headmaster: </span><span class="prompt_value">{{ school.headmaster }}</span></p>
+<div class="messagetrigger js_link" onclick="new_message({{school.headmaster.id}}, '#dialog');">send a message </div>
+<br>
+{% else %}
+<p><b>No Headmasters Registered</b></p>
+{% endif %}
+<h2>Summary Data</h2>
+<table>
+    <thead>
+        <th>Item</th>
+        <th>Value</th>
+        <th>Submitted</th>
+        <th>Submitted By</th>
+        <th>Overall %</th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Teacher Attendance</td>
+        {% if teacher_attendance %}
+            {# we assume the list is sorted, descending #}
+            {% with teacher_attendance.0 as most_recent %}
+            <td>{{ most_recent.percent }}% ({{ most_recent.actual }} / {{ most_recent.estimated }})</td>
+            <td>{{ most_recent.date }}</td>
+            <td>{{ most_recent.reporter }}</td>
+            <td>{{ school.teacher_attendance }}</td>
+            {% endwith %}
+        {% else %}
+            <td colspan=4 class="no_data">No attendance records found</td>
+        {% endif %}
+        </tr>
+        <tr>
+            <td>Student Attendance</td>
+        {% if student_attendance %}
+            {# we assume the list is sorted, descending #}
+            {% with student_attendance.0 as most_recent %}
+            <td>{{ most_recent.percent }}% ({{ most_recent.actual }} / {{ most_recent.estimated }})</td>
+            <td>{{ most_recent.date }}</td>
+            <td>{{ most_recent.reporter }}</td>
+            <td>{{ school.student_attendance }}</td>
+            {% endwith %}
+        {% else %}
+            <td colspan=4 class="no_data">No attendance records found</td>
+        {% endif %}
+        </tr>
+        <tr>
+            <td>Water Availablility</td>
+        {% if water_availability %}
+            {# we assume the list is sorted, descending #}
+            {% with water_availability.0 as most_recent %}
+            <td>{{ most_recent.percent }}% ({{ most_recent.actual }} / {{ most_recent.estimated }})</td>
+            <td>{{ most_recent.date }}</td>
+            <td>{{ most_recent.reporter }}</td>
+            <td>{{ school.water_availability }}</td>
+            {% endwith %}
+        {% else %}
+            <td colspan=4 class="no_data">No water records found</td>
+        {% endif %}
+        </tr>
+        
+        </tr>
+    </tbody>
+</table>
+{% include "schools/partials/message_div.html" %}
+{% endblock %}
