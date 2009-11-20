@@ -152,6 +152,7 @@ class App (rapidsms.app.App):
         else:                        
             msg.respond("Sorry, %s, we couldn't understand that. Please send either 'yes' or 'no'." %\
                         headmaster)
+            return
         SchoolWaterReport.objects.create(reporter=headmaster,
                                          date=msg.date,
                                          school=headmaster.school,
