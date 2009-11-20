@@ -3,20 +3,26 @@
     color:red;
 }
 
+
 /* the status of folks from the blaster */
 .pending {
-    background-color:#FEFFBD;
+    background-color: #eeeeee;
 }
 
 .failed {
-    background-color:#FFC5C5;
+    color: #333333;
+    background-color: red;
 }
-
 .success {
-    background-color:#E0FFE3;
+	background:#ccff99;
+	border-color:#C6D880;
 }
 
 /* end status */
+
+td .date {
+    font-size: .5em;
+}
 
 .prompt_value {
     font-weight:bold;
@@ -62,13 +68,85 @@
 /*************** DASHBOARD STUFF ***************/
 
 .dashboard-module {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
     position:relative;
-    min-height:200px;	
+    min-height:200px;
+    background-color: #EEE; 
 }
 .dashboard-link {
+    padding-right: 10px;
     position:absolute; 
     bottom: 0;
     right: 0; 
     text-align:right;
 }
 
+#map {
+    background-color:white; 
+}
+.school-reports, .global-stats { 
+    line-height: 1.5em; 
+    list-style-type: square;
+}
+
+.school-reports, .global-stats li { 
+    padding-bottom: 3px; 
+    padding-top: 3px; 
+}
+
+
+/* END DASHBOARD */
+
+/* these were modified in screen.css of the blueprint */
+
+/* custom headings */
+
+h2, h3 {
+    border-bottom-color: #cccccc;
+    border-left-style: solid;
+    border-right-style: solid;
+    border-top-style: solid;
+    border-left-color: #cccccc;
+    border-right-color: #cccccc;
+    border-top-color: #cccccc;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    background: url(../images/h2-bg.png) repeat-x;
+    border-bottom: 1px solid;
+    color: #999999;
+}
+
+h2 {
+    color: white; 
+    background-color: #333333; 
+    padding: 10px; 
+    border-color: #999999; 
+    border-style: solid; 
+    border-width: 1px;
+    margin-bottom: 0.25em;
+}
+
+
+body 
+{
+    font-size: 75%;
+    background-color: #eeeeee;
+}
+
+#inner {
+	background-color:white;
+	width: 970px;
+}
+
+/* These don't appear to be doing much so commenting them out */
+/*
+input.span-1, textarea.span-1, input.span-2, textarea.span-2, input.span-3, textarea.span-3, input.span-4, textarea.span-4, input.span-5, textarea.span-5, input.span-6, textarea.span-6, input.span-7, textarea.span-7, input.span-8, textarea.span-8, input.span-9, textarea.span-9, input.span-10, textarea.span-10, input.span-11, textarea.span-11, input.span-12, textarea.span-12, input.span-13, textarea.span-13, input.span-14, textarea.span-14, input.span-15, textarea.span-15, input.span-16, textarea.span-16, input.span-17, textarea.span-17, input.span-18, textarea.span-18, input.span-19, textarea.span-19, input.span-20, textarea.span-20, input.span-21, textarea.span-21, input.span-22, textarea.span-22, input.span-23, textarea.span-23, input.span-24, textarea.span-24 {border-left-width:1px!important;border-right-width:1px!important;padding-left:5px!important;padding-right:5px!important;}
+
+div.border { border-right-style: none; padding-right:4px;margin-right:5px;}
+div.colborder { border-right-style: none; padding-right:24px;margin-right:25px;}
+
+.box {padding:1.5em;margin-bottom:1.5em;background:#ccffff;}
+*/

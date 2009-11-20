@@ -1,9 +1,9 @@
 {% extends "schools/school_base.html" %}
 {% block page_stylesheets %}
-    <link type="text/css" rel="stylesheet" href="/static/schools/stylesheets/styles.css" />
     <link rel="stylesheet" href="/static/schools/stylesheets/blueprint/screen.css" type="text/css" media="screen, projection">
-    <link rel="stylesheet" href="/static/schools/stylesheets/blueprint/print.css" type="text/css" media="print">    
+    <link rel="stylesheet" href="/static/schools/stylesheets/blueprint/print.css" type="text/css" media="print">
 <!--[if lt IE 8]><link rel="stylesheet" href="css/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
+    <link type="text/css" rel="stylesheet" href="/static/schools/stylesheets/styles.css" />
 {% endblock %}
 {% block pagecontent %}
     <div class="container showgrid">
@@ -14,7 +14,7 @@
            <p style="text-align:right;">Monday, November 23, 2009</p>
       </div>
       <hr>
-      <div class="span-8 border">
+      <div class="span-8">
         <div class="dashboard-module">
             <h2>Latest School Reports</h2>
             <ul class="school-reports">
@@ -25,7 +25,7 @@
             <a class="dashboard-link" href="#">see all</a>
         </div>
       </div>
-      <div class="span-8 border">
+      <div class="span-8">
         <div class="dashboard-module">
             <h2>Today's Stats</h2>
             <ul class="global-stats">
@@ -51,11 +51,10 @@
             <a class="dashboard-link" href="#">view all stats</a>
         </div>
       </div>
-      <hr>
       <div class="span-16">
+            <div class="dashboard-module" id="map">
             <h2>Schools Reporting Problems</h2>
-            <div id="map">
-        `     <!--<embed map here>-->
+              <!--<embed map here>-->
               <div id="map_canvas" name="map_canvas">
                 <object
                     classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
@@ -93,6 +92,8 @@
         </div>
       </div>
       <div class="span-12">
+          <div class="dashboard-module">
+        
       <h2>Recent Questions</h2>
 <table>
     <thead>
@@ -162,7 +163,7 @@
     </tbody>
 </table>
 
-      
+           </div>
       </div>
       <div class="span-12 last">
         <div class="dashboard-module">
