@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import os, random, re
+from datetime import datetime, timedelta
 from xml.etree import ElementTree
 
 from django.core.management.commands.dumpdata import Command
@@ -9,12 +10,56 @@ from rapidsms.tests.scripted import TestScript
 
 from schools.app import App
 from schools.models import *
+from blaster.models import *
+
+# Got these from http://en.wikipedia.org/wiki/Districts_and_Regions_of_Uganda
+# and http://babynamesworld.parentsconnect.com/category-ugandan-names.html
+SCHOOL_AND_LAST_NAMES = \
+    ["Abbo","Adroa","Akiiki","Akiki","Balondemu","Bitek","Gwandoya","Kadokechi","Kigongo",
+     "Kissa","Kizza","Kyoga","Lutalo","Luzige","Madongo","Magomu","Mangeni","Masani",
+     "Mulogo","Munanire","Munyiga","Musoke","Nabirye","Nabulungi","Najja","Nakisisa","Namono",
+     "Nasiche","Ogwambi","Ojore","Okello","Taban","Wemusa","Wesesa","Zesiro","Zilabamuzale",
+     "Kalangala","Kampala","Kayunga","Kiboga","Luwero","Lyantonde","Masaka","Mityana","Mpigi",
+     "Mubende","Mukono","Nakaseke","Nakasongola","Rakai","Sembabule","Wakiso","Amuria","Budaka",
+     "Bududa","Bugiri","Bukedea","Bukwa","Busia","Butaleja","Iganga","Jinja","Kaberamaido",
+     "Kaliro","Kamuli","Kapchorwa","Katakwi","Kumi","Manafwa","Mayuge","Mbale","Namutumba",
+     "Pallisa","Sironko","Soroti","Tororo","Abim","Adjumani","Amolatar","Amuru","Apac","Arua",
+     "Dokolo","Gulu","Kaabong","Kitgum","Koboko","Kotido","Lira","Moroto","Moyo","Nakapiripirit",
+     "Nebbi","Nyadri","Oyam","Pader","Yumbe","Bulisa","Bundibugyo","Bushenyi","Hoima","Ibanda",
+     "Isingiro","Kabale","Kabarole","Kamwenge","Kanungu","Kasese","Kibale","Kiruhura","Kisoro",
+     "Kyenjojo","Masindi","Mbarara","Ntungamo","Rukungirie"]
+
+# Got these from http://www.studentsoftheworld.info/penpals/stats.php3?Pays=UGA
+FIRST_NAMES = \
+    ["Sharon","Joseph","Martha","John","Maureen","Alex","Sarah","James","Faith","Moses","Grace",
+     "Henry","Esther","Patrick","Brenda","Julius","Gloria","David","Joan","Charles","Mercy",
+     "Peter","Mary","Okello","Ruth","Ronald","Juliet","Micheal","Vicky","Jude","Ritah","Paul",
+     "Florence","Isaac","Hellen","Brian","Diana","Emma","Racheal","Mark","Pearl","Solomon",
+     "Prossy","Lawrence","Rachel","George","Annet","Richard","Doreen","Jack","Winnie","Denis",
+     "Sylvia","Fred","Angel","Michael","Jackie","Robert","Cathy","Pius","Hope","Stephen",
+     "Lydia","Andrew","Pauline","Eric","Lilian","Kenneth","Nabukenya","Williams","Linda",
+     "Francis","Julie","Evans","Natasha","Joshua","Claire","Arthur","Annie","Ronnie",
+     "Christine","Ivan","Stella","Tonny","Betty","Daniel","Viola","Tom","Patience","Kaggwa",
+     "Keisha","Edward","Ciara","Kalungi","Sandra","Frank","Patricia","Jimmy","Lisa","Ben",
+     "Carol","Eddy","Freda","Ambrose","Remmy","Christopher","Becky","Edgar","Anna","Hakim",
+     "Marion","Derrick","Peace","Alfred","Clare","Marvin","Debbie","Matovu","Namutebi",
+     "Nicholas","Joy","Abdul","Miriam","Allan","Kevin","Mukasa","Rebecca","Okot","Barbara",
+     "Kyagaba","Dina","Joel","Bridget","Samuel","Karen","Mwesigwa","Pamella","Jonathan",
+     "Joanne","Ssali","Sweetie","Bukenya","Jasmine","Martin","Beyonce","Phillip","Evelyne",
+     "Nelly","Vivian","Benjamin","Dorah","Victor","Desire","Kimera","Jojo","Ssebulime",
+     "Flavia","Lutaaya","Nicole","Mbabaali","Immaculate","Kato","Jennifer","Angwella","Olivia",
+     "Ntambi","Barbie","Walter","Judith","Vincent","Iryn","Amos","Shannie","Timothy","Juliana",
+     "Semi","Jovia","Sunday","Ann","Trevor","Paula","Wasswa","Nakirya","Innocent","Irene",
+     "Arnold","Anita","Sammy","Mimi","Mathias","Pretty","Bob","Clara","Gerald","Angella","Otia",
+     "Mbabazi","Mayanja","Leah","Tadeo"]
+
+SCHOOL_TYPES = ["Primary", "Secondary"]
 
 class TestApp (TestScript):
     apps = (App,)
 
     def testSchoolToElement(self):
-        school = self._new_school("Test School")
+        school = self._new_school()
         elem = school.to_element()
         expected = '<School latitude="%s" longitude="%s"><Name>%s</Name><Teachers>%s</Teachers></School>' %\
                     (school.latitude, school.longitude, school.name, school.teachers)
@@ -24,21 +69,35 @@ class TestApp (TestScript):
     
         
     def testGenerateData(self):
+        
+        self._create_message_blasts()
+        blasts = MessageBlast.objects.all()
         for i in range(100):
-            school = self._new_school("Demo School %s" % i)
+            school = self._new_school()
+            headmaster = self._new_headmaster(school)
+            # these go to everyone
+            for blast in blasts:
+                BlastedMessage.objects.create(blast=blast,reporter=headmaster)
+            to_populate = random.random() 
+            if to_populate < .95:
+                self._populate_data(school, headmaster)
+            
+            
+        self._dumpdata()
+    
+    def _dumpdata(self):
         dumpdata = Command()
         filename = os.path.abspath(os.path.join(os.path.dirname(__file__),"test_schools.json"))
         options = { "indent" : 2 }
-        datadump = dumpdata.handle("schools", **options)
-        # uncomment these lines to save the fixture
-        # file = open(filename, "w")
-        # file.write(datadump)
-        # file.close()
-        # print "=== Successfully wrote fixtures to %s ===" % filename
+        datadump = dumpdata.handle("schools","reporters", "blaster", **options)
+        file = open(filename, "w")
+        file.write(datadump)
+        file.close()
+        print "=== Successfully wrote fixtures to %s ===" % filename
         
     
         
-    def _new_school(self, name):
+    def _new_school(self):
         # estimate the rough boundaries of Uganda
         min_lat = -0.964005
         max_lat = 3.699819
@@ -46,9 +105,10 @@ class TestApp (TestScript):
         max_lon = 34.727783
         min_students = 5
         max_students = 35
+        name = "%s %s" % (random.choice(SCHOOL_AND_LAST_NAMES), random.choice(SCHOOL_TYPES))
         lat = random.uniform(min_lat, max_lat)
         lon = random.uniform(min_lon, max_lon)
-        teachers = random.randint(0,100)
+        teachers = random.randint(3,20)
         school = School.objects.create(latitude=str(lat), longitude=str(lon), 
                                        teachers=teachers, name=name)
         for year in range(1,13):
@@ -57,3 +117,85 @@ class TestApp (TestScript):
             Grade.objects.create(school=school,year=year,
                                  girls=girls,boys=boys)
         return school
+        
+    def _new_headmaster(self, school):
+        # create a headmaster 
+        firstname = random.choice(FIRST_NAMES)
+        lastname = random.choice(SCHOOL_AND_LAST_NAMES)
+        alias = Reporter.parse_name("%s %s" % (firstname, lastname))[0]
+        return Headmaster.objects.create(school=school,first_name=firstname,
+                                         last_name = lastname,alias=alias)
+        
+        
+    def _populate_data(self, school, headmaster):
+        """Poplate a single report of each type"""
+        now = datetime.now()
+        # report time anywhere from 2 weeks ago to 2 days from now
+        offset = random.randint(-2, 14)
+        date = now + timedelta(days=offset)
+        
+        # each thing has a 90% chance of having a response
+        if random.random() < .90:
+            # say the water is 95% working
+            water = False if random.random() > .95 else True
+            SchoolWaterReport.objects.create(reporter=headmaster,
+                                             date=date,
+                                             school=school,
+                                             water_working=water)
+            message = BlastedMessage.objects.get(reporter=headmaster,
+                                                 blast=self.WATER_BLAST)
+            text = "yes" if water else "no"
+            BlastResponse.objects.create(date=now,text=text, 
+                                         message=message,success=True)
+            
+        if random.random() < .90:
+            teachers = self._get_scaled_int(school.teachers,.95)
+            SchoolTeacherReport.objects.create(reporter=headmaster,
+                                           date=date,
+                                           school=school,
+                                           expected=school.teachers,
+                                           actual=teachers)
+            
+            message = BlastedMessage.objects.get(reporter=headmaster,
+                                                 blast=self.TEACHER_BLAST)
+            BlastResponse.objects.create(date=now,text=str(teachers), 
+                                         message=message,success=True)
+        for grade in school.classes.all():
+            if random.random() < .90:
+                girls = self._get_scaled_int(grade.girls,.92)
+                GirlsAttendenceReport.objects.create(reporter=headmaster,
+                                                 date=date,
+                                                 grade=grade,
+                                                 expected=grade.girls,
+                                                 actual=girls)
+            if random.random() < .90:
+                boys = self._get_scaled_int(grade.boys,.92)
+                BoysAttendenceReport.objects.create(reporter=headmaster,
+                                                date=date,
+                                                grade=grade,
+                                                expected=grade.boys,
+                                                actual=boys)
+                
+        
+    def _get_scaled_int(self, value, likelihood):
+        """Treats value as a set of unique occurrences, each of which has
+           likelihood percent chance of being true.  Returns a random number
+           probabilistically = to one iteration of the values happening.  If
+           likelihood = 0, returns 0, if likelihood = 1 returns value"""
+        count = 0
+        for i in range(value):
+            if random.random() < likelihood:
+                count += 1
+        return count
+    
+    def _create_message_blasts(self):
+        questions = [1,2]
+        now = datetime.now()
+        blasts = []
+        for question_id in questions:
+            question = BlastableMessage.objects.get(id=question_id)
+            blasts.append(MessageBlast.objects.create(message=question,date=now))
+        self.WATER_BLAST = blasts[0]
+        self.TEACHER_BLAST = blasts[1]
+        
+        
