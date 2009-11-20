@@ -67,7 +67,7 @@ class School(models.Model,SerializableModel):
             tried = BlastedMessage.\
                         objects.filter(reporter=headmaster).count()
             if tried != 0:
-                return success/tried
+                return success/tried * 100
         return "No data"
         
     @property
