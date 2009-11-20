@@ -112,11 +112,9 @@ class School(models.Model,SerializableModel):
         expected = 0
         actual = 0
         for arg in args:
-            print arg
             expected = expected + sum([report.expected for report in arg])
             actual = actual + sum([report.actual for report in arg])
         if expected != 0:
-            print "%s / %s" % (actual, expected)
             return actual / expected * 100
         else:
             return "Error, divide by 0?"
