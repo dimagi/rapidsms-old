@@ -150,3 +150,62 @@ div.colborder { border-right-style: none; padding-right:24px;margin-right:25px;}
 
 .box {padding:1.5em;margin-bottom:1.5em;background:#ccffff;}
 */
+
+/* these are the buttons on the maps */
+#buttons ul li {
+    color: #999999;
+    cursor:pointer;
+    font-size: 17px;
+    border-color: #cccccc;
+    border-style: solid;
+    margin-bottom: 10px;
+    border-width: 1px;
+    padding-right: 25px;
+    padding-left: 75px;
+    padding-bottom: 20px;
+    padding-top: 20px;
+    list-style-type: none;   
+    min-height:25px;
+}
+
+#water_availability li {
+    
+    background: url(../images/water_64.png) no-repeat center left;
+}
+
+
+#teacher_attendance li {
+    
+    background: url(../images/teachers_64.png) no-repeat center left;
+}
+
+#boys_attendance li {
+    
+    background: url(../images/boys_64.png) no-repeat center left;
+}
+
+#girls_attendance li {
+    background: url(../images/girls_64.png) no-repeat center left;
+}
+
+#slogan{
+}
+
+.slogan{
+    padding-left: 30px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+    margin-right: 10px;
+    margin-top: 0px;
+    padding-top: 20px;
+    line-height: 40px;
+    border-style: solid;
+    border-color: #cccccc;
+    border-width: 1px;
+    height: 60px;
+    background: left;
+    font-size: 40px;
+    color: #999999;
+}
+
+

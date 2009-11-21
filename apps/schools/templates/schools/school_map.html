@@ -7,25 +7,18 @@
 {% endblock %}
 {% block pagecontent %}
         <div id="slogan">
-            <p class="slogan">Visualizing the Data</p>
+            <p class="slogan">Mapping the Data</p>
         </div><!--End Slogan--> 
 
         <div id="one_third">
             <div id="buttons">
 		    <ul>
-    			<li><div class="js_link" onclick="javascript:trigger('ResponseRate')">Response Rate</div></li>
-			<li><div class="js_link" onclick="javascript:trigger('TeacherAttendance')">Teachers Attendence</div></li>
-			<li><div class="js_link" onclick="javascript:trigger('BoysAttendance')">Boys Attendence</div></li>
-			<li><div class="js_link" onclick="javascript:trigger('GirlsAttendance')">Girls Attendence</div></li>
-			<li><div class="js_link" onclick="javascript:trigger('WaterAvailability')">Water Availability</div></li>
-                </ul>
-            </div>
-            <p class="grayText">Visualize this data in charts or spreadsheets</p>
-            <div class="one_sixth">
-                <a href="#">Charts</a>
-            </div>
-            <div id="right" class="one_sixth">
-                <a href="#">Spreadsheets</a>
+    			<div id="response_rate" onclick="javascript:trigger('ResponseRate')"><li>Response Rate</div></li>
+			    <div id="teacher_attendance" onclick="javascript:trigger('TeacherAttendance')"><li>Teachers Attendence</li></div>
+			    <div id="boys_attendance" onclick="javascript:trigger('BoysAttendance')"><li>Boys Attendence</li></div>
+			    <div id="girls_attendance" onclick="javascript:trigger('GirlsAttendance')"><li>Girls Attendence</li></div>
+			    <div id="water_availability" onclick="javascript:trigger('WaterAvailability')"><li>Water Availability</li></div>
+            </ul>
             </div>
         </div><!--End 1/3-->
         
