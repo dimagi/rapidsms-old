@@ -14,7 +14,7 @@
     background-color: red;
 }
 .success {
-	background:#ccff99;
+	background:#C1FFC0;
 	border-color:#C6D880;
 }
 
@@ -139,6 +139,12 @@ body
 #inner {
 	background-color:white;
 	width: 970px;
+}
+
+thead th 
+{
+    background-color: #999999;
+    color: white;
 }
 
 /* These don't appear to be doing much so commenting them out */
