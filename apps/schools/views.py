@@ -8,10 +8,17 @@ from django.shortcuts import get_object_or_404
 from rapidsms.webui.utils import render_to_response
 
 from schools.models import *
-
+from blaster.models import *
 
 def dashboard(req, template_name="schools/dashboard.html"):
-    return render_to_response(req, template_name, { })
+    context = {}
+    recent_blasts = MessageBlast.objects.order_by("-date")[:5]
+    context["recent_blasts"] = recent_blasts
+    if recent_blasts:
+        last_blast = recent_blasts[0]
+        context["last_blast"] = last_blast
+        context["last_blast_recipients"] = last_blast.recipients.all()[:5]
+    return render_to_response(req, template_name, context) 
 
 
 def schools(req, template_name="schools/summary.html"):

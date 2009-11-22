@@ -5,6 +5,7 @@
 <!--[if lt IE 8]><link rel="stylesheet" href="css/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
     <link type="text/css" rel="stylesheet" href="/static/schools/stylesheets/styles.css" />
 {% endblock %}
+{% block title %}Uganda Ministry of Health School Monitoring{% endblock %}
 {% block pagecontent %}
     <div class="container showgrid">
       <div class="span-18">
@@ -95,128 +96,29 @@
           <div class="dashboard-module">
         
       <h2>Recent Questions</h2>
-<table>
-    <thead>
-        <th>Date</th>
-        <th>Text</th>
-        <th>Sent</th>
-        <th>Responded</th>
-    </thead>
-    <tbody>
-    
-        <tr>
-            <td>Nov. 18, 2009 - 3:17 p.m.</td>
-            <td><a href="/blaster/7">Is the school water point currently working?</a></td>
-            <td>3</td>
-
-            <td>1</td>
-        </tr>
-    
-        <tr>
-            <td>Nov. 18, 2009 - 3:15 p.m.</td>
-            <td><a href="/blaster/6">Is the school water point currently working?</a></td>
-            <td>3</td>
-            <td>1</td>
-
-        </tr>
-    
-        <tr>
-            <td>Nov. 18, 2009 - 3:13 p.m.</td>
-            <td><a href="/blaster/5">Is the school water point currently working?</a></td>
-            <td>3</td>
-            <td>0</td>
-        </tr>
-
-    
-        <tr>
-            <td>Nov. 18, 2009 - 3:10 p.m.</td>
-            <td><a href="/blaster/4">How many boys and girls attended P3 today?</a></td>
-            <td>3</td>
-            <td>1</td>
-        </tr>
-    
-        <tr>
-
-            <td>Nov. 18, 2009 - 3:09 p.m.</td>
-            <td><a href="/blaster/3">How many boys and girls attended P2 today?</a></td>
-            <td>3</td>
-            <td>0</td>
-        </tr>
-    
-        <tr>
-            <td>Nov. 18, 2009 - 2:33 p.m.</td>
-
-            <td><a href="/blaster/2">How many teachers were present today?</a></td>
-            <td>3</td>
-            <td>1</td>
-        </tr>
-    
-        <tr>
-            <td>Nov. 18, 2009 - 1:05 p.m.</td>
-            <td><a href="/blaster/1">Is the school water point currently working?</a></td>
-
-            <td>3</td>
-            <td>1</td>
-        </tr>
-    
-    </tbody>
-</table>
-
+      {% if recent_blasts %}
+        {% with recent_blasts as blasts %}
+        {% include "blaster/partials/blast_table.html" %}
+        {% endwith %}
+        <a class="dashboard-link" href="{% url blaster.views.index %}">see all</a>
+      {% else %} 
+        No blasts yet.
+      {% endif %}
            </div>
       </div>
       <div class="span-12 last">
         <div class="dashboard-module">
+        {% if last_blast %}
         <h2>Last Question</h2>
-        <p><span class="prompt">Message: </span><span class="prompt_value">Is the school water point currently working?</span></p>
-        <p><span class="prompt">Sent: </span><span class="prompt_value">Nov. 18, 2009 - 3:17 p.m.</span></p>
-        
-<table>
-
-    <thead>
-        <th>Name</th>
-        <th>School</th>
-        <th>Status</th>
-        <th>Response</th>
-        <th>Date</th>
-
-    </thead>
-    <tbody>
-    
-        <tr class="pending">
-            <td>John Headmaster</td>
-            <td>Demo School 16</td>
-            <td>pending</td>
-            
-            <td>N/A</td>
-
-            <td>N/A</td>
-            
-        </tr>
-    
-        <tr class="success">
-            <td>Cory Web</td>
-            <td>Demo School 10</td>
-            <td>success</td>
-            
-            <td>yessm</td>
-
-            <td>Nov. 18, 2009 - 3:20 p.m.</td>
-            
-        </tr>
-    
-        <tr class="pending">
-            <td>Cory Zue</td>
-            <td>Demo School 0</td>
-            <td>pending</td>
-            
-            <td>N/A</td>
-
-            <td>N/A</td>
-            
-        </tr>
-    
-    </tbody>
-</table>
+        <p><span class="prompt">Message: </span><span class="prompt_value">{{last_blast.message.text }}</span></p>
+        <p><span class="prompt">Sent: </span><span class="prompt_value">{{ last_blast.date|date }} - {{ last_blast.date|time }}</span></p>
+        {% with last_blast_recipients as recipients %}
+        {% include "blaster/partials/blast_recipients.html" %}
+        {% endwith %}
+        <a class="dashboard-link" href="{% url blaster.views.single_blast last_blast.id %}">see all</a>
+        {% else %}
+        No blasts found.
+        {% endif %}
       </div>
     </div>
     
