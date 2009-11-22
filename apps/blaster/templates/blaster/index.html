@@ -1,22 +1,5 @@
 {% extends "blaster/layout.html" %}
 {% block pagecontent %}
 <h2>Messages</h2>
-<table>
-    <thead>
-        <th>Date</th>
-        <th>Text</th>
-        <th># Sent</th>
-        <th># Responded</th>
-    </thead>
-    <tbody>
-    {% for blast in blasts %}
-        <tr>
-            <td>{{ blast.date|date }} - {{ blast.date|time}}</td>
-            <td><a href="{% url blaster.views.single_blast blast.id %}">{{ blast.message.text }}</a></td>
-            <td>{{ blast.recipients.count }}</td>
-            <td>{{ blast.responded|length }}</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+{% include "blaster/partials/blast_table.html" %}
 {% endblock %}
