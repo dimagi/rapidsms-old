@@ -3,8 +3,8 @@
     "pk": 1, 
     "model": "blaster.blastablemessage", 
     "fields": {
-      "text": "How many teachers were present today?", 
-      "handling_method": "teacher_attendance", 
+      "text": "Is the school water point currently working?", 
+      "handling_method": "water_availability", 
       "handling_app": "schools"
     }
   }, 
@@ -12,8 +12,8 @@
     "pk": 2, 
     "model": "blaster.blastablemessage", 
     "fields": {
-      "text": "Is the school water point currently working?", 
-      "handling_method": "water_availability", 
+      "text": "How many teachers were present today?", 
+      "handling_method": "teacher_attendance", 
       "handling_app": "schools"
     }
   }, 
