@@ -20,8 +20,14 @@ def index(req):
     sort_desc_string = "-" if sort_descending else ""
     search_string = req.REQUEST.get("search_string", "")
     
-    query = Message.objects.order_by("%s%s" % (sort_desc_string, sort_column)).filter(
-        Q(text__icontains=search_string) | Q(connection__identity__icontains=search_string))
+    query = Message.objects.select_related("connection", "connection__backend"
+            ).order_by("%s%s" % (sort_desc_string, sort_column))
+    if search_string == "":
+        query = query.all()
+    else:
+        query = query.filter(
+           Q(text__icontains=search_string) |
+           Q(connection__identity__icontains=search_string))
     
     messages = paginated(req, query)
     return render_to_response(req, template_name, {"columns": columns,
