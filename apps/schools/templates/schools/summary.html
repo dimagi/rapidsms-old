@@ -6,7 +6,10 @@
 {% endblock %}
 {% block pagecontent %}
 <h2>School Summary</h2>
-<br>
+{% if selected_region %}
+<p><a href="{% url schools.views.schools %}">Show All</a></p>
+{% endif %}
+
 <h3>Filter by Region</h3>
 <div id="regions">
 <ul>
@@ -31,7 +34,8 @@
         <th>Headmaster (click to message)</th>
         <th>Response Rate</th>
         <th>Teacher Attendance</th>
-        <th>Student Attendance</th>
+        <th>Girls Attendance</th>
+        <th>Boys Attendance</th>
         <th>Water Availability</th>
     </thead>
     <tbody>
@@ -46,7 +50,8 @@
             </td>
             <td>{{ school.response_rate|floatformat:2 }}</td>
             <td>{{ school.teacher_attendance|floatformat:2 }}</td>
-            <td>{{ school.student_attendance|floatformat:2 }}</td>
+            <td>{{ school.girls_attendance|floatformat:2 }}</td>
+            <td>{{ school.boys_attendance|floatformat:2 }}</td>
             <td>{{ school.water_availability|floatformat:2 }}</td>
         </tr>
         {% endfor %}
