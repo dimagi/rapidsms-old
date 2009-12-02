@@ -25,10 +25,10 @@
                 </div>
                 {% else %}None{% endif %}
             </td>
-            <td>{{ school.response_rate }}</td>
-            <td>{{ school.teacher_attendance }}</td>
-            <td>{{ school.student_attendance }}</td>
-            <td>{{ school.water_availability }}</td>
+            <td>{{ school.response_rate|floatformat:2 }}</td>
+            <td>{{ school.teacher_attendance|floatformat:2 }}</td>
+            <td>{{ school.student_attendance|floatformat:2 }}</td>
+            <td>{{ school.water_availability|floatformat:2 }}</td>
         </tr>
         {% endfor %}
     </tbody>
