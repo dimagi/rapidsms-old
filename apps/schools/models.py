@@ -8,10 +8,12 @@ from xml.etree.ElementTree import Element, SubElement
 
 from django.db import models
 
+from locations.models import Location, LocationType
 from reporters.models import Reporter
 from schools.xml import SerializableModel
 
-class School(models.Model,SerializableModel):
+
+class School(Location,SerializableModel):
     """A basic model for a school."""
     # these two fields determine how the model is displayed as XML
     # the key is the name of the attribute/element, the value is
@@ -29,15 +31,6 @@ class School(models.Model,SerializableModel):
              "WaterAvailability": "water_availability",
              "ResponseRate": "response_rate"
               }
-        
-    latitude  = models.DecimalField(max_digits=8, decimal_places=6, 
-                                    blank=True, null=True, 
-                                    help_text="The physical latitude of this location")
-    longitude = models.DecimalField(max_digits=8, decimal_places=6, 
-                                    blank=True, null=True, 
-                                    help_text="The physical longitude of this location")
-
-    name = models.CharField(max_length=200)
     
     teachers = models.PositiveIntegerField(help_text="The number of teachers at the school")
     
