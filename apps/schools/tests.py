@@ -11,6 +11,7 @@ from rapidsms.tests.scripted import TestScript
 from schools.app import App
 from schools.models import *
 from blaster.models import *
+from locations.models import *
 
 # Got these from http://en.wikipedia.org/wiki/Districts_and_Regions_of_Uganda
 # and http://babynamesworld.parentsconnect.com/category-ugandan-names.html
@@ -28,6 +29,24 @@ SCHOOL_AND_LAST_NAMES = \
      "Nebbi","Nyadri","Oyam","Pader","Yumbe","Bulisa","Bundibugyo","Bushenyi","Hoima","Ibanda",
      "Isingiro","Kabale","Kabarole","Kamwenge","Kanungu","Kasese","Kibale","Kiruhura","Kisoro",
      "Kyenjojo","Masindi","Mbarara","Ntungamo","Rukungirie"]
+    
+
+REGIONS = ["Central", "Eastern", "Northern", "Western"]
+
+# map regions to districts 
+DISTRICTS = \
+    {"Central": ["Kalangala","Kampala","Kayunga","Kiboga","Luwero","Lyantonde","Masaka","Mityana","Mpigi",
+                 "Mubende","Mukono","Nakaseke","Nakasongola","Rakai","Sembabule","Wakiso"],
+     "Eastern": ["Amuria","Budaka","Bududa","Bugiri","Bukedea","Bukwa","Busia","Butaleja","Iganga","Jinja",
+                 "Kaberamaido","Kaliro","Kamuli","Kapchorwa","Katakwi","Kumi","Manafwa","Mayuge","Mbale",
+                 "Namutumba","Pallisa","Sironko","Soroti","Tororo"],
+     "Northern": ["Abim","Adjumani","Amolatar","Amuru","Apac","Arua","Dokolo","Gulu","Kaabong","Kitgum",
+                 "Koboko","Kotido","Lira","Moroto","Moyo","Nakapiripirit","Nebbi","Nyadri","Oyam","Pader",
+                 "Yumbe"],
+     "Western": ["Bulisa","Bundibugyo","Bushenyi","Hoima","Ibanda","Isingiro","Kabale","Kabarole",
+                 "Kamwenge","Kanungu","Kasese","Kibale","Kiruhura","Kisoro","Kyenjojo","Masindi","Mbarara",
+                 "Ntungamo","Rukungirie"]
+     }
 
 # Got these from http://www.studentsoftheworld.info/penpals/stats.php3?Pays=UGA
 FIRST_NAMES = \
@@ -58,6 +77,9 @@ SCHOOL_TYPES = ["Primary", "Secondary"]
 class TestApp (TestScript):
     apps = (App,)
 
+    def setUp(self):
+        self._create_locations()
+        
     def testSchoolToElement(self):
         school = self._new_school()
         elem = school.to_element()
@@ -69,7 +91,6 @@ class TestApp (TestScript):
     
         
     def testGenerateData(self):
-        
         self._create_message_blasts()
         blasts = MessageBlast.objects.all()
         for i in range(100):
@@ -89,7 +110,7 @@ class TestApp (TestScript):
         dumpdata = Command()
         filename = os.path.abspath(os.path.join(os.path.dirname(__file__),"test_schools.json"))
         options = { "indent" : 2 }
-        datadump = dumpdata.handle("schools","reporters", "blaster", **options)
+        datadump = dumpdata.handle("locations", "schools","reporters", "blaster", **options)
         file = open(filename, "w")
         file.write(datadump)
         file.close()
@@ -108,9 +129,15 @@ class TestApp (TestScript):
         name = "%s %s" % (random.choice(SCHOOL_AND_LAST_NAMES), random.choice(SCHOOL_TYPES))
         lat = random.uniform(min_lat, max_lat)
         lon = random.uniform(min_lon, max_lon)
+        parent = random.choice(Location.objects.filter(type__name="District"))
         teachers = random.randint(3,20)
+        count = School.objects.filter(parent=parent).count()
+        school_code = "%(district)s%(school)03d" % \
+                    {"district": parent.code, "school":count + 1}
+        school_type = LocationType.objects.get(name="School")
         school = School.objects.create(latitude=str(lat), longitude=str(lon), 
-                                       teachers=teachers, name=name)
+                                       code=school_code, type=school_type,
+                                       teachers=teachers, name=name, parent=parent)
         for year in range(1,13):
             girls = random.uniform(min_students, max_students)
             boys = random.uniform(min_students, max_students)
@@ -188,6 +215,35 @@ class TestApp (TestScript):
                 count += 1
         return count
     
+    def _create_locations(self):
+        try:
+            LocationType.objects.get(name="School")
+            # assume if this is there that everything else is set, we probably loaded
+            # the fixtures.
+            return 
+        except LocationType.DoesNotExist:
+            # just let this pass through to the rest of the method
+            pass
+        region_type = LocationType.objects.create(name="Region")
+        district_type = LocationType.objects.create(name="District")
+        school_type = LocationType.objects.create(name="School")
+        region_code = 1
+        for region_name in REGIONS:
+            region = Location.objects.create(type=region_type,
+                                             code=str(region_code), 
+                                             name=region_name)
+            district_code = 1
+            for district_name in DISTRICTS[region_name]:
+                full_district_code = "%(region)s%(district)02d" % \
+                    {"region":region_code, "district":district_code}
+                district = Location.objects.create(type=district_type,
+                                                   code=full_district_code,
+                                                   name=district_name,
+                                                   parent=region)
+                district_code = district_code+1
+            region_code = region_code+1
+            
+        
     def _create_message_blasts(self):
         questions = [1,2]
         now = datetime.now()
