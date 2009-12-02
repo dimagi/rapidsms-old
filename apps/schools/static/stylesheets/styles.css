@@ -140,6 +140,9 @@ body
 	width: 970px;
 }
 
+.selected {
+    font-weight: bold;
+}
 
 /* padding copied from blueprint screen */
 th, td, caption {padding:4px 10px 4px 5px;}

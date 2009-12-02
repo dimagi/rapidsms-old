@@ -22,8 +22,26 @@ def dashboard(req, template_name="schools/dashboard.html"):
 
 
 def schools(req, template_name="schools/summary.html"):
-    schools = School.objects.all()
-    return render_to_response(req, template_name, { "schools": schools })
+    regions = Location.objects.filter(type__name="Region")
+    districts = None
+    region = None
+    district = None
+    if "region" in req.GET:
+        region = Location.objects.get(type__name="Region", name=req.GET["region"])
+        schools = School.objects.filter(parent__parent__name=req.GET["region"])
+    elif "district" in req.GET:
+        district = Location.objects.get(type__name="District", name=req.GET["district"])
+        region = district.parent
+        schools = School.objects.filter(parent__name=req.GET["district"])
+    if region:
+        districts = region.children.filter(type__name="District")
+    else:
+        schools = School.objects.all()
+    return render_to_response(req, template_name, {"regions": regions,
+                                                   "districts": districts,
+                                                   "selected_region" : region,
+                                                   "selected_district" : district,
+                                                   "schools": schools })
 
 
 def map(req, template_name="schools/school_map.html"):
