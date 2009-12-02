@@ -140,8 +140,26 @@ body
 	width: 970px;
 }
 
-.selected {
+/* schools list styling */
+
+#regions .selected {
     font-weight: bold;
+}
+
+#regions ul, #districts ul
+{
+    list-style-type: none;
+    margin-top: 10px;
+    padding: 0;
+    text-align: center;
+}
+
+#regions li, #districts li 
+{
+    margin-top: 10px;
+	padding-left: 20px;
+    padding-right: 20px;
+    display: inline;
 }
 
 /* padding copied from blueprint screen */

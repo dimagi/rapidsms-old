@@ -8,6 +8,7 @@
 <h2>School Summary</h2>
 <br>
 <h3>Filter by Region</h3>
+<div id="regions">
 <ul>
 {% for region in regions %}
     <li {% ifequal selected_region region %}class="selected"{% endifequal %}>
@@ -16,6 +17,7 @@
 </ul>
 {% if districts %}
 <h3>Filter by District</h3>
+<div id="districts">
 <ul>
 {% for district in districts %}
     <li {% ifequal selected_district district %}class="selected"{% endifequal %}>
