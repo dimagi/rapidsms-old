@@ -9,7 +9,7 @@ from xml.etree.ElementTree import Element, SubElement
 from django.db import models
 
 from locations.models import Location, LocationType
-from reporters.models import Reporter
+from reporters.models import Reporter, ReporterGroup
 from schools.xml import SerializableModel
 
 
@@ -33,6 +33,8 @@ class School(Location,SerializableModel):
               }
     
     teachers = models.PositiveIntegerField(help_text="The number of teachers at the school")
+    
+    
     
     def __unicode__(self):
         return self.name
@@ -121,6 +123,19 @@ class Headmaster(Reporter):
     def __unicode__(self):
         return Reporter.__unicode__(self)
     
+class SchoolGroup(ReporterGroup):
+    """A group of reporters attached to a school."""
+    GROUP_TYPES = (
+        ('GEM', 'GEM Leaders'),
+        ('Teachers', 'Teachers'),
+        ('Headmasters', 'Headmasters'), # this is kind of redundant with the existing headmaster
+    )
+    type = models.CharField(max_length=20, choices=GROUP_TYPES)
+    school = models.ForeignKey(School)
+    
+    def __unicode__(self):
+        return "%s %s" % (self.school,self.type)
+                                       
 class Grade(models.Model):
     """A Grade (class) in a school"""
     school = models.ForeignKey(School, related_name="classes")
