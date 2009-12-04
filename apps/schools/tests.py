@@ -110,7 +110,7 @@ class TestApp (TestScript):
         dumpdata = Command()
         filename = os.path.abspath(os.path.join(os.path.dirname(__file__),"test_schools.json"))
         options = { "indent" : 2 }
-        datadump = dumpdata.handle("locations", "schools","reporters", "blaster", **options)
+        datadump = dumpdata.handle("locations", "reporters", "schools","blaster", **options)
         file = open(filename, "w")
         file.write(datadump)
         file.close()
