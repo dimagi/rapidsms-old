@@ -53,29 +53,11 @@
         </div>
       </div>
       <div class="span-16">
-            <div class="dashboard-module" id="map">
+            <div class="dashboard-module">
             <h2>Schools Reporting Problems</h2>
-              <!--<embed map here>-->
-              <div id="map_canvas" name="map_canvas">
-                <object
-                    classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
-                    codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,29,0"
-                    width="630px"
-                    height="400px">
-                    <param name="movie" value="MapSimple.swf">
-                    <param name="quality" value="high">
-                    <embed
-                        width="630px"
-                        height="400px"
-                        name="map_test"
-                        src="/static/schools/prototype/map_test.swf"
-                        quality="high"
-                        flashVars="schoolxml=./xml"
-                        pluginspage="http://www.macromedia.com/go/getflashplayer"
-                        type="application/x-shockwave-flash">
-                    </embed>
-                </object>
-               </div>
+            {% with "./xml" as xml_location %}
+            {% include "schools/partials/map.html" %}
+            {% endwith %}
             </div>  
       </div>
       <div class="span-8 last">
