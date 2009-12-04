@@ -59,7 +59,9 @@ def xml(req):
 
 def single_school(req, id, template_name="schools/single_school.html"):
     school = get_object_or_404(School, id=id)
-    return render_to_response(req, template_name, { "school": school })
+    xml_location = "/schools/%s/xml" % id
+    return render_to_response(req, template_name, {"school": school,
+                                                   "xml_location": xml_location })
 
 def single_school_xml(req, id):
     school = get_object_or_404(School, id=id)
