@@ -156,7 +156,7 @@ class Report(models.Model):
 
 class SchoolTeacherReport(Report):
     """Report of school teacher attendance on a particular day"""
-    school = models.ForeignKey(School)
+    school = models.ForeignKey(School, related_name="teacher_attendance_reports")
     # this will be pulled from the school's information at the time of submitting
     # to allow that to change over time
     expected = models.PositiveIntegerField()
@@ -164,7 +164,7 @@ class SchoolTeacherReport(Report):
     
     def percent(self):
         if self.expected != 0:
-            return self.actual / self.expected
+            return self.actual / self.expected * 100
         return "N/A"
         
     def __unicode__(self):
@@ -172,7 +172,7 @@ class SchoolTeacherReport(Report):
     
 class SchoolWaterReport(Report):
     """Report of school water information on a particular day"""
-    school = models.ForeignKey(School)
+    school = models.ForeignKey(School, related_name="water_reports")
     water_working = models.BooleanField()
     
     @property
