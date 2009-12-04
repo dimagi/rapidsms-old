@@ -48,7 +48,7 @@ def map(req, template_name="schools/school_map.html"):
     """Display a map with school data on it"""
     return render_to_response(req, template_name, {})
 
-def xml(req, template_name="schools/demo.xml"):
+def xml(req):
     """Get some basic xml data for populating the map."""
     all_schools = School.objects.all()
     root = Element("root")
@@ -59,8 +59,13 @@ def xml(req, template_name="schools/demo.xml"):
 
 def single_school(req, id, template_name="schools/single_school.html"):
     school = get_object_or_404(School, id=id)
-    
     return render_to_response(req, template_name, { "school": school })
+
+def single_school_xml(req, id):
+    school = get_object_or_404(School, id=id)
+    root = Element("root")
+    root.append(school.to_element())
+    return HttpResponse(ElementTree.tostring(root), mimetype="text/xml")
 
 def message(req, id, template_name="schools/message.html"):
     head = get_object_or_404(Headmaster, id=id)
