@@ -137,18 +137,8 @@ td .date {
 /* custom headings */
 
 h2, h3 {
-    border-bottom-color: #cccccc;
-    border-left-style: solid;
-    border-right-style: solid;
-    border-top-style: solid;
-    border-left-color: #cccccc;
-    border-right-color: #cccccc;
-    border-top-color: #cccccc;
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-top-width: 1px;
-    background: url(../images/h2-bg.png) repeat-x;
-    border-bottom: 1px solid;
+    border-style: none;
+    background: none;
     color: #999999;
 }
 
