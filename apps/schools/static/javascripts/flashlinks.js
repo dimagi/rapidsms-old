@@ -8,3 +8,7 @@ function thisMovie(movieName) {
 function trigger(value) {
         thisMovie("map_test").receiveNotification(value);
 }
+
+function triggerXml(xmlurl,value) {
+        thisMovie("map_test").receiveXML(xmlurl,value);
+}
