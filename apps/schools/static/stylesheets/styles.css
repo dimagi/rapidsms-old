@@ -7,16 +7,23 @@
 
 #school-nav li
 {
+    display: inline;
+}
+
+
+#school-nav a {
     margin-top: 10px;
     padding: 10px;
-    display: inline;
+    text-decoration: none;
+    font-size: 120%;
     background-color:#eeeeee;
 }
 
-#school-nav a {
-    text-decoration: none;
-    font-size: 120%;
+#school-nav a:hover
+{
+    background-color:#dddddd;
 }
+
 
 .error {
     font-weight:bold;
