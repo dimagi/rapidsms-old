@@ -1,0 +1,32 @@
+{% extends "blaster/layout.html" %}
+{% block pagecontent %}
+<p><span class="prompt">Message: </span><span class="prompt_value">{{ blast.message.text }}</span></p>
+<p><span class="prompt">Sent: </span><span class="prompt_value">{{ blast.date|date }} - {{ blast.date|time }}</span></p>
+<p><span class="prompt">Recipients: </span><span class="prompt_value">{{  blast.recipients.count }}</span></p>
+<p><span class="prompt">Responded: </span><span class="prompt_value">{{ blast.responded|length }}</span></p>
+<table>
+    <thead>
+        <th>Name</th>
+        <th>School</th>
+        <th>Status</th>
+        <th>Last Response</th>
+        <th>Date</th>
+    </thead>
+    <tbody>
+    {% for recip in blast.recipients.all %}
+        <tr class="{{recip.status}}">
+            <td>{{ recip.reporter }}</td>
+            <td>{{ recip.school }}</td>
+            <td>{{ recip.status }}</td>
+            {% if recip.responded %}
+            <td>{{ recip.response.text }}</td>
+            <td>{{ recip.response.date|date }} - {{ recip.response.date|time }}</td>
+            {% else %}
+            <td>N/A</td>
+            <td>N/A</td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

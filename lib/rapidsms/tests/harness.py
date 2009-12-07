@@ -11,11 +11,11 @@ from rapidsms.app import App
 # a really dumb Logger stand-in
 class MockLogger (list):
     def __init__(self):
-
-	# enable logging during tests with an
-	# environment variable, since the runner
-	# doesn't seem to have args
-	self.to_console = os.environ.get("verbose", False)
+        # enable logging during tests with an
+        # environment variable, since the runner
+        # doesn't seem to have args
+        self.to_console = os.environ.get("verbose", True)
+        
 
     def write (self, *args):
         if self.to_console:
@@ -48,6 +48,12 @@ class MockRouter (Router):
         # rl - Seems odd that stop_all_apps wasn't here before. =|
         self.stop_all_apps()
         self.stop_all_backends()
+        
+    def send(self, message):
+        # in the MockRouter, override send because the mock router doesn't actually
+        # run()
+        super(Router, self).send(message)
+        self.run()
 
 class MockBackend (Backend):
     def start (self):
