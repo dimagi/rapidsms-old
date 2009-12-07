@@ -125,15 +125,32 @@ class Headmaster(Reporter):
     
 class SchoolGroup(ReporterGroup):
     """A group of reporters attached to a school."""
-    GROUP_TYPES = (
-        ('GEM', 'GEM Leaders'),
-        ('PTA', 'Parent-Teachers Association'),
-        ('Teachers', 'Teachers'),
-        ('Headmasters', 'Headmasters'), # this is kind of redundant with the existing headmaster
-    )
-    type = models.CharField(max_length=20, choices=GROUP_TYPES)
-    school = models.ForeignKey(School)
+    # this enum takes the form 
+    # { <key>: (group display, member display) }
+    # the group displays are used by django 
+    SCHOOL_GROUP_TYPES = {
+        'GEM': ('GEM Leaders', 'GEM Leader'),
+        'PTA': ('Parent-Teachers Association', 'PTA Member'),
+        'Teachers': ('Teachers', 'Teacher'),
+        'Headmasters': ('Headmasters', 'Headmaster') # this is kind of redundant with the existing headmaster
+    }
+    GROUP_ENUMS = ((key, values[0]) for key, values in SCHOOL_GROUP_TYPES.items())
+    type = models.CharField(max_length=20, choices=GROUP_ENUMS)
+    school = models.ForeignKey(School, related_name="groups")
     
+    def members_list_display(self):
+        """A display string for the list of members."""
+        return ", ".join([str(reporter) for reporter in self.reporters.all()])
+    
+    def member_title(self):
+        """The title that this groups members go by E.g. members of the 
+           Parent Teachers Association group are known as PTA Members."""
+        return self.SCHOOL_GROUP_TYPES[self.type][1]
+
+    def group_title(self):
+        """The title that this group is known by."""
+        return self.get_type_display()
+        
     def __unicode__(self):
         return "%s %s" % (self.school,self.type)
                                        

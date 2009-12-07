@@ -18,8 +18,17 @@
     {% else %}
     <p><b>No Headmasters Registered</b></p>
     {% endif %}
-    <p><span class="prompt">Region: </span><span class="prompt_value">{{ school.parent.parent }}</span></p>
-    <p><span class="prompt">District: </span><span class="prompt_value">{{ school.parent }}</span></p>
+    <p><span class="prompt">Region: </span><span class="prompt_value">{{ school.parent.parent }}</span><br>  
+       <span class="prompt">District: </span><span class="prompt_value">{{ school.parent }}</span></p>
+    {% if school.groups.all %}
+    <h3>Other Groups</h3>
+    <ul>
+        {% for group in school.groups.all %}
+        <li><span class="prompt">{{ group.group_title}}:</span> 
+            <span class="prompt_value">{{ group.members_list_display }}</span></li>
+        {% endfor %}
+    </ul>
+    {% endif %}
 </div>
 <div class="span-16 last">
     {% include "schools/partials/map.html" %}
