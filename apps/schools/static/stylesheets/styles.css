@@ -3,20 +3,33 @@
     list-style-type: none;
     margin-top: 10px;
     padding: 0;
+    width: 950px;
+    padding-bottom: 7px;
+    border-bottom-width: 1px; 
+    border-bottom-color: #dddddd;
+    border-bottom-style: solid;
+    
 }
 
 #school-nav li
 {
+    display: inline;
+}
+
+
+#school-nav a {
     margin-top: 10px;
     padding: 10px;
-    display: inline;
+    text-decoration: none;
+    font-size: 120%;
     background-color:#eeeeee;
 }
 
-#school-nav a {
-    text-decoration: none;
-    font-size: 120%;
+#school-nav a:hover
+{
+    background-color:#dddddd;
 }
+
 
 .error {
     font-weight:bold;
@@ -125,18 +138,8 @@ td .date {
 /* custom headings */
 
 h2, h3 {
-    border-bottom-color: #cccccc;
-    border-left-style: solid;
-    border-right-style: solid;
-    border-top-style: solid;
-    border-left-color: #cccccc;
-    border-right-color: #cccccc;
-    border-top-color: #cccccc;
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-top-width: 1px;
-    background: url(../images/h2-bg.png) repeat-x;
-    border-bottom: 1px solid;
+    border-style: none;
+    background: none;
     color: #999999;
 }
 
