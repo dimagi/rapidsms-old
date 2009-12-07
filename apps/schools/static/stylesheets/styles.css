@@ -97,11 +97,12 @@ td .date {
     background-color: #EEE; 
 }
 .dashboard-link {
-    padding-right: 10px;
-    position:absolute; 
+    position:absolute;
+    padding: 0.25em 0.5em;
     bottom: 0;
-    right: 0; 
-    text-align:right;
+    right: 0;
+    background: #f8f8f8;
+    -moz-border-radius-topleft: 0.5em;
 }
 
 #map {

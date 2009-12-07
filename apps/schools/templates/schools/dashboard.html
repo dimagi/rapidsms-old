@@ -16,7 +16,7 @@
                 <li>Alice User from Luwero Primary School reports that 7 of 10 teachers are present today</li>    
                 <li>Charlie User from Luwero Primary School reports that 8 of 12 boys and 11 of 13 girls are present in P1 today.</li>    
             </ul>
-            <a class="dashboard-link" href="#">see all</a>
+            <a class="dashboard-link" href="#">All Reports</a>
         </div>
       </div>
       <div class="span-8">
@@ -28,7 +28,7 @@
                 <li><span class="global-number">752 of 1023</span> Reported Teachers</li>
                 <li><span class="global-number">135 of 152</span> Water Supplies Working</li>
             </ul>
-            <a class="dashboard-link" href="#">view today's stats</a>
+            <a class="dashboard-link" href="#">Today's Stats</a>
         </div>
       </div>
       <div class="span-8 last">
@@ -42,7 +42,7 @@
                 <li><span class="global-number">72%</span> Overall Student Attendance Rate</li>
                 <li><span class="global-number">91%</span> Water Supplies Working</li>
             </ul>
-            <a class="dashboard-link" href="#">view all stats</a>
+            <a class="dashboard-link" href="#">All Stats</a>
         </div>
       </div>
       <div class="span-16">
@@ -61,7 +61,7 @@
                 <li>The water is NOT working at St. Joseph Secondary School!</li>    
                 <li>The water is NOT working at Seroma Primary School!</li>
             </ul>
-            <a class="dashboard-link" href="#">see all</a>
+            <a class="dashboard-link" href="#">All Problems</a>
         </div>
       </div>
       <div class="span-12">
@@ -72,7 +72,7 @@
         {% with recent_blasts as blasts %}
         {% include "blaster/partials/blast_table.html" %}
         {% endwith %}
-        <a class="dashboard-link" href="{% url blaster.views.index %}">see all</a>
+        <a class="dashboard-link" href="{% url blaster.views.index %}">All Blasts</a>
       {% else %} 
         No blasts yet.
       {% endif %}
@@ -87,7 +87,7 @@
         {% with last_blast_recipients as recipients %}
         {% include "blaster/partials/blast_recipients.html" %}
         {% endwith %}
-        <a class="dashboard-link" href="{% url blaster.views.single_blast last_blast.id %}">see all</a>
+        <a class="dashboard-link" href="{% url blaster.views.single_blast last_blast.id %}">All Questions</a>
         {% else %}
         No blasts found.
         {% endif %}
