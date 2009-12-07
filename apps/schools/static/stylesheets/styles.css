@@ -258,3 +258,26 @@ thead th
 }
 
 
+/* a few fixes to repair the damage done by blueprintcss
+ * most of these could be avoided by including blueprint BEFORE the
+ * rapidsms stylesheets (it is a framework, after all), but that would
+ * require more template rejiggery than i want to perform right now. */
+
+/* blueprint/screen.css:99
+ * (seriously? fix the width of all ".container"s??) */
+#header .container {
+    width: auto;
+}
+
+/* blueprint/screen.css:39
+ * (restore styles from webapp/layout.css:19) */
+a {
+    color: #33A7D2;
+    text-decoration: none;
+}
+
+/* blueprint/screen.css:26
+ * (restore from webapp/layout.css:10) */
+body {
+    font-family: "Lucida Grande", "Bitstream Vera Sans", Verdana, sans-serif;
+}
