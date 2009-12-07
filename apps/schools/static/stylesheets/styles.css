@@ -276,6 +276,12 @@ a {
     text-decoration: none;
 }
 
+/* blueprint/screen.css:38
+ * (restore styles from webapp/layout.css:24) */
+a:hover {
+	color: #33A7D2;
+}
+
 /* blueprint/screen.css:26
  * (restore from webapp/layout.css:10) */
 body {
