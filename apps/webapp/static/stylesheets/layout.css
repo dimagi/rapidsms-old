@@ -82,18 +82,23 @@ div.clear-hack {
 	position: relative;
 	color: #ccf;
 }
-	
-        /* get the crude login and
-         * logout links into the
-         * upper right corner */
-        #auth p {
-                float: right;
-                margin-top: -21px;
-        }
 
-        #auth p a{
-                color: white;
-        }
+/* hide the login/logout link in the top right. this doesn't
+ * need to be especially discoverable, since when the user
+ * tries to do something that requires authentication, they
+ * should be redirected automatically */
+#auth {
+	font-size: 80%;
+	position: absolute;
+	line-height: 22px;
+	margin: 0 10px;
+	right: 0;
+	top: 0;
+}
+
+	#auth a {
+		color: #fff;
+	}
 
 
 	#branding {
