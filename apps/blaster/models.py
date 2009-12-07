@@ -1,7 +1,8 @@
 from django.db import models
 
 from reporters.models import Reporter
-from schools.models import Headmaster
+from schools.utils import get_location_filter_params
+from schools.models import School
 
 class BlastableMessage(models.Model):
     """A message that can be blasted."""
@@ -53,10 +54,12 @@ class BlastedMessage(models.Model):
         
     @property 
     def school(self):
-        try:
-            return Headmaster.objects.get(id=self.reporter.id).school
-        except Headmaster.DoesNotExist:
-            return None
+        if self.reporter.location:
+            try:
+                return School.objects.get(id=self.reporter.location.id)
+            except School.DoesNotExist:
+                return None
+        return None
             
     @property
     def responded (self):

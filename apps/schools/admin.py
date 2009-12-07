@@ -5,7 +5,6 @@ from django.contrib import admin
 from schools.models import *
 
 admin.site.register(School)
-admin.site.register(Headmaster)
 admin.site.register(SchoolGroup)
 admin.site.register(Grade)
 admin.site.register(Report)

@@ -1,0 +1,17 @@
+{% extends base_template %}
+{% block page_stylesheets %}
+    <link rel="stylesheet" href="/static/schools/stylesheets/blueprint/screen.css" type="text/css" media="screen, projection">
+    <link rel="stylesheet" href="/static/schools/stylesheets/blueprint/print.css" type="text/css" media="print">
+<!--[if lt IE 8]><link rel="stylesheet" href="css/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
+    <link type="text/css" rel="stylesheet" href="/static/schools/stylesheets/styles.css" />
+{% endblock %}
+{% block content %}
+<div id="app-nav">
+<ul>
+    <li><a href="/blaster">New Question</a></li>
+    <li><a href="/blaster/list">View Previous Questions</a></li>
+</ul> 
+</div>
+{% block pagecontent %}
+{% endblock %}
+{% endblock %}

@@ -7,8 +7,8 @@ import blaster.views as views
 
     
 urlpatterns = patterns('',
-    url(r'^blaster/?$', views.index),
-    url(r'^blaster/new/?$', views.new),
+    url(r'^blaster/?$', views.new),
+    url(r'^blaster/list/?$', views.list),
     url(r'^blaster/(?P<id>\d*)/?$', 'blaster.views.single_blast', name="single_blast"),
     #url(r'^builds/xforms/(?P<id>\d+)/?$', 'buildmanager.views.get_build_xform', name="get_build_xform"),    
     
