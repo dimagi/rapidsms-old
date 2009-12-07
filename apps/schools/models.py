@@ -127,6 +127,7 @@ class SchoolGroup(ReporterGroup):
     """A group of reporters attached to a school."""
     GROUP_TYPES = (
         ('GEM', 'GEM Leaders'),
+        ('PTA', 'Parent-Teachers Association'),
         ('Teachers', 'Teachers'),
         ('Headmasters', 'Headmasters'), # this is kind of redundant with the existing headmaster
     )
