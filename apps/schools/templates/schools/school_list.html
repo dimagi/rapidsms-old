@@ -15,7 +15,7 @@
 <ul>
 {% for region in regions %}
     <li {% ifequal selected_region region %}class="selected"{% endifequal %}>
-    <a href="{% url schools.views.schools %}?region={{region}}">{{region}}</a></li>
+    <a href="{% url schools.views.schools %}?region={{ region.id }}">{{region}}</a></li>
 {% endfor %}
 </ul>
 {% if districts %}
@@ -24,7 +24,7 @@
 <ul>
 {% for district in districts %}
     <li {% ifequal selected_district district %}class="selected"{% endifequal %}>
-    <a href="{% url schools.views.schools %}?district={{district}}">{{district}}</a></li>
+    <a href="{% url schools.views.schools %}?district={{ district.id }}">{{district}}</a></li>
 {% endfor %}
 {% endif %}
 </ul>

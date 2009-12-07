@@ -73,7 +73,7 @@
         {% with recent_blasts as blasts %}
         {% include "blaster/partials/blast_table.html" %}
         {% endwith %}
-        <a class="dashboard-link" href="{% url blaster.views.index %}">see all</a>
+        <a class="dashboard-link" href="{% url blaster.views.list %}">see all</a>
       {% else %} 
         No blasts yet.
       {% endif %}

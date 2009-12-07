@@ -95,7 +95,8 @@ class TestApp (TestScript):
         blasts = MessageBlast.objects.all()
         for i in range(100):
             school = self._new_school()
-            headmaster = self._new_headmaster(school)
+            headmaster = self._new_reporter(school, "headmaster")
+            self._create_groups(school)
             # these go to everyone
             for blast in blasts:
                 BlastedMessage.objects.create(blast=blast,reporter=headmaster)
@@ -117,18 +118,13 @@ class TestApp (TestScript):
         print "=== Successfully wrote fixtures to %s ===" % filename
         
     
-        
+    
     def _new_school(self):
         # estimate the rough boundaries of Uganda
-        min_lat = -0.964005
-        max_lat = 3.699819
-        min_lon = 29.992676
-        max_lon = 34.727783
+        lat, lon = _ugandan_coordinate()
         min_students = 5
         max_students = 35
         name = "%s %s" % (random.choice(SCHOOL_AND_LAST_NAMES), random.choice(SCHOOL_TYPES))
-        lat = random.uniform(min_lat, max_lat)
-        lon = random.uniform(min_lon, max_lon)
         parent = random.choice(Location.objects.filter(type__name="District"))
         teachers = random.randint(3,20)
         count = School.objects.filter(parent=parent).count()
@@ -138,20 +134,36 @@ class TestApp (TestScript):
         school = School.objects.create(latitude=str(lat), longitude=str(lon), 
                                        code=school_code, type=school_type,
                                        teachers=teachers, name=name, parent=parent)
-        for year in range(1,13):
+        for year in range(1,3):
+            # only make 3 grades to keep things simple
             girls = random.uniform(min_students, max_students)
             boys = random.uniform(min_students, max_students)
             Grade.objects.create(school=school,year=year,
                                  girls=girls,boys=boys)
         return school
         
-    def _new_headmaster(self, school):
-        # create a headmaster 
+    def _create_groups(self, school):
+        for type in SCHOOL_GROUP_TYPES: 
+            # headmasters are created separately so we guarantee exactly 1
+            # per school
+            if not type=="headmaster":
+                members = random.randint(0,5)
+                for i in range(members):
+                    self._new_reporter(school, type)
+                
+    def _new_reporter(self, school, type):
+        # create a reporter, add them to a school and the group type
         firstname = random.choice(FIRST_NAMES)
         lastname = random.choice(SCHOOL_AND_LAST_NAMES)
         alias = Reporter.parse_name("%s %s" % (firstname, lastname))[0]
-        return Headmaster.objects.create(school=school,first_name=firstname,
-                                         last_name = lastname,alias=alias)
+        reporter = Reporter.objects.create(first_name=firstname, 
+                                           last_name = lastname,
+                                           alias=alias, location=school)
+        reporter.save()
+        group = SchoolGroup.get_or_create(type, school)
+        reporter.groups.add(group)
+        reporter.save()
+        return reporter
         
         
     def _populate_data(self, school, headmaster):
@@ -254,4 +266,21 @@ class TestApp (TestScript):
         self.WATER_BLAST = blasts[0]
         self.TEACHER_BLAST = blasts[1]
         
-        
+def _ugandan_coordinate():
+    min_lat = -0.964005
+    max_lat = 3.518904
+    min_lon = 29.992676
+    max_lon = 34.727783
+    lat = random.uniform(min_lat, max_lat)
+    lon = random.uniform(min_lon, max_lon)
+    if _in_lake(lat, lon):
+        return _ugandan_coordinate()
+    return (lat,lon)
+
+def _in_lake(lat, lon):
+    # it's a big lake...
+    # we also use this to snip off the upper left area where the country
+    # cuts in.
+    return (lat < 0.400998 and lon > 31.761475) or \
+           (lat > 1.10955 and lon < 31.135254)
+    

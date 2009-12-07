@@ -14,15 +14,14 @@ class App (rapidsms.app.App):
 
     def parse (self, message):
         """Parse and annotate messages in the parse phase."""
-        # stick a headmaster on here, if we find her.  Otherwise 
+        # stick a school on here, if we find it.  Otherwise 
         # just set the property empty
-        message.headmaster = None
-        if message.reporter:
+        message.school = None
+        if message.reporter and message.reporter.location:
             try:
-                message.headmaster = Headmaster.objects.get(id=message.reporter.id)
-            except Headmaster.DoesNotExist:
+                message.school = School.objects.get(id=message.reporter.location.id)
+            except School.DoesNotExist:
                 pass
-
 
     def handle (self, message):
         """Add your main application logic in the handle phase."""
@@ -42,44 +41,44 @@ class App (rapidsms.app.App):
         pass
     
     
-    def get_headmaster_or_respond(self, msg):
-        """Gets the headmaster from the message, or responds if there isn't one"""
-        if msg.headmaster:
-            return msg.headmaster
+    def get_school_or_respond(self, msg):
+        """Gets the school from the message, or responds if there isn't one"""
+        if msg.school:
+            return msg.school
         elif msg.reporter:
             # should be impossible
-            msg.respond("Sorry %s, but we can't find which school you are a headmaster of." %\
+            msg.respond("Sorry %s, but we can't find which school you are reporting from." %\
                         (msg.reporter))
         else:
             # should be impossible
             msg.respond("Sorry, but we don't know who you are!")
         
-    def get_grade_or_respond(self, msg, headmaster, grade_year):
+    def get_grade_or_respond(self, msg, school, grade_year):
         """Gets the grade for the school and grade number, or responds if there isn't one"""
         try:
-            return Grade.objects.get(school=headmaster.school, year=grade_year)
+            return Grade.objects.get(school=school, year=grade_year)
         except Grade.DoesNotExist:
             msg.respond("Sorry %s, but we can't find a Grade %s class at %s." %\
-                        (headmaster, grade_year, headmaster.school))
+                        (msg.reporter, grade_year, school))
 
     def teacher_attendance(self, msg):
         """Handles teacher attendance"""
-        headmaster = self.get_headmaster_or_respond(msg)
-        if headmaster:
+        school = self.get_school_or_respond(msg)
+        if school:
+            
             if msg.text.strip().isdigit():
                 teacher_count = int(msg.text)
-                school = headmaster.school
-                SchoolTeacherReport.objects.create(reporter=headmaster,
+                SchoolTeacherReport.objects.create(reporter=msg.reporter,
                                                    date=msg.date,
                                                    school=school,
                                                    expected=school.teachers,
                                                    actual=teacher_count)
                 msg.respond("Thank you for your report of %s teachers attending %s today, %s!" %\
-                            (teacher_count, school, headmaster))
+                            (teacher_count, school, msg.reporter))
                 return True
             else:
                 msg.respond("Sorry %s, I didn't understand %s. Just send the number of teachers who attended school today." %\
-                            (msg.headmaster, msg.text))
+                            (msg.reporter, msg.text))
                 
     # there has got to be a better way to do this
     def grade_attendance_1(self, msg):  return self.grade_attendance(msg, 1)
@@ -97,15 +96,15 @@ class App (rapidsms.app.App):
         
     def grade_attendance(self, msg, grade_year=1):
         """Handles teacher attendance"""
-        headmaster = self.get_headmaster_or_respond(msg)
-        if not headmaster: return
-        grade = self.get_grade_or_respond(msg, headmaster, grade_year)
+        school = self.get_school_or_respond(msg)
+        if not school: return
+        grade = self.get_grade_or_respond(msg, school, grade_year)
         if not grade: return
         
-        def fail(msg, headmaster):
+        def fail(msg, school):
             """This message gets sent if anything goes wrong""" 
             msg.respond("Sorry, %s, we couldn't understand that. Please send a message like: 4 boys 5 girls." %\
-                        headmaster)
+                        school)
             
         # we expect "5 girls, 3 boys"
         # or "12 g 9 b"
@@ -122,14 +121,14 @@ class App (rapidsms.app.App):
                     girls = int(groups[0])
                     boys = int(groups[2])
                 else:
-                    fail(msg, headmaster)
+                    fail(msg, msg.reporter)
                 
-                GirlsAttendenceReport.objects.create(reporter=headmaster,
+                GirlsAttendenceReport.objects.create(reporter=msg.reporter,
                                                      date=msg.date,
                                                      grade=grade,
                                                      expected=grade.girls,
                                                      actual=girls)
-                BoysAttendenceReport.objects.create(reporter=headmaster,
+                BoysAttendenceReport.objects.create(reporter=msg.reporter,
                                                     date=msg.date,
                                                     grade=grade,
                                                     expected=grade.boys,
@@ -137,28 +136,28 @@ class App (rapidsms.app.App):
                                     
                 
                 msg.respond("Thank you for your report of %s girls and %s boys attending %s today, %s!" %\
-                            (girls,boys, headmaster.school, headmaster))
+                            (girls,boys, school, msg.reporter))
                 return True
-        fail(msg, headmaster)
+        fail(msg, msg.reporter)
             
                                                    
     def water_availability(self, msg):
         """Handles water availability"""
-        headmaster = self.get_headmaster_or_respond(msg)
-        if not headmaster: return 
+        school = self.get_school_or_respond(msg)
+        if not school: return 
         
         if self.TRUE.match(msg.text):    water = True  
         elif self.FALSE.match(msg.text): water = False
         else:                        
             msg.respond("Sorry, %s, we couldn't understand that. Please send either 'yes' or 'no'." %\
-                        headmaster)
+                        msg.reporter)
             return
-        SchoolWaterReport.objects.create(reporter=headmaster,
+        SchoolWaterReport.objects.create(reporter=msg.reporter,
                                          date=msg.date,
-                                         school=headmaster.school,
+                                         school=school,
                                          water_working=water)
         summary = " that the water supply is working" if water else " that the water supply is not working"
         msg.respond("Thank you for your report %s at %s, %s!" %\
-                    (summary, headmaster.school, headmaster))
+                    (summary, school, msg.reporter))
         return True
             

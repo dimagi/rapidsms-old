@@ -24,11 +24,14 @@
     <h3>Other Groups</h3>
     <ul>
         {% for group in school.groups.all %}
+            {% ifequal group.type "headmaster" %}{# we special case these so ignore #}{% else %}
         <li><span class="prompt">{{ group.group_title}}:</span> 
             <span class="prompt_value">{{ group.members_list_display }}</span></li>
+            {% endifequal %}
         {% endfor %}
     </ul>
     {% endif %}
+    <p><a href="/blaster?school={{ school.id }}">send a question to this school</a></p>
 </div>
 <div class="span-16 last">
     {% include "schools/partials/map.html" %}

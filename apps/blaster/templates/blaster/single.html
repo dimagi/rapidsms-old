@@ -1,4 +1,4 @@
-{% extends "blaster/layout.html" %}
+{% extends "blaster/blaster_base.html" %}
 {% block pagecontent %}
 <p><span class="prompt">Message: </span><span class="prompt_value">{{ blast.message.text }}</span></p>
 <p><span class="prompt">Sent: </span><span class="prompt_value">{{ blast.date|date }} - {{ blast.date|time }}</span></p>

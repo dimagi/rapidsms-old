@@ -42,12 +42,13 @@ class School(Location,SerializableModel):
     @property
     def headmaster(self):
         try:
-            return Headmaster.objects.get(school=self)
-        except Headmaster.DoesNotExist:
+            hm_group = self.groups.get(type="headmaster")
+            if hm_group.reporters.all():
+                # todo: determine if we want to handle this better.
+                # right now it picks the top one
+                return hm_group.reporters.all()[0]
+        except SchoolGroup.DoesNotExist:
             return None
-        except Headmaster.MultipleObjectsReturned:
-            # todo: determine if we want to handle this better.
-            return Headmaster.objects.filter(school=self)[0]
     
     @property
     def response_rate(self):
@@ -115,29 +116,32 @@ class School(Location,SerializableModel):
             return "Error, divide by 0?"
         
             
-class Headmaster(Reporter):
-    """A headmaster of a school"""
-    
-    school = models.ForeignKey(School)
-    
-    def __unicode__(self):
-        return Reporter.__unicode__(self)
-    
+# this enum takes the form 
+# { <key>: (group display, member display) }
+# the group displays are used by django 
+SCHOOL_GROUP_TYPES = {
+        'gem': ('GEM Leaders', 'GEM Leader'),
+        'pta': ('Parent-Teachers Association', 'PTA Member'),
+        'teacher': ('Teachers', 'Teacher'),
+        'headmaster': ('Headmasters', 'Headmaster') # this is kind of redundant with the existing headmaster
+}
+        
 class SchoolGroup(ReporterGroup):
     """A group of reporters attached to a school."""
-    # this enum takes the form 
-    # { <key>: (group display, member display) }
-    # the group displays are used by django 
-    SCHOOL_GROUP_TYPES = {
-        'GEM': ('GEM Leaders', 'GEM Leader'),
-        'PTA': ('Parent-Teachers Association', 'PTA Member'),
-        'Teachers': ('Teachers', 'Teacher'),
-        'Headmasters': ('Headmasters', 'Headmaster') # this is kind of redundant with the existing headmaster
-    }
     GROUP_ENUMS = ((key, values[0]) for key, values in SCHOOL_GROUP_TYPES.items())
     type = models.CharField(max_length=20, choices=GROUP_ENUMS)
     school = models.ForeignKey(School, related_name="groups")
     
+    @classmethod
+    def get_or_create(cls, type, school):
+        try:
+            return SchoolGroup.objects.get(school=school, type=type)
+        except SchoolGroup.DoesNotExist:
+            # this means we have to create it
+            title = "%s (%s) %s" % (school.name, school.id, SCHOOL_GROUP_TYPES[type][0])
+            return cls.objects.create(title=title, type=type, school=school)
+        
+        
     def members_list_display(self):
         """A display string for the list of members."""
         return ", ".join([str(reporter) for reporter in self.reporters.all()])
@@ -145,7 +149,7 @@ class SchoolGroup(ReporterGroup):
     def member_title(self):
         """The title that this groups members go by E.g. members of the 
            Parent Teachers Association group are known as PTA Members."""
-        return self.SCHOOL_GROUP_TYPES[self.type][1]
+        return SCHOOL_GROUP_TYPES[self.type][1]
 
     def group_title(self):
         """The title that this group is known by."""
@@ -167,7 +171,7 @@ class Grade(models.Model):
 class Report(models.Model):
     """A reporting of some information"""
     date = models.DateTimeField()
-    reporter = models.ForeignKey(Headmaster)
+    reporter = models.ForeignKey(Reporter)
     
     class Meta:
         abstract = True

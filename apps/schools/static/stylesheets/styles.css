@@ -1,4 +1,4 @@
-#school-nav ul
+#app-nav ul
 {
     list-style-type: none;
     margin-top: 10px;
@@ -11,13 +11,13 @@
     
 }
 
-#school-nav li
+#app-nav li
 {
     display: inline;
 }
 
 
-#school-nav a {
+#app-nav a {
     margin-top: 10px;
     padding: 10px;
     text-decoration: none;
@@ -25,7 +25,7 @@
     background-color:#eeeeee;
 }
 
-#school-nav a:hover
+#app-nav a:hover
 {
     background-color:#dddddd;
 }

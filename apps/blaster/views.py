@@ -7,11 +7,12 @@ from django.http import HttpResponse
 from django.db import transaction
 
 from blaster.models import *
-from schools.models import Headmaster, School
+from reporters.models import Reporter
+from schools.models import School, SchoolGroup
 
 from rapidsms.webui.utils import render_to_response
 
-def index(req, template_name="blaster/index.html"):
+def list(req, template_name="blaster/index.html"):
     all_blasts = MessageBlast.objects.order_by("-date")
     return render_to_response(req, template_name, {"blasts": all_blasts})
 
@@ -22,11 +23,63 @@ def single_blast(req, id, template_name="blaster/single.html"):
 def new(req, template_name="blaster/new.html"):
     
     def get(req, template_name="blaster/new.html", errors=None):
+        filter_params = get_location_filter_params(req, "location__")
         messages = BlastableMessage.objects.all()
         # TODO: genericize this out to only depend on reporters
-        reporters = Headmaster.objects.all()    
+
+        # filter out those not matching the type.
+        if "type" in req.GET:
+            
+            filter_type = req.GET["type"]
+        else:
+            filter_type = None
+        
+        reporters = Reporter.objects.filter(**filter_params)
+        # loop through and set some attributes on the reporters so we 
+        # can display school specific information in the UI
+        # TODO: this is horribly inefficient and could be optimized
+        
+        final_list = []
+        for reporter in reporters:
+            if reporter.location:
+                try:
+                    school = School.objects.get(id=reporter.location.id)
+                    reporter.school = school
+                    if filter_type:
+                        try:
+                            group = school.groups.get(type=filter_type)
+                            if reporter in group.reporters.all():
+                                reporter.school_role = group.member_title
+                            else:
+                                # they aren't part of the group we're filtering
+                                # on so don't add them
+                                continue
+                        except SchoolGroup.DoesNotExist:
+                            # if the school doesn't have a group then
+                            # don't add them
+                            continue
+                    else:
+                        # see if they belong to any known groups, and if so
+                        # set those objects in the UI
+                        groups = reporter.groups.all()
+                        school_groups = []
+                        for group in groups:
+                            try:
+                                school_groups.append(SchoolGroup.objects.get(id=group.id))
+                            except SchoolGroup.DoesNotExist:
+                                # wasn't a school group, just ignore it
+                                pass
+                        reporter.school_groups = school_groups
+                        # list their roles
+                        reporter.school_role = ",".join([grp.member_title() for grp in school_groups])
+                except School.DoesNotExist:
+                    reporter.school=None
+            final_list.append(reporter)
+        # sort by location, then role
+        final_list.sort(lambda x, y: cmp("%s-%s" % (x.location,x.school_role),
+                                         "%s-%s" % (y.location,y.school_role)))
         return render_to_response(req, template_name, {"messages": messages,
-                                                       "reporters": reporters,
+                                                       "reporters": final_list,
                                                        "errors": errors
                                                        } )    
     

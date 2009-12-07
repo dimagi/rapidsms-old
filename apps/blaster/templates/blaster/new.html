@@ -1,4 +1,4 @@
-{% extends "blaster/layout.html" %}
+{% extends "blaster/blaster_base.html" %}
 {% block javascripts %}
 <script type="text/javascript">
 // TODO: clean all these javascripts
@@ -60,7 +60,7 @@ function toggle(name, value) {
 {% endblock %}
 {% block pagecontent %}
 
-<h2>New Message</h2>
+<h2>New Question</h2>
 <br>
 {% if errors %}
 <p><span class="error">{{ errors|safe }}</p>
@@ -82,6 +82,7 @@ Select: <span class="js_link" onclick="toggle('select_reporter', true)">All</spa
         <th>Send?</th>
         <th>Person</th>
         <th>School</th>
+        <th>Role(s)</th>
     </thead>
     <tbody>
     {% for reporter in reporters %}
@@ -91,6 +92,7 @@ Select: <span class="js_link" onclick="toggle('select_reporter', true)">All</spa
             </td>
             <td>{{ reporter }}</td>
             <td>{{ reporter.school }}</td>
+            <td>{{ reporter.school_role }}</td>
         </tr>
     {% endfor %}
     </tbody>
