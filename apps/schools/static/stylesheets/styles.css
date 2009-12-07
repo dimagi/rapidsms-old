@@ -3,6 +3,12 @@
     list-style-type: none;
     margin-top: 10px;
     padding: 0;
+    width: 950px;
+    padding-bottom: 7px;
+    border-bottom-width: 1px; 
+    border-bottom-color: #dddddd;
+    border-bottom-style: solid;
+    
 }
 
 #school-nav li
