@@ -8,6 +8,10 @@ class App (rapidsms.app.App):
     """From the view, conduct a message blast.  Responses get collected
        with the blast.  Only one blast can be open at a given time."""
     
+    # TODO: due to this app being developed for the Uganda Ministry of
+    # Education project it is currently highly coupled with the schools
+    # app.  Breaking out these dependencies is left as future work.
+    
     def handle (self, message):
         """Add your main application logic in the handle phase."""
         if not message.reporter:
@@ -26,6 +30,8 @@ class App (rapidsms.app.App):
                 if hasattr(app, blast_msg.handling_method):
                     success = getattr(app, blast_msg.handling_method)(message)
                     # make sure it's a valid boolean, in case they return nothing
+                    # or some other object.  Django doesn't like populating 
+                    # boolean fields with random data (obviously)
                     success = True if success else False
             response = BlastResponse.objects.create(message=latest,
                                                     text=message.text,
