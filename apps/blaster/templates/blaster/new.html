@@ -1,4 +1,5 @@
-{% extends "blaster/blaster_base.html" %}
+{% extends "blaster/base.html" %}
+
 {% block javascripts %}
 <script type="text/javascript">
 // TODO: clean all these javascripts
@@ -58,7 +59,15 @@ function toggle(name, value) {
 
 </script>
 {% endblock %}
-{% block pagecontent %}
+
+{% block content %}
+<h1>
+	<a href="">Question Sender</a>
+	/ <a href="">New Question</a>
+</h1>
+
+
+
 
 <h2>New Question</h2>
 <br>
