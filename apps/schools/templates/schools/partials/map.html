@@ -12,7 +12,7 @@
                    name="map_test"
                    src="/static/schools/prototype/map_test.swf"
                    quality="high"
-                   flashVars="schoolxml={% if xml_location %}{{ xml_location }}{% else %}/schools/xml{% endif %}{% if api_key %}&key={{ api_key }}{% endif %}"
+                   flashVars="schoolxml={% if xml_location %}{{ xml_location }}{% else %}/schools/xml{% endif %}{% if api_key %}&key={{ api_key }}{% endif %}{% if marker %}&marker={{ marker }}{% endif %}"
                    pluginspage="http://www.macromedia.com/go/getflashplayer"
                    type="application/x-shockwave-flash">
             </embed>

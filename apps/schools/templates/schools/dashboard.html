@@ -47,21 +47,30 @@
       </div>
       <div class="span-16">
             <div class="dashboard-module">
-            <h2>Schools Reporting Problems</h2>
+            <h2>Problem and Featured Schools</h2>
+            {% with "Custom" as marker %}
             {% include "schools/partials/map.html" %}
+            {% endwith %}
             </div>  
       </div>
       <div class="span-8 last">
         <div class="dashboard-module">
             <h2>Problems</h2>
             <ul class="problems">
-                <li>The water is NOT working at Olila High School!</li>    
-                <li>No teachers attended Rhema Primary School Today!</li>    
-                <li>The water is NOT working at Teso Secondary School!</li>    
-                <li>The water is NOT working at St. Joseph Secondary School!</li>    
-                <li>The water is NOT working at Seroma Primary School!</li>
+                {% for problem in problems %}
+                <li>{{ problem }}</li>    
+                {% endfor %}
             </ul>
             <a class="dashboard-link" href="#">All Problems</a>
+        </div>
+        <div class="dashboard-module">
+            <h2>Featured Schools</h2>
+            <ul class="highlights">
+                {% for highlight in highlights %}
+                <li>{{ highlight }}</li>    
+                {% endfor %}
+            </ul>
+            <a class="dashboard-link" href="#">All Featured Schools</a>
         </div>
       </div>
       <div class="span-12">

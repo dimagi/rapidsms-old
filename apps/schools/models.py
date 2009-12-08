@@ -29,8 +29,17 @@ class School(Location,SerializableModel):
              "BoysAttendance": "boys_attendance",
              "GirlsAttendance": "girls_attendance",
              "WaterAvailability": "water_availability",
-             "ResponseRate": "response_rate"
-              }
+             "ResponseRate": "response_rate",
+             # we use these in different views to store things like problems
+             # and "featured schools".  You can set them and they show up
+             # in the map as follows: 
+             # custom =  -1: yellow
+             # custom =   0: red
+             # custom = 100: blue (in between 0 and 100 is shades of purple)
+             # custom_text pops up when you click a "customized" marker.
+             "Custom": "custom",
+             "CustomText": "custom_text"
+             }
     
     teachers = models.PositiveIntegerField(help_text="The number of teachers at the school")
     
@@ -38,6 +47,7 @@ class School(Location,SerializableModel):
     
     def __unicode__(self):
         return self.name
+    
     
     @property
     def headmaster(self):
@@ -102,7 +112,38 @@ class School(Location,SerializableModel):
         reports = SchoolWaterReport.objects.filter(school=self)
         if not reports: return "No data"
         return self._percent_expected_actual(reports)
-        
+    
+    @property
+    def problems(self):
+        """A list of any known problems associated with this school"""
+        # this is pretty quckly stitched together for demo purposes
+        to_return = []
+        if self.water_availability == 0:
+            to_return.append("The water is not working")
+        if self.response_rate == 0:
+            to_return.append("No responses have been received")
+        if self.teacher_attendance < 50:
+            to_return.append("Poor teacher attendance ("+ self.teacher_attendance + "%)")
+        # hacky way to set a few arbitrary data points for this demo indicator
+        # but make sure it's consistent!
+        if self.id % 33 == 17:
+            to_return.append("Corporal punishment reported")
+        return to_return
+    
+    @property
+    def highlights(self):
+        """A list of excellent data coming from a school"""
+        # this is also pretty quckly stitched together for demo purposes
+        to_return = []
+        if self.student_attendance == 100:
+            to_return.append("Perfect student attendance")
+        # we use the hacky additions below in favor of the real properties on their own
+        # because otherwise with the current data corpus the numbers are too high
+        if self.response_rate == 100 and self.id %15 == 3:
+            to_return.append("Perfect response rate")
+        if self.teacher_attendance == 100 and self.id % 9 == 7:
+            to_return.append("Perfect teacher attendance")
+        return to_return
     
     def _percent_expected_actual(self, *args):
         expected = 0
