@@ -1,0 +1,73 @@
+.module {
+	background: #f8f8f8;
+}
+
+	.module.map {
+		height: 40em;
+	}
+
+	.module ul,
+	.module li {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.module ul {
+		padding: 0 0.5em;
+		margin: 0.5em 0;
+		height: 24em;
+		overflow-y: scroll;
+		overflow-x: auto;
+	}
+
+		.module li {
+			display: block;
+			border: 1px solid #ddd;
+			margin-top: 0.5em;
+			padding: 0.5em;
+			background: #fff;
+			line-height: 1.4;
+		}
+
+		.module li:first-child {
+			margin-top: 0; }
+
+
+ul.reports li {
+	padding: 0;
+	border: none;
+	background: none;
+}
+
+	ul.reports div.meta {
+		border: 1px solid #ddd;
+		border-bottom: 0;
+		background: #eee;
+		padding: 0.25em;
+		font-size: 1em;
+		color: #aaa;
+		float: left;
+	}
+
+	ul.reports div.report {
+		border: 1px solid #ddd;
+		padding: 0.25em;
+		font-size: 2em;
+		background: #fff;
+		clear: both;
+	}
+
+	ul.reports div.report strong {
+		font-weight: normal;
+		background: #ffd;
+	}
+
+
+ul.stats {
+}
+
+
+.split-3, .split-2 {
+	margin-top: 1em;
+}

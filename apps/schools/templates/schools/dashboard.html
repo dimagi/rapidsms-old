@@ -1,97 +1,148 @@
-{% extends "schools/school_base.html" %}
-{% block pagecontent %}
-    <div class="container showgrid">
-      <div class="span-18">
-          <H1>School Activity Dashboard</h1>
-      </div>
-      <div class="span-6 last">
-           <p style="text-align:right;">Monday, November 23, 2009</p>
-      </div>
-      <hr>
-      <div class="span-8">
-        <div class="dashboard-module">
-            <h2>Latest School Reports</h2>
-            <ul class="school-reports">
-                <li>Bob User from Kampala Secondary School reports that the water IS working</li>    
-                <li>Alice User from Luwero Primary School reports that 7 of 10 teachers are present today</li>    
-                <li>Charlie User from Luwero Primary School reports that 8 of 12 boys and 11 of 13 girls are present in P1 today.</li>    
-            </ul>
-            <a class="dashboard-link" href="#">All Reports</a>
-        </div>
-      </div>
-      <div class="span-8">
-        <div class="dashboard-module">
-            <h2>Today's Stats</h2>
-            <ul class="global-stats">
-                <li><span class="global-number">153 of 450</span> Schools Reporting</li>    
-                <li><span class="global-number">20352 of 25014</span> Reported Students</li>
-                <li><span class="global-number">752 of 1023</span> Reported Teachers</li>
-                <li><span class="global-number">135 of 152</span> Water Supplies Working</li>
-            </ul>
-            <a class="dashboard-link" href="#">Today's Stats</a>
-        </div>
-      </div>
-      <div class="span-8 last">
-        <div class="dashboard-module">
-            <h2>Global Stats</h2>
-            <ul class="global-stats">
-                <li><span class="global-number">1034</span> Schools Reporting</li>    
-                <li><span class="global-number">2709</span> Known Teachers</li>    
-                <li><span class="global-number">45043</span> Known Students</li>    
-                <li><span class="global-number">87%</span> Overall Teacher Attendance Rate</li>
-                <li><span class="global-number">72%</span> Overall Student Attendance Rate</li>
-                <li><span class="global-number">91%</span> Water Supplies Working</li>
-            </ul>
-            <a class="dashboard-link" href="#">All Stats</a>
-        </div>
-      </div>
-      <div class="span-16">
-            <div class="dashboard-module">
-            <h2>Schools Reporting Problems</h2>
-            {% include "schools/partials/map.html" %}
-            </div>  
-      </div>
-      <div class="span-8 last">
-        <div class="dashboard-module">
-            <h2>Problems</h2>
-            <ul class="problems">
-                <li>The water is NOT working at Olila High School!</li>    
-                <li>No teachers attended Rhema Primary School Today!</li>    
-                <li>The water is NOT working at Teso Secondary School!</li>    
-                <li>The water is NOT working at St. Joseph Secondary School!</li>    
-                <li>The water is NOT working at Seroma Primary School!</li>
-            </ul>
-            <a class="dashboard-link" href="#">All Problems</a>
-        </div>
-      </div>
-      <div class="span-12">
-          <div class="dashboard-module">
-        
-      <h2>Recent Questions</h2>
-      {% if recent_blasts %}
-        {% with recent_blasts as blasts %}
-        {% include "blaster/partials/blast_table.html" %}
-        {% endwith %}
-        <a class="dashboard-link" href="{% url blaster.views.list %}">All Blasts</a>
-      {% else %} 
-        No blasts yet.
-      {% endif %}
-           </div>
-      </div>
-      <div class="span-12 last">
-        <div class="dashboard-module">
-        {% if last_blast %}
-        <h2>Last Question</h2>
-        <p><span class="prompt">Message: </span><span class="prompt_value">{{last_blast.message.text }}</span></p>
-        <p><span class="prompt">Sent: </span><span class="prompt_value">{{ last_blast.date|date }} - {{ last_blast.date|time }}</span></p>
-        {% with last_blast_recipients as recipients %}
-        {% include "blaster/partials/blast_recipients.html" %}
-        {% endwith %}
-        <a class="dashboard-link" href="{% url blaster.views.single_blast last_blast.id %}">All Questions</a>
-        {% else %}
-        No blasts found.
-        {% endif %}
-      </div>
-    </div>
-    
+{% extends "schools/base.html" %}
+{% block content %}
+<h1>
+	<a href="">School Monitoring</a>
+	/ <a href="">Dashboard</a>
+</h1>
+
+
+<div class="module map">
+	<h2>Overview of Schools</h2>
+	<!--{% include "schools/partials/map.html" %}-->
+</div>
+<div class="clear-hack"></div>
+
+
+<div class="split-3">
+	<div class="left">
+		<div class="module">
+			<h2>Latest Reports</h2>
+			<div class="toolbar">
+				<a href="">All Reports</a>
+			</div>
+			<ul class="reports">
+				<li>
+					<div class="meta">
+						<a href="" class="location">Lyantonde Secondary</a>
+						&raquo; <a href="" class="reporter">Bob User</a>
+					</div>
+					<div class="report">
+						The water is <strong>working</strong>.
+					</div>
+				</li>
+				<li>
+					<div class="meta">
+						<a href="" class="location">Luwero Primary</a>
+						&raquo;  <a href="" class="reporter">Alice User</a>
+					</div>
+					<div class="report">
+						<strong>7 out of 10</strong>
+						teachers are present today.
+					</div>
+				</li>
+				<li>
+					<div class="meta">
+						<a href="" class="location">Luwero Primary</a>
+						&raquo; <a href="" class="reporter">Charlie User</a>
+					</div>
+					<div class="report">
+						<strong>8 boys</strong> and <strong>11 girls</strong>
+						are present <!--in grade <strong>P1</strong>--> today.
+					</div>
+				</li>
+				<li class="warn">
+					<div class="meta">
+						<a href="" class="location">Luwero Primary</a>
+						&raquo; <a href="" class="reporter">Dave User</a>
+					</div>
+					<div class="report">
+						Test
+					</div>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<div class="mid">
+		<div class="module">
+			<h2>Today's Stats</h2>
+			<div class="toolbar">
+				<a href="">All Stats</a>
+			</div>
+			<ul class="global-stats">
+				<li><span class="global-number">153 of 450</span> Schools Reporting</li>
+				<li><span class="global-number">20352 of 25014</span> Reported Students</li>
+				<li><span class="global-number">752 of 1023</span> Reported Teachers</li>
+				<li><span class="global-number">135 of 152</span> Water Supplies Working</li>
+			</ul>
+		</div>
+	</div>
+	<div class="right">
+		<div class="module">
+			<h2>Global Stats</h2>
+			<div class="toolbar">
+				<a href="">All Stats</a>
+			</div>
+			<ul class="global-stats">
+				<li><span class="global-number">1034</span> Schools Reporting</li>
+				<li><span class="global-number">2709</span> Known Teachers</li>
+				<li><span class="global-number">45043</span> Known Students</li>
+				<li><span class="global-number">87%</span> Overall Teacher Attendance Rate</li>
+				<li><span class="global-number">72%</span> Overall Student Attendance Rate</li>
+				<li><span class="global-number">91%</span> Water Supplies Working</li>
+			</ul>
+		</div>
+	</div>
+</div>
+<div class="clear-hack"></div>
+
+<div class="split-2">
+	<!--<div class="left">
+		<div class="module">
+			<h2>Problems</h2>
+			<ul class="problems">
+				<li>The water is NOT working at Olila High School!</li>
+				<li>No teachers attended Rhema Primary School Today!</li>
+				<li>The water is NOT working at Teso Secondary School!</li>
+				<li>The water is NOT working at St. Joseph Secondary School!</li>
+				<li>The water is NOT working at Seroma Primary School!</li>
+			</ul>
+			<a class="more" href="">All Problems</a>
+		</div>
+	</div>-->
+	<div class="left">
+		<div class="module">
+			<h2>Recent Questions</h2>
+			<div class="toolbar">
+				<a href="{% url blaster.views.list %}">All Blasts</a>
+			</div>
+
+			{% if recent_blasts %}
+				{% with recent_blasts as blasts %}
+					{% include "blaster/partials/blast_table.html" %}
+				{% endwith %}
+			{% else %}
+				No blasts yet.
+			{% endif %}
+		</div>
+	</div>
+	<div class="right">
+		<div class="module">
+		{% if last_blast %}
+			<h2>Last Question</h2>
+			<div class="toolbar">
+				<a href="{% url blaster.views.single_blast last_blast.id %}">All Questions</a>
+			</div>
+
+			<p><span class="prompt">Message: </span><span class="prompt_value">{{last_blast.message.text }}</span></p>
+			<p><span class="prompt">Sent: </span><span class="prompt_value">{{ last_blast.date|date }} - {{ last_blast.date|time }}</span></p>
+			{% with last_blast_recipients as recipients %}
+				{% include "blaster/partials/blast_recipients.html" %}
+			{% endwith %}
+		{% else %}
+			No blasts found.
+		{% endif %}
+		</div>
+	</div>
+</div>
+<div class="clear-hack"></div>
 {% endblock %}

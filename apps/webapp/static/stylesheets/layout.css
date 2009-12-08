@@ -40,8 +40,8 @@ abbr {
 
 p {
 	line-height: 1.4; }
-	
-		
+
+
 /* position accessibility-only parts of labels (which are
  * more verbose than is necessary, sometimes) off-screen:
  *
@@ -283,39 +283,41 @@ div.clear-hack {
 
 	/* split a section vertically in
 	 * half, with some css hackery */
-	 
-	#inner div.split {
+	#inner div.split,
+	#inner div.split-2 {
 		padding: 0 0.5em;
 	}
-		
+
 		/* TODO: explain the margins! */
-		#inner div.split .left {
+		#inner div.split .left,
+		#inner div.split-2 .left {
 			margin-left: -0.5em;
 			float: left;
 			border: none;
 			width: 50%;
 		}
-		
-		#inner div.split .right {
+
+		#inner div.split .right,
+		#inner div.split-2 .right {
 			margin-right: -0.5em;
 			float: right;
 			border: none;
 			width: 50%;
 		}
-	
+
 	/* split a section into THREE */
-	
+
 	#inner div.split-3 {
 		padding: 0 1em;
 	}
-		
+
 		#inner div.split-3 .left {
 			margin-left: -1em;
 			float: left;
 			border: none;
 			width: 33%;
 		}
-		
+
 		#inner div.split-3 .mid {
 			margin-right: 1em;
 			margin-left: 1em;
@@ -323,7 +325,7 @@ div.clear-hack {
 			border: none;
 			width: 34%;
 		}
-		
+
 		#inner div.split-3 .right {
 			margin-right: -1em;
 			float: right;
@@ -398,6 +400,9 @@ input.small {
 		margin: 0;
 	}
 
+
+
+
 	#top{
 		background-color: #333333;
 	}
@@ -425,6 +430,3 @@ input.small {
 		margin-left: 10px;
 		width: 630px;
 	}
-
-
-
