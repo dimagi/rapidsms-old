@@ -8,7 +8,7 @@
 
 
 body {
-	background: #eef url("../images/page-bg.png") repeat-y 50% 0;
+	background: #eee url("../images/body-bg.png");
 	font: 9pt "Lucida Grande", "Bitstream Vera Sans", Verdana, sans-serif;
 	line-height: 1;
 	color: #333;
@@ -66,6 +66,13 @@ div.clear-hack {
 	width: 83em;
 	margin: 0 auto;
 	background: #fff;
+
+	/* a little pretty for the 10/dec demo */
+	-moz-box-shadow: 4px 4px 8px #aaa;
+	box-shadow: 4px 4px 8px #aaa;
+	margin-top: 0.5em;
+	-moz-border-radius-bottomright: 1em;
+	-moz-border-radius-bottomleft: 1em;
 }
 
 	/* no scaling for ie6 */

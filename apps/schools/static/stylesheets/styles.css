@@ -154,14 +154,10 @@ h2 {
 }
 
 
-body 
-{
-    font-size: 75%;
-    background-color: #eeeeee;
+body {
 }
 
 #inner {
-	background-color:white;
 	width: 970px;
 }
 
