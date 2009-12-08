@@ -37,6 +37,17 @@ h2, h3 {
 	line-height: 1;
 }
 
+	h2 {
+		color: #fff;
+		border-bottom: 0;
+		background: #000 url("../images/h2-bg-alt.png") repeat-x 0 100%;
+		padding: 0.3125em;
+		background-color: #000;
+		font-weight: normal;
+		font-size: 160%;
+		text-shadow: #000 2px 2px 1px;
+	}
+
 	/* subheaders are almost the same. to dull things,
 	 * i took the colors and images from h2, reduced
 	 * saturation by 50%, and increased lightness by
@@ -47,7 +58,7 @@ h2, h3 {
 		background-color: #aad0d4;
 		font-weight: normal;
 	}
-		
+
 	/* additional, less important info can
 	 * be wrapped in a span to dullify it */
 	h2 span {
@@ -322,8 +333,8 @@ table {
 	position: absolute;
 	top: 0;
 	right: 0;
-	height: 2em;
-	line-height: 2em;
+	line-height: 1em;
+	padding-top: 1em;
 }
 
 	/* toolbar links (add, see more, do
@@ -332,7 +343,7 @@ table {
 	.module div.toolbar span {
 		display: block;
 		float: right;
-		color: #fff;
+		color: #eee;
 		margin-right: 0.625em;
 		padding-left: 21px;
 		background-repeat: no-repeat;
