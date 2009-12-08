@@ -150,7 +150,52 @@ table {
 				font-style: italic;
 			}
 
-		
+	table.sortable {
+	}
+
+		/* make the entire header clickable to sort,
+		 * by removing the padding from the TH, and
+		 * instead adding it to the link */
+		table.sortable thead th {
+			padding: 0;
+		}
+
+		table.sortable thead th a {
+			display: block;
+			padding: 0.5em;
+			color: #888;
+			outline: 0;
+
+			/* divide the column headers with
+			 * a sweet web one-point-oh bevel */
+			border-right: 1px solid #ddd;
+			border-left: 1px solid #fff;
+		}
+
+		/* remove the bevel from either end of the row */
+		table.sortable thead th:first-child a { border-left: none; }
+		table.sortable thead th:last-child  a { border-right: none; }
+
+		table.sortable col.sorted {
+			background-color: #f8f8ff;
+		}
+
+		/* highlight sortable columns when the TH is hovered over, a bit
+		 * like native controls. this is crappy, since we should really be
+		 * highlighting when the link is hovered, but that background is
+		 * already being used by the up/down arrows */
+		table.sortable thead th:hover   { background-image: url(../images/table-header-bg-highlight.png); }
+		table.sortable thead th:hover a { color: #000; }
+
+		table.sortable thead th.sorted a {
+			background-repeat: no-repeat;
+			background-position: right;
+			padding-right: 15px;
+		}
+
+		table.sortable thead th.ascending  a { background-image: url("../../webapp/icons/silk/arrow_down.png"); }
+		table.sortable thead th.descending a { background-image: url("../../webapp/icons/silk/arrow_up.png"); }
+
 	tr.no-data { }
 		
 			tr.no-data td {

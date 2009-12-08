@@ -1,19 +1,19 @@
-
-th.sorted {
-    background-color: lightyellow;
-    background-repeat: no-repeat;
-    background-position: right;
-    padding-right:15px;
+form#search {
+	position: absolute;
+	right: 1em;
+	top: 1em;
 }
 
-th#descending {
-    background-image: url("../../webapp/icons/silk/arrow_up.png");
+#inner table {
+	width: 100%;
 }
 
-th#ascending {
-    background-image: url("../../webapp/icons/silk/arrow_down.png");
+#inner th,
+#inner td {
+	width: 16%;
 }
 
-td.sorted {
-    background-color: lightyellow;
+#inner th:last-child,
+#inner td:last-child {
+	width: 32%;
 }
