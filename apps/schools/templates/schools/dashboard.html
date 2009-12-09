@@ -8,7 +8,7 @@
 
 <div class="module map">
 	<h2>Overview of Schools</h2>
-	<!--{% include "schools/partials/map.html" %}-->
+	{% include "schools/partials/map.html" %}
 </div>
 <div class="clear-hack"></div>
 
@@ -68,11 +68,39 @@
 			<div class="toolbar">
 				<a href="">All Stats</a>
 			</div>
-			<ul class="global-stats">
-				<li><span class="global-number">153 of 450</span> Schools Reporting</li>
-				<li><span class="global-number">20352 of 25014</span> Reported Students</li>
-				<li><span class="global-number">752 of 1023</span> Reported Teachers</li>
-				<li><span class="global-number">135 of 152</span> Water Supplies Working</li>
+			<ul class="stats">
+				<li>
+					<div>
+						<span class="num">153</span>
+						of <span class="total">450</span>
+						is <span class="perc">34%</span>
+					</div>
+					Schools Reported Today
+				</li>
+				<li>
+					<div>
+						<span class="num">752</span>
+						of <span class="total">1023</span>
+						is <span class="perc">74%</span>
+					</div>
+					Teachers Reported Today
+				</li>
+				<li>
+					<div>
+						<span class="num">20352</span>
+						of <span class="total">25014</span>
+						is <span class="perc">81%</span>
+					</div>
+					Students Reported Today
+				</li>
+				<li>
+					<div>
+						<span class="num">135</span>
+						of <span class="total">152</span>
+						is <span class="perc">89%</span>
+					</div>
+					Water Supplies Working Today
+				</li>
 			</ul>
 		</div>
 	</div>
@@ -82,13 +110,31 @@
 			<div class="toolbar">
 				<a href="">All Stats</a>
 			</div>
-			<ul class="global-stats">
-				<li><span class="global-number">1034</span> Schools Reporting</li>
-				<li><span class="global-number">2709</span> Known Teachers</li>
-				<li><span class="global-number">45043</span> Known Students</li>
-				<li><span class="global-number">87%</span> Overall Teacher Attendance Rate</li>
-				<li><span class="global-number">72%</span> Overall Student Attendance Rate</li>
-				<li><span class="global-number">91%</span> Water Supplies Working</li>
+			<ul class="stats">
+				<li>
+					<div><span class="num">450</span></div>
+					Schools Registered
+				</li>
+				<li>
+					<div><span class="num">1023</span></div>
+					Registered Teachers
+				</li>
+				<li>
+					<div><span class="num">25014</span></div>
+					Registered Students
+				</li>
+				<li>
+					<div><span class="num">87%</span></div>
+					Overall Teacher Attendance Rate
+				</li>
+				<li>
+					<div><span class="num">72%</span></div>
+					Overall Student Attendance Rate
+				</li>
+				<li>
+					<div><span class="num">91%</span></div>
+					Water Supplies Working
+				</li>
 			</ul>
 		</div>
 	</div>

@@ -3,7 +3,6 @@
 }
 
 	.module.map {
-		height: 40em;
 	}
 
 	.module ul,
@@ -14,7 +13,8 @@
 	}
 
 	.module ul {
-		padding: 0 0.5em;
+		padding: 0.5em;
+		padding-top: 0;
 		margin: 0.5em 0;
 		height: 24em;
 		overflow-y: scroll;
@@ -27,7 +27,6 @@
 			margin-top: 0.5em;
 			padding: 0.5em;
 			background: #fff;
-			line-height: 1.4;
 		}
 
 		.module li:first-child {
@@ -38,13 +37,17 @@ ul.reports li {
 	padding: 0;
 	border: none;
 	background: none;
+	margin-top: 0.5em;
 }
+
+	ul.reports li:first-child {
+		margin-top: 0; }
 
 	ul.reports div.meta {
 		border: 1px solid #ddd;
 		border-bottom: 0;
 		background: #eee;
-		padding: 0.25em;
+		padding: 0.5em;
 		font-size: 1em;
 		color: #aaa;
 		float: left;
@@ -55,6 +58,7 @@ ul.reports li {
 		padding: 0.25em;
 		font-size: 2em;
 		background: #fff;
+		line-height: 1.2;
 		clear: both;
 	}
 
@@ -67,6 +71,29 @@ ul.reports li {
 ul.stats {
 }
 
+	ul.stats li {
+		text-align: center;
+	}
+
+		ul.stats li div {
+			margin-bottom: 0.5em;
+			padding-bottom: 0.5em;
+			border-bottom: 1px dotted #eee;
+			line-height: 1.2;
+			color: #aaa;
+		}
+
+			ul.stats li span.num,
+			ul.stats li span.total,
+			ul.stats li span.perc {
+				font-size: 200%;
+				color: #000;
+			}
+
+			ul.stats li span.total {
+				font-size: 150%;
+				color: #aaa;
+			}
 
 .split-3, .split-2 {
 	margin-top: 1em;
