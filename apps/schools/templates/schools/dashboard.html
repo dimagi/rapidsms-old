@@ -8,7 +8,9 @@
 
 <div class="module map">
 	<h2>Overview of Schools</h2>
+  {% with "Custom" as marker %}
 	{% include "schools/partials/map.html" %}
+	{% endwith %}
 </div>
 <div class="clear-hack"></div>
 

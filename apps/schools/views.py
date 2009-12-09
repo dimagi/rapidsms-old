@@ -19,6 +19,17 @@ def dashboard(req, template_name="schools/dashboard.html"):
         last_blast = recent_blasts[0]
         context["last_blast"] = last_blast
         context["last_blast_recipients"] = last_blast.recipients.all()[:5]
+    # set the problem and feature lists to match up with the xml, but 
+    # only include a max of 5
+    problems = []
+    highlights = []
+    for school in School.objects.all():
+        if school.problems:
+            problems.append("%s at %s" %(school.problems[0], school.name))
+        elif school.highlights:
+            highlights.append("%s at %s" %(school.highlights[0], school.name))
+    context["problems"] = problems[:5]
+    context["highlights"] = highlights[:5]
     return render_to_response(req, template_name, context) 
 
 
@@ -58,6 +69,17 @@ def xml(req):
     all_schools = School.objects.all()
     root = Element("root")
     for school in all_schools:
+        # for now automatically set the problems and highlights as custom
+        # attributes.  If a school has both highlights and problems the 
+        # problems win
+        if school.problems:
+            # TODO: should we show more than one?
+            school.custom = 0
+            school.custom_text = school.problems[0]
+        elif school.highlights:
+            # TODO: should we show more than one?
+            school.custom = 100
+            school.custom_text = school.highlights[0]
         school_elem = school.to_element()
         root.append(school_elem)
     return HttpResponse(ElementTree.tostring(root), mimetype="text/xml")
