@@ -41,6 +41,23 @@
 		}
 
 
+.module.locations a,
+.module.roles a {
+	background: url("../../webapp/icons/silk/bullet_white.png") no-repeat 0 50%;
+	padding-left: 21px;
+	outline: none;
+}
+
+	.module .checked a,
+	.module .checked-parent a {
+		background-image: url("../../webapp/icons/silk/accept--dull.png");
+		background-color: #fffff8;
+	}
+
+	#inner .module .checked a {
+		background-image: url("../../webapp/icons/silk/accept.png"); }
+
+
 table {
 	width: 100%;
 }
@@ -74,12 +91,19 @@ table {
 		padding: 0.25em;
 		line-height: 1.2;
 		color: #000;
+		outline: 0;
 	}
 
-	.question li a:hover {
-		text-decoration: none;
-		background: none;
-	}
+		.question li a:hover {
+			text-decoration: none;
+			background: none;
+		}
+
+		.question li.checked {
+			background: #ffd; }
+
+		#inner .question li.checked a {
+			background: #ffd; }
 
 	.question li .info {
 		border-top: 1px dotted #eee;

@@ -1,6 +1,7 @@
 {% extends "blaster/base.html" %}
 {% load pagination-tags %}
 
+
 {% block content %}
 <h1>
 	<a href="">Question Sender</a>
@@ -9,41 +10,41 @@
 
 <div class="split-4">
 	<div class="left">
-		<div class="module">
+		<div class="module locations regions">
 			<h2>Regions</h2>
 			<ul>{% for region in regions %}
-				<li class="r-{{ region_id }}">
+				<li id="loc-{{ region.pk }}">
 					<a href="">{{ region }}</a>
 				</li>{% endfor %}
 		</div>
 	</div>
 	<div class="mid-left">
-		<div class="module">
+		<div class="module locations districts">
 			<h2>Districts</h2>
 			<!--<div class="toolbar">
 				<a href="">All</a>
 				<a href="">None</a>
 			</div>-->
 			<ul>{% for district in districts %}
-				<li class="d-{{ district_id }} r-{{ district.parent_id }}">
+				<li id="loc-{{ district.pk }}" class="child-of-{{ district.parent_id }}">
 					<a href="">{{ district }}</a>
 				</li>{% endfor %}
 		</div>
 	</div>
 	<div class="mid-right">
-		<div class="module">
+		<div class="module locations schools">
 			<h2>Schools</h2>
 			<ul>{% for school in schools %}
-				<li class="s-{{ school.parent_id }} d-{{ school.parent_id }}">
+				<li id="loc-{{ school.pk }}" class="child-of-{{ school.parent_id }}">
 					<a href="">{{ school }}</a>
 				</li>{% endfor %}
 		</div>
 	</div>
 	<div class="right">
-		<div class="module">
+		<div class="module roles">
 			<h2>Roles</h2>
 			<ul>{% for key, val in roles %}
-				<li class="r-{{ key}}">
+				<li class="role-{{ key}}{% ifequal key "headmaster" %} checked{% endifequal %}">
 					<a href="">
 						{{ val }}
 					</a>
@@ -52,6 +53,37 @@
 	</div>
 </div>
 <div class="clear-hack"></div>
+
+<script type="text/javascript">
+	(function() {
+		var cls = "checked";
+		var par = "-parent";
+
+		var checked = function(element) {
+			return $(element).hasClass(cls) || $(element).hasClass(cls+par);
+		};
+
+		var children = function(element) {
+			var loc_slug = $(element).get(0).id;
+			var loc_pk = loc_slug.replace(/\D/g, "");
+			return $(".child-of-" + loc_pk);
+		};
+
+		var inherit = function(element, state) {
+			$.each(children(element), function() {
+				$(this).toggleClass(cls+par, state);
+				inherit(this, checked(this));
+			});
+		};
+
+		$(".module.locations a, .module.roles a").click(function(ev) {
+			var li = $(this).parent("li");
+			li.toggleClass(cls);
+			inherit(li, checked(li));
+			ev.preventDefault();
+		});
+	})();
+</script>
 
 
 <div class="split-2">
@@ -112,6 +144,16 @@
 	</div>
 </div>
 <div class="clear-hack"></div>
+
+<script type="text/javascript">
+	(function() {
+		$(".question a").click(function(ev) {
+			var li = $(this).parent("li");
+			li.toggleClass("checked");
+			ev.preventDefault();
+		});
+	})();
+</script>
 
 <div class="send">
 	<input type="button" value="Send Question" />
