@@ -18,7 +18,7 @@ class App(rapidsms.app.App):
         if re.search(r"join", txt, re.I):
             resp = "Thank you for joining RapidSMS!"
 
-        elif re.search(r"report", txt, re.I):
+        elif re.search(r"report|\d+|yes|no", txt, re.I):
             resp = "Thank you for submitting a report to RapidSMS!"
 
         elif re.search(r"help", txt, re.I):
