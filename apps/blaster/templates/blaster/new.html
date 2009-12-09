@@ -1,6 +1,128 @@
 {% extends "blaster/base.html" %}
+{% load pagination-tags %}
 
-{% block javascripts %}
+{% block content %}
+<h1>
+	<a href="">Question Sender</a>
+	/ <a href="">New Question</a>
+</h1>
+
+<div class="split-4">
+	<div class="left">
+		<div class="module">
+			<h2>Regions</h2>
+			<ul>{% for region in regions %}
+				<li class="r-{{ region_id }}">
+					<a href="">{{ region }}</a>
+				</li>{% endfor %}
+		</div>
+	</div>
+	<div class="mid-left">
+		<div class="module">
+			<h2>Districts</h2>
+			<!--<div class="toolbar">
+				<a href="">All</a>
+				<a href="">None</a>
+			</div>-->
+			<ul>{% for district in districts %}
+				<li class="d-{{ district_id }} r-{{ district.parent_id }}">
+					<a href="">{{ district }}</a>
+				</li>{% endfor %}
+		</div>
+	</div>
+	<div class="mid-right">
+		<div class="module">
+			<h2>Schools</h2>
+			<ul>{% for school in schools %}
+				<li class="s-{{ school.parent_id }} d-{{ school.parent_id }}">
+					<a href="">{{ school }}</a>
+				</li>{% endfor %}
+		</div>
+	</div>
+	<div class="right">
+		<div class="module">
+			<h2>Roles</h2>
+			<ul>{% for key, val in roles %}
+				<li class="r-{{ key}}">
+					<a href="">
+						{{ val }}
+					</a>
+				</li>{% endfor %}
+		</div>
+	</div>
+</div>
+<div class="clear-hack"></div>
+
+
+<div class="split-2">
+	<div class="left">
+		<div class="module">
+			<h2>Recipients</h2>
+
+			<table class="sortable">
+				<thead>
+					<tr>
+						<th><a href="">Person</a></th>
+						<th><a href="">Role</a></th>
+						<th><a href="">School</a></th>
+					</tr>
+				</thead>
+
+				<tbody>{% if people.object_list %}{% for person in people.object_list %}
+					<tr>
+						<td>{{ person }}</td>
+						<td>{{ person.school_role }}</td>
+						<td>{{ person.location.name }}</td>
+					</tr>{% endfor %}{% else %}
+					<tr class="no-data">
+						<td colspan="3">
+							No recipients yet.
+						</td>
+					</tr>
+					{% endif %}
+				</tbody>
+
+				<tfoot>
+					<tr>
+						<td colspan="3">
+							<div class="paginator">
+								{% paginator people %}
+							</div>
+						</td>
+					</tr>
+				</tfoot>
+			</table>
+		</div>
+	</div>
+	<div class="right">
+		<div class="module question">
+			<h2>Question</h2>
+			<ul>{% for message in messages %}
+				<li>
+					<a href="">{{ message }}</a>
+					<div class="info">
+						<div>Used: <span>6 times</span></div>
+						<div>Last: <span>10 days ago</span></div>
+						<div>Responses: <span>650</span></div>
+						<div>Rate: <span>50%</span></div>
+					</div>
+				</li>{% endfor %}
+			</ul>
+		</div>
+	</div>
+</div>
+<div class="clear-hack"></div>
+
+<div class="send">
+	<input type="button" value="Send Question" />
+</div>
+{% endblock %}
+
+
+
+
+
+{% block javascriptsx %}
 <script type="text/javascript">
 // TODO: clean all these javascripts
 function toggle(source) {
@@ -60,7 +182,7 @@ function toggle(name, value) {
 </script>
 {% endblock %}
 
-{% block content %}
+{% block contentx %}
 <h1>
 	<a href="">Question Sender</a>
 	/ <a href="">New Question</a>

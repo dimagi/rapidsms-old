@@ -333,6 +333,21 @@ div.clear-hack {
 			width: 33%;
 		}
 
+	/* split a section into FOUR */
+
+	#inner div.split-4 {
+		padding-left: 3em; }
+
+		#inner div.split-4 .left,  #inner div.split-4 .mid-left,
+		#inner div.split-4 .right, #inner div.split-4 .mid-right {
+			margin-left: 1em;
+			float: left;
+			width: 25%;
+		}
+
+		#inner div.split-4 .left {
+			margin-left: -3em; }
+
 	/* when an app has something really
 	 * important to say, it can use the
 	 * apps/webui/templates/message.html

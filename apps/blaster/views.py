@@ -1,6 +1,7 @@
 from datetime import datetime
 import httplib, urllib, urllib2
 from threading import Thread
+import re
 
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
@@ -8,9 +9,10 @@ from django.db import transaction
 
 from blaster.models import *
 from reporters.models import Reporter
-from schools.models import School, SchoolGroup
+from locations.models import LocationType, Location
+from schools.models import School, SchoolGroup, SCHOOL_GROUP_TYPES
 
-from rapidsms.webui.utils import render_to_response
+from rapidsms.webui.utils import render_to_response, paginated
 
 def list(req, template_name="blaster/index.html"):
     all_blasts = MessageBlast.objects.order_by("-date")
@@ -40,7 +42,8 @@ def new(req, template_name="blaster/new.html"):
         # TODO: this is horribly inefficient and could be optimized
         
         final_list = []
-        for reporter in reporters:
+        #for reporter in reporters:
+        for reporter in []:
             if reporter.location:
                 try:
                     school = School.objects.get(id=reporter.location.id)
@@ -78,9 +81,57 @@ def new(req, template_name="blaster/new.html"):
         # sort by location, then role
         final_list.sort(lambda x, y: cmp("%s-%s" % (x.location,x.school_role),
                                          "%s-%s" % (y.location,y.school_role)))
+
+
+        # wow! what a complete contradiction of the entire point of the
+        # locations app. no matter, it's just for the demo.
+        r = LocationType.objects.get(name="Region")
+        regions = r.locations.all().order_by("name")
+
+        d = LocationType.objects.get(name="District")
+        districts = d.locations.all().order_by("parent__id", "name")
+
+        s = LocationType.objects.get(name="School")
+        schools = s.locations.all().order_by("parent__id", "parent__parent__id", "name")
+
+        def _with_role(reporter):
+            """
+            Add a 'school_role' attribute (a comma-separated list of the
+            'member_title' method of each linked SchoolGroup object) to
+            *reporter* and return it.
+
+            This is horribly, horribly inefficient, but there isn't a
+            more direct way of finding the SchoolGroup names of each
+            reporter, since every single School has its own roles (??).
+            """
+
+            groups = SchoolGroup.objects.filter(reporters=reporter)
+            roles = ", ".join([g.member_title() for g in groups])
+            roles = re.sub(r"\s+(Member|Leader)", "", roles)
+
+            reporter.school_role = roles
+            return reporter
+
+        #people = [
+        #    _with_role(person)
+        #    for person in Reporter.objects.all()]
+
+        all_people = Reporter.objects.all()[0:100]
+        people = paginated(req, all_people, per_page=10, wrapper=_with_role)
+
+        roles = [
+            (key, vals[1])
+            for key, vals in SCHOOL_GROUP_TYPES.items()]
+
         return render_to_response(req, template_name, {"messages": messages,
                                                        "reporters": final_list,
-                                                       "errors": errors
+                                                       "errors": errors,
+
+                                                       "regions": regions,
+                                                       "districts": districts,
+                                                       "schools": schools,
+                                                       "people": people,
+                                                       "roles": roles
                                                        } )    
     
     @transaction.commit_manually
