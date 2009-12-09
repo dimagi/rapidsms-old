@@ -32,68 +32,45 @@
 		.module li:first-child {
 			margin-top: 0; }
 
+		.module li div.meta,
+		.module li div.caption {
+		}
 
-ul.reports li {
-	padding: 0;
-	border: none;
-	background: none;
-	margin-top: 0.5em;
+		.module li div.report {
+			font-size: 2em;
+			line-height: 1.2;
+			border-bottom: 1px dotted #eee;
+			margin-bottom: 0.25em;
+			padding-bottom: 0.25em;
+		}
+
+
+ul.reports {
 }
-
-	ul.reports li:first-child {
-		margin-top: 0; }
-
-	ul.reports div.meta {
-		border: 1px solid #ddd;
-		border-bottom: 0;
-		background: #eee;
-		padding: 0.5em;
-		font-size: 1em;
-		color: #aaa;
-		float: left;
-	}
-
-	ul.reports div.report {
-		border: 1px solid #ddd;
-		padding: 0.25em;
-		font-size: 2em;
-		background: #fff;
-		line-height: 1.2;
-		clear: both;
-	}
 
 	ul.reports div.report strong {
 		font-weight: normal;
 		background: #ffd;
 	}
 
-
-ul.stats {
-}
-
-	ul.stats li {
-		text-align: center;
+	ul.reports div.meta {
+		color: #aaa;
 	}
 
-		ul.stats li div {
-			margin-bottom: 0.5em;
-			padding-bottom: 0.5em;
-			border-bottom: 1px dotted #eee;
-			line-height: 1.2;
-			color: #aaa;
-		}
 
-			ul.stats li span.num,
-			ul.stats li span.total,
-			ul.stats li span.perc {
-				font-size: 200%;
-				color: #000;
-			}
+ul.stats {
+		text-align: center;
+}
 
-			ul.stats li span.total {
-				font-size: 150%;
-				color: #aaa;
-			}
+	ul.stats li span {
+		font-size: 50%;
+		color: #aaa;
+	}
+
+	ul.stats li span.total {
+		font-size: 100%;
+	}
+
 
 .split-3, .split-2 {
 	margin-top: 1em;
