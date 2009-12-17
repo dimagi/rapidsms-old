@@ -123,7 +123,7 @@ class School(Location,SerializableModel):
         if self.response_rate == 0:
             to_return.append("No responses have been received")
         if self.teacher_attendance < 50:
-            to_return.append("Poor teacher attendance ("+ self.teacher_attendance + "%)")
+            to_return.append("Poor teacher attendance (%s)" % self.teacher_attendance)
         # hacky way to set a few arbitrary data points for this demo indicator
         # but make sure it's consistent!
         if self.id % 33 == 17:
