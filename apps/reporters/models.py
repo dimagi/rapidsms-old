@@ -3,6 +3,7 @@
 
 
 import re
+import logging
 from datetime import datetime
 from django.db import models
 from django.core.urlresolvers import reverse
@@ -218,14 +219,31 @@ class Reporter(models.Model):
         alias = unique(re.sub(r"[^a-zA-Z]", "", flat_name))
         return (alias.lower(), flat_name, "")
     
+    def set_preferred_connection(self, conn):
+        connections = PersistantConnection.objects.filter(reporter=self)
+        for connection in connections:
+            if connection.preferred == True and connection != conn:
+                connection.preferred = False
+                connection.save()
+        conn.preferred = True
+        conn.save()
     
+    @property
     def connection(self):
         """Returns the connection object last used by this Reporter.
            The field is (probably) updated by app.py when receiving
            a message, so depends on _incoming_ messages only."""
         
-        # TODO: add a "preferred" flag to connection, which then
-        # overrides the last_seen connection as the default, here
+        # return preferred connection, if one has been set
+        try:
+            return self.connections.get(preferred=True)
+        except PersistantConnection.MultipleObjectsReturned:
+            # this should never happen
+            logging.error("Reporter has multiple preferred connections!")
+            pass
+        except PersistantConnection.DoesNotExist:
+            pass
+        
         try:
             return self.connections.latest("last_seen")
         
@@ -251,7 +269,10 @@ class Reporter(models.Model):
         # return the latest, or none, if they've
         # has never been seen on ANY connection
         return max(timedates) if timedates else None
-
+    
+    def send_message(self, router, msg):
+        be = router.get_backend(self.connection.backend.slug)
+        be.message(self.connection.identity, msg).send()
 
 class PersistantBackend(models.Model):
     """This class exists to provide a primary key for each
@@ -295,7 +316,7 @@ class PersistantConnection(models.Model):
     identity  = models.CharField(max_length=30)
     reporter  = models.ForeignKey(Reporter, related_name="connections", blank=True, null=True)
     last_seen = models.DateTimeField(blank=True, null=True)
-    
+    preferred = models.BooleanField(default=False)
     
     class Meta:
         verbose_name = "Connection"

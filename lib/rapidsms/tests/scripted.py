@@ -4,6 +4,7 @@ from django.utils.encoding import smart_str
 from harness import MockRouter, EchoApp
 from rapidsms.backends.backend import Backend
 from rapidsms.message import Message
+from rapidsms.i18n import init as i18n_init
 import unittest, re
 try:
     from django.test import TestCase
@@ -50,7 +51,12 @@ class TestScript (TestCase):
     """
     apps = None
 
-    def setUp (self):
+    def setUp (self, default_lang='en'):
+        """ default_lang specifies the default language in ISO 639/X
+        in in which sms messages are expected (note this code should
+        correspond to the contents of contrib/locale/(code)
+        (currently, we only support testing one language at a time)
+        """
         self.router = MockRouter()
         self.backend = Backend(self.router)
         self.router.add_backend(self.backend)
@@ -60,6 +66,7 @@ class TestScript (TestCase):
         for app_class in self.apps:
             app = app_class(self.router)
             self.router.add_app(app)
+        i18n_init(default_lang, [[default_lang]] )
 
     def tearDown (self):
         if self.router.running:

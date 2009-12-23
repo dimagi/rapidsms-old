@@ -37,6 +37,7 @@ class IncomingMessage(MessageBase):
         return "%s %s" % (MessageBase.__unicode__(self), self.received)  
 
     class Meta:
+        get_latest_by = 'received'
         # the permission required for this tab to display in the UI
         permissions = (
             ("can_view", "Can view message logs"),

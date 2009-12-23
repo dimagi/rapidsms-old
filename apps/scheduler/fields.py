@@ -9,7 +9,6 @@ unpickle anything. Also works fine when querying.
 
 http://www.djangosnippets.org/snippets/1694/ 
 """
-
 from django.db import models
 
 try:
@@ -48,11 +47,14 @@ class PickledObjectField(models.Field):
         return 'TextField'
     
     def get_db_prep_lookup(self, lookup_type, value):
-        if lookup_type == 'exact':
+        if lookup_type == 'exact' or lookup_type == 'iexact':
             value = self.get_db_prep_save(value)
             return super(PickledObjectField, self).get_db_prep_lookup(lookup_type, value)
         elif lookup_type == 'in':
             value = [self.get_db_prep_save(v) for v in value]
             return super(PickledObjectField, self).get_db_prep_lookup(lookup_type, value)
+        elif lookup_type == 'contains' or lookup_type == 'icontains':
+            value = self.get_db_prep_save(value)
+            return super(PickledObjectField, self).get_db_prep_lookup(lookup_type, value)
         else:
-            raise TypeError('Lookup type %s is not supported.' % lookup_type)
+            raise TypeError('Lookup type %s not supported for PickledObject.' % lookup_type)

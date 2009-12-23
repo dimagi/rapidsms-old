@@ -8,13 +8,13 @@ from models import OutgoingMessage, IncomingMessage
 
 class App(rapidsms.app.App):
     
-    def handle(self, message):
-        # make and save messages on their way in and 
-        # cast connection as string so pysqlite doesnt complain
-        msg = IncomingMessage(identity=message.connection.identity, text=message.text,
-            backend=message.connection.backend.slug)
-        msg.save()
-        self.debug(msg)
+    def parse(self, message):
+        # make and save messages on their way in 
+        persistent_msg = IncomingMessage.objects.create(identity=message.connection.identity, \
+                                                        text=message.text, \
+                                                        backend=message.connection.backend.slug)
+        message.persistent_msg = persistent_msg
+        self.debug(persistent_msg)
     
     def outgoing(self, message):
         # make and save messages on their way out and 

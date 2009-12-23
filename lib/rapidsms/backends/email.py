@@ -1,6 +1,28 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 
+"""
+
+To use the emails backend, one needs to append 'email' to the list of 
+available backends, like so:
+
+backends=http,email
+
+Within the BACKENDS config section of the rapidsms.ini, you must also add:
+
+[email]
+host=smtp.gmail.com
+port=587
+username=foo@gmail.com
+password=bar
+
+The following additional parameters are optional
+use_tls=False
+fail_silently=False
+
+Note that if fail_silently is False, then errors with message sending will
+result in an exception being thrown.
+"""
 
 from __future__ import absolute_import
 from rapidsms.message import Message
