@@ -109,7 +109,11 @@ class WeltelFormsLogic(FormsLogic):
             response = _("Patient %(id)s registered ") % {"id": patient_id }
             p_created = True
         site_code = site_code_from_patient_id(patient_id)
-        patient.site = Site.objects.get( code=site_code )
+        try:
+            patient.site = Site.objects.get( code=site_code )
+        except Site.DoesNotExist:
+            response = _("Site %(code)s does not exist") % {"code": site_code }
+            return (patient, response)
         if gender: patient.gender = gender
         patient.state = PatientState.objects.get(code='default')
         if date_registered: 
@@ -143,8 +147,8 @@ class WeltelFormsLogic(FormsLogic):
         try:
             site = Site.objects.get(code=site_code)
         except Site.DoesNotExist:
-            message.respond(_("Site %(code)s does not exist") % {"code": site_code })
-            return
+            response = _("Site %(code)s does not exist") % {"code": site_code }
+            return None, response
         # for now, set unique id to be phone number
         nurse, n_created = Nurse.objects.get_or_create(alias= phone_number)
         nurse.sites.add(site)

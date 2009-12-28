@@ -17,6 +17,31 @@ class TestSMS (TestScript):
     def setUp(self):
         TestScript.setUp(self)
         
+    testOutcomeToOtherPhone = """
+        1248 > well register tst/7 male
+        1248 < Patient tst/7 registered with new number 1248
+        1299 > tst/7 2
+        1299 < Command not recognized
+    """
+
+    test_unknown_patient_other = """
+        # (%s)\s*(.*)" % PATIENT_ID_REGEX)
+        1240 > nonexistent/1 1
+        1240 < Unknown patient nonexistent/1.
+        """
+    
+    test_unknown_site_patient = """
+        # new patient - these have only been tested with empty db (no forms). may break once populated.
+        1240 > well register nonexistantsite/1 female
+        1240 < Error. Unknown sitecode nonexistantsite
+        """
+    
+    test_unknown_site_nurse = """
+        # new nurse - these have only been tested with empty db (no forms). may break once populated.
+        1240 > well nurse nonexistantsite
+        1240 < Error. Unknown sitecode nonexistantsite
+        """
+    
     test_unregistered = """
         1233 > asdf
         1233 < This number is not registered. To register, text: 'well register patient_id gender (phone_number)

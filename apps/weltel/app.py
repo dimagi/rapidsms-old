@@ -142,9 +142,13 @@ class App (rapidsms.app.App):
         return decorator        
 
     @kw("(%s)\s+(numbers)" % PATIENT_ID_REGEX)
-    @is_nurse
     def outcome(self, message, patient_id, outcome_code):
         """ Expecting a text from a nurse of the form: <patient-id> <outcome-code> """
+        if not isinstance(message.reporter,Nurse):
+            # we do nurse check manually here, since we want to call 'from_other_phone' 
+            # if sender is not nurse
+            self.from_other_phone(message, patient_id, outcome_code)
+            return
         try:
             patient = Patient.objects.get(alias=patient_id)
         except Patient.DoesNotExist:
@@ -169,7 +173,11 @@ class App (rapidsms.app.App):
 
     @kw("(%s)\s*(.*)" % PATIENT_ID_REGEX)
     def from_other_phone(self, message, patient_id, text):
-        message.reporter = Patient.objects.get(alias=patient_id)
+        try:
+            message.reporter = Patient.objects.get(alias=patient_id)
+        except Patient.DoesNotExist:
+            message.respond(_("Unknown patient %(id)s.") % {'id':patient_id})
+            return
         try:
             func,groups = self.kw.match(None, text)
         except TypeError:
