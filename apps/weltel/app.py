@@ -47,7 +47,7 @@ class App (rapidsms.app.App):
             except EventSchedule.DoesNotExist:
                 # automatically deregister users we haven't seen in 3 weeks
                 set_daily_event("weltel.callbacks.automatic_deregistration", \
-                                hour=0, minute=15, callback_args=3)
+                                hour=0, minute=15, callback_args=[3])
                 
             # set up bi-weekly shida report
             try:
