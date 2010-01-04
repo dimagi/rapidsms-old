@@ -20,7 +20,7 @@ class TestSchedule (TestScript):
     def test_mambo(self):
         wfl = WeltelFormsLogic()
         backend = PersistantBackend.objects.get_or_create(slug=self.backend.slug)[0]
-        patient, response = wfl.get_or_create_patient("tst/8", \
+        patient, response = wfl.get_or_create_patient("BA108", \
                                                       phone_number="1250", \
                                                       backend=backend, 
                                                       gender="f", 
@@ -47,7 +47,7 @@ class TestSchedule (TestScript):
         backend = PersistantBackend.objects.get_or_create(slug=self.backend.slug)[0]
         delta = timedelta(weeks=3)
         registered = datetime.now() - delta
-        patient, response = wfl.get_or_create_patient("tst/9", \
+        patient, response = wfl.get_or_create_patient("BA109", \
                                                       phone_number="1251", \
                                                       backend=backend, 
                                                       gender="m", 
@@ -60,7 +60,7 @@ class TestSchedule (TestScript):
         # speedup the scheduler so that 1 second == 7 days
         self.router.get_app('scheduler').schedule_thread._debug_speedup(days=7)
 
-        # test tst/9 is inactive
+        # test BA109 is inactive
         time.sleep(3.0)
         updated_patient = Patient.objects.get(id=patient.id)
         self.assertTrue(updated_patient.active==False)
@@ -82,7 +82,7 @@ class TestSchedule (TestScript):
         """
         wfl = WeltelFormsLogic()
         backend = PersistantBackend.objects.get_or_create(slug=self.backend.slug)[0]
-        nurse, response = wfl.get_or_create_nurse(site_code="tst", \
+        nurse, response = wfl.get_or_create_nurse(site_code="BA1", \
                                                   phone_number="1252", \
                                                   backend=backend)
         # timeout after one week
@@ -106,7 +106,7 @@ class TestSchedule (TestScript):
     def test_shida_report(self):
         wfl = WeltelFormsLogic()
         backend = PersistantBackend.objects.get_or_create(slug=self.backend.slug)[0]
-        nurse, response = wfl.get_or_create_nurse(site_code="tst", \
+        nurse, response = wfl.get_or_create_nurse(site_code="BA1", \
                                                   phone_number="1252", \
                                                   backend=backend)
         # timeout after one week
@@ -114,14 +114,14 @@ class TestSchedule (TestScript):
                                  minutes='*')
         schedule.save()
         # create problem patients
-        patient, response = wfl.get_or_create_patient("tst/10", \
+        patient, response = wfl.get_or_create_patient("BA1010", \
                                                       phone_number="1257", \
                                                       backend=backend, 
                                                       gender="m",
                                                       date_registered=datetime.now())
         patient.register_event(SHIDA_CODE)
         # create problem patients
-        patient2, response = wfl.get_or_create_patient("tst/11", \
+        patient2, response = wfl.get_or_create_patient("BA1011", \
                                                       phone_number="1258", \
                                                       backend=backend, 
                                                       gender="m",
@@ -133,7 +133,7 @@ class TestSchedule (TestScript):
         time.sleep(1.0)
         # test regular report
         script = """
-            1252 < tst/10 1257 shida tst/11 1258 shida
+            1252 < BA1010 1257 shida BA1011 1258 shida
         """
         self.runScript(script)
         schedule.delete()

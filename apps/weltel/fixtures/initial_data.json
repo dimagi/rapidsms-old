@@ -1306,8 +1306,32 @@
         "pk": 1, 
         "model": "locations.location", 
         "fields": {
-            "code": "tst", 
-            "name": "Test Site", 
+            "code": "BA1", 
+            "name": "Weltel Site 1", 
+            "parent": null, 
+            "longitude": null, 
+            "latitude": null, 
+            "type": null
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "locations.location", 
+        "fields": {
+            "code": "BA2", 
+            "name": "Weltel Site 2", 
+            "parent": null, 
+            "longitude": null, 
+            "latitude": null, 
+            "type": null
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "locations.location", 
+        "fields": {
+            "code": "BA3", 
+            "name": "Weltel Site 3", 
             "parent": null, 
             "longitude": null, 
             "latitude": null, 
@@ -1372,6 +1396,16 @@
     }, 
     {
         "pk": 1, 
+        "model": "weltel.site", 
+        "fields": {}
+    }, 
+    {
+        "pk": 2, 
+        "model": "weltel.site", 
+        "fields": {}
+    }, 
+    {
+        "pk": 3, 
         "model": "weltel.site", 
         "fields": {}
     }, 

@@ -98,7 +98,7 @@ class Patient(WeltelUser):
         self.state = event.next_state
         self.save()
         if issuer is None: issuer = self.alias
-        EventLog(event=event, patient=self, triggered_by=issuer).save()
+        EventLog(event=event, patient=self, triggered_by=unicode(issuer)).save()
         return event
 
     def subscribe(self):

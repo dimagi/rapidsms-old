@@ -18,7 +18,7 @@ SAWA_CODE = 'sawa'
 SHIDA_CODE = 'shida'
 OTHER_CODE = 'other'
 WELTEL_KEYWORD = "well"
-PATIENT_ID_REGEX = "[a-z]+/[0-9]+"
+PATIENT_ID_REGEX = "[a-z]+[0-9]+"
 
 class App (rapidsms.app.App):
     kw = Keyworder()
@@ -40,15 +40,6 @@ class App (rapidsms.app.App):
             
             self.boostrapped = True
             
-            # we could also put this in the fixture
-            # set up automatic deregistration event
-            try:
-                EventSchedule.objects.get(callback="weltel.callbacks.automatic_deregistration")
-            except EventSchedule.DoesNotExist:
-                # automatically deregister users we haven't seen in 3 weeks
-                set_daily_event("weltel.callbacks.automatic_deregistration", \
-                                hour=0, minute=15, callback_args=[3])
-                
             # set up bi-weekly shida report
             try:
                 EventSchedule.objects.get(callback="weltel.callbacks.shida_report")
@@ -207,7 +198,7 @@ class App (rapidsms.app.App):
             problem = message.reporter.register_event(SHIDA_CODE)
         message.reporter.related_messages.add(message.persistent_msg)
         logging.info("Patient %s set to '%s'" % (message.reporter.alias, SHIDA_CODE) )
-        message.respond( response + _("Pole for '%(code)s'") % {'code':problem.name} )
+        message.respond( response + _("Asante. Tutakupigia simu hivi karibuni. ('%(code)s')") % {'code':problem.name} )
     
     @kw("(shida)(whatever)?")
     @is_patient
@@ -215,7 +206,7 @@ class App (rapidsms.app.App):
         message.reporter.register_event(SHIDA_CODE)
         message.reporter.related_messages.add(message.persistent_msg)
         logging.info("Patient %s set to '%s'" % (message.reporter.alias, SHIDA_CODE) )
-        message.respond( _("Pole") )
+        message.respond( _("Asante. Tutakupigia simu hivi karibuni.") )
 
     @kw("(%(well)s set phone.*)" % {'well':WELTEL_KEYWORD} )
     @is_patient

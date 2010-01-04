@@ -15,6 +15,7 @@ SAWA = 'sawa'
 SHIDA = 'shida'
 OTHER = 'other'
 
+@login_required
 def index(request, template="weltel/index.html"):
     context = {}
     sites = Site.objects.all()
