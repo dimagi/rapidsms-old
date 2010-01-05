@@ -10,7 +10,7 @@ from weltel.models import *
 from weltel.formslogic import WeltelFormsLogic
 from weltel.app import SAWA_CODE, SHIDA_CODE
 
-class TestApp (TestScript):
+class TestSchedule (TestScript):
     #apps = ([scheduler_app.App])
     apps = (reporters_app.App, form_app.App, scheduler_app.App, weltel_app.App )
     
@@ -75,7 +75,7 @@ class TestApp (TestScript):
         self.router.stop()
         schedule.delete()
             
-    def test_shida_report(self):
+    def test_shida_report_basic(self):
         """ it's difficult to check shida_empty and shida in sequence
         since self.runScript stops the router (without any sleep's)
         and we rely on activities in different threads)
@@ -95,7 +95,7 @@ class TestApp (TestScript):
         time.sleep(1.0)
         # test regular report
         script = """
-            1252 < no problem patients
+            1252 < No problem patients
         """
         self.runScript(script)
         

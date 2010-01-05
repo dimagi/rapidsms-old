@@ -98,7 +98,6 @@ class TestScript (TestCase):
                 msg = self.backend.message(num, txt)
                 msg.date = date 
                 self.backend.route(msg)  
-                self.router.run()
             elif dir == '<':
                 msg = self.backend.next_message()
                 # smart_str is a django util that prevents dumb terminals

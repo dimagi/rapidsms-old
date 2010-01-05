@@ -210,10 +210,17 @@ class EventSchedule(models.Model):
             hours = self.allMatch
         # self.minutes will never be empty
         
+        # the following ensures that 'days of month' will override empty 'day of week'
+        # and vice versa
+        if len(days_of_month)>0 and len(days_of_week)==0:
+            days_of_week = self.allMatch
+        if len(days_of_week)>0 and len(days_of_month)==0:
+            days_of_month = self.allMatch
+        
         return ((when.minute     in minutes) and
                 (when.hour       in hours) and
-                ((when.day       in days_of_month) or
-                (when.weekday()  in days_of_week)) and
+                (when.day        in days_of_month) and
+                (when.weekday()  in days_of_week) and
                 (when.month      in months))
 
     def activate(self):

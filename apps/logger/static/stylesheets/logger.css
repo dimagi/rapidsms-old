@@ -1,0 +1,19 @@
+
+th.sorted {
+    background-color: lightyellow;
+    background-repeat: no-repeat;
+    background-position: right;
+    padding-right:15px;
+}
+
+th#descending {
+    background-image: url("../../webapp/icons/silk/arrow_up.png");
+}
+
+th#ascending {
+    background-image: url("../../webapp/icons/silk/arrow_down.png");
+}
+
+td.sorted {
+    background-color: lightyellow;
+}

@@ -24,6 +24,17 @@ a {
 	a:hover {
 		text-decoration: underline; }
 
+
+/* javascript-like links */
+.js_link {
+    cursor:pointer;
+    color:#33a7d2;
+    
+}
+.js_link:hover {
+    text-decoration: underline; 
+}
+
 abbr {
 	cursor: help; }
 
@@ -334,3 +345,4 @@ input.small {
 		float: right;
 		margin: 0;
 	}
+

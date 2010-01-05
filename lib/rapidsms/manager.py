@@ -89,11 +89,12 @@ def start (args):
     # access it globally, including any subprocesses
     # spawned by django
     os.environ["RAPIDSMS_INI"] = ini
+    os.environ["DJANGO_SETTINGS_MODULE"] = "rapidsms.webui.settings"
 
     # read the config, which is shared
     # between the back and frontend
     conf = Config(ini)
-
+    
     # if we found a config ini, try to configure Django
     if conf.sources:
 
@@ -105,7 +106,7 @@ def start (args):
 
         # whatever we're doing, we'll need to call
         # django's setup_environ, to configure the ORM
-        os.environ["DJANGO_SETTINGS_MODULE"] = "rapidsms.webui.settings"
+        
         from django.core.management import setup_environ, execute_manager
         setup_environ(settings)
     else:
