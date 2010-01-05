@@ -37,6 +37,17 @@ h2, h3 {
 	line-height: 1;
 }
 
+	h2 {
+		color: #fff;
+		border-bottom: 0;
+		background: #000 url("../images/h2-bg-alt.png") repeat-x 0 100%;
+		padding: 0.3125em;
+		background-color: #000;
+		font-weight: normal;
+		font-size: 160%;
+		text-shadow: #000 2px 2px 1px;
+	}
+
 	/* subheaders are almost the same. to dull things,
 	 * i took the colors and images from h2, reduced
 	 * saturation by 50%, and increased lightness by
@@ -47,7 +58,7 @@ h2, h3 {
 		background-color: #aad0d4;
 		font-weight: normal;
 	}
-		
+
 	/* additional, less important info can
 	 * be wrapped in a span to dullify it */
 	h2 span {
@@ -61,24 +72,27 @@ h2, h3 {
 /* this doesn't belong here, but i'm not sure where
  * else to put it. the reporters app is pretty much
  * core, so maybe this will _become_ the right place. */
-a.reporter, a.connection, span.rapidsms {
-	background: no-repeat 0 50% url("../icons/silk/user.png");
+a.reporter, a.connection, a.location, span.rapidsms {
+	background: no-repeat 0 50%;
 	padding-left: 18px;
+	color: #000;
 }
-	
-	/* connections look slightly different
-	 * (highlight with red (regular link color with
-	 * huge rotated 180 degrees) to warn that they
-	 * should probably be converted to reporters) */
-	a.connection {
-		background-image: url("../icons/silk/phone.png");
-		color: #d25d33;
+
+	a.reporter   { background-image: url("../icons/silk/user--dull.png");  }
+	a.connection { background-image: url("../icons/silk/phone--dull.png"); }
+	a.location   { background-image: url("../icons/silk/house--dull.png"); }
+
+	/* on hover, revert to the usual link
+	 * color to clarify that it's a link */
+	a.reporter:hover, a.connection:hover, a.location:hover {
+		background-color: none;
+		color: #33a7d2;
 	}
-	
-	/* connections look slightly different
-	 * (highlight with red (regular link color with
-	 * huge rotated 180 degrees) to warn that they
-	 * should probably be converted to reporters) */
+
+	a.reporter:hover   { background-image: url("../icons/silk/user.png");  }
+	a.connection:hover { background-image: url("../icons/silk/phone.png"); }
+	a.location:hover   { background-image: url("../icons/silk/house.png"); }
+
 	span.rapidsms {
 		background-image: url("../icons/silk/building.png");
 		color: #aaa;
@@ -150,7 +164,52 @@ table {
 				font-style: italic;
 			}
 
-		
+	table.sortable {
+	}
+
+		/* make the entire header clickable to sort,
+		 * by removing the padding from the TH, and
+		 * instead adding it to the link */
+		table.sortable thead th {
+			padding: 0;
+		}
+
+		table.sortable thead th a {
+			display: block;
+			padding: 0.5em;
+			color: #888;
+			outline: 0;
+
+			/* divide the column headers with
+			 * a sweet web one-point-oh bevel */
+			border-right: 1px solid #ddd;
+			border-left: 1px solid #fff;
+		}
+
+		/* remove the bevel from either end of the row */
+		table.sortable thead th:first-child a { border-left: none; }
+		table.sortable thead th:last-child  a { border-right: none; }
+
+		table.sortable col.sorted {
+			background-color: #f8f8ff;
+		}
+
+		/* highlight sortable columns when the TH is hovered over, a bit
+		 * like native controls. this is crappy, since we should really be
+		 * highlighting when the link is hovered, but that background is
+		 * already being used by the up/down arrows */
+		table.sortable thead th:hover   { background-image: url(../images/table-header-bg-highlight.png); }
+		table.sortable thead th:hover a { color: #000; }
+
+		table.sortable thead th.sorted a {
+			background-repeat: no-repeat;
+			background-position: right;
+			padding-right: 15px;
+		}
+
+		table.sortable thead th.ascending  a { background-image: url("../../webapp/icons/silk/arrow_down.png"); }
+		table.sortable thead th.descending a { background-image: url("../../webapp/icons/silk/arrow_up.png"); }
+
 	tr.no-data { }
 		
 			tr.no-data td {
@@ -277,8 +336,8 @@ table {
 	position: absolute;
 	top: 0;
 	right: 0;
-	height: 2em;
-	line-height: 2em;
+	line-height: 1em;
+	padding-top: 1em;
 }
 
 	/* toolbar links (add, see more, do
@@ -287,7 +346,7 @@ table {
 	.module div.toolbar span {
 		display: block;
 		float: right;
-		color: #fff;
+		color: #eee;
 		margin-right: 0.625em;
 		padding-left: 21px;
 		background-repeat: no-repeat;

@@ -40,7 +40,7 @@ class TestApp (TestScript):
             sample_1 > this is the expected message
             sample_1 > this is the unexpected message
         """)
-        response = self.client.get('/logger', {'search_string': 'the expected'})
+        response = self.client.get('/logger', {'q': 'the expected'})
         self.assertEqual(200, response.status_code)
         self.assertContains(response, "the expected message")
         self.assertNotContains(response, "the unexpected message")
@@ -51,7 +51,7 @@ class TestApp (TestScript):
             2125551212 > this is the expected message
             2125553434 > this is the unexpected message
         """)
-        response = self.client.get('/logger', {'search_string': '5551212'})
+        response = self.client.get('/logger', {'q': '5551212'})
         self.assertEqual(200, response.status_code)
         self.assertContains(response, "the expected message")
         self.assertNotContains(response, "the unexpected message")
@@ -62,12 +62,12 @@ class TestApp (TestScript):
             sample_1 > this is the EXPECTED message
             sample_1 > this is the unexpected message
         """)
-        response = self.client.get('/logger', {'search_string': 'the expected'})
+        response = self.client.get('/logger', {'q': 'the expected'})
         self.assertEqual(200, response.status_code)
         self.assertContains(response, "the EXPECTED message")
         self.assertNotContains(response, "the unexpected message")
 
     def testSortingRetainsSearch(self):
         self.client.login(username='brian', password='test')
-        response = self.client.get('/logger', {'search_string': 'foo'})
-        self.assertContains(response, "?search_string=foo", 6) # 5 from the columns + 1 from a pagination link
+        response = self.client.get('/logger', {'q': 'foo'})
+        self.assertContains(response, "?q=foo", 6) # 5 from the columns + 1 from a pagination link

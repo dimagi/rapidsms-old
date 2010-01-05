@@ -135,8 +135,11 @@ class Backend(backend.Backend):
         from_user = parsed["From"] 
         # if the from format was something like:
         # "Bob User" <bob@users.com>
-        # just pull out the relevant address part.
-        match = re.match(r".*<(.*@.*\..*)>", from_user) 
+        # just pull out the relevant address part from within the carats.
+        # Note that we don't currently do anything smart parsing email
+        # addresses to make sure they are valid, we either just take
+        # what we get, or take what we get between <>.    
+        match = re.match(r"^.*<\s*(\S+)\s*>", from_user)
         if match:
             new_addr = match.groups()[0]
             self.debug("converting %s to %s" % (from_user, new_addr))

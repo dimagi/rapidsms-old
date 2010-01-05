@@ -1,14 +1,19 @@
 from django.db import models
 
 from reporters.models import Reporter
-from schools.models import Headmaster
+from schools.utils import get_location_filter_params
+from schools.models import School
 
 class BlastableMessage(models.Model):
     """A message that can be blasted."""
     text = models.CharField(max_length=160)
     
-    # todo: parsing, validation.  Could potentially use the Questions app
-    # for this.
+    # Bare bones handling/validation - if these are defined
+    # the method should return true if successful response,
+    # otherwise false.  Currently methods are found in
+    # app.pyx
+    handling_app = models.CharField(max_length=30)
+    handling_method = models.CharField(max_length=50)
     
     def __unicode__(self):
         return self.text
@@ -49,10 +54,12 @@ class BlastedMessage(models.Model):
         
     @property 
     def school(self):
-        try:
-            return Headmaster.objects.get(id=self.reporter.id).school
-        except Headmaster.DoesNotExist:
-            return None
+        if self.reporter.location:
+            try:
+                return School.objects.get(id=self.reporter.location.id)
+            except School.DoesNotExist:
+                return None
+        return None
             
     @property
     def responded (self):
@@ -66,7 +73,7 @@ class BlastedMessage(models.Model):
         if self.successfully_responded:
             return "success"
         elif self.responded:
-            return "responded"
+            return "failed"
         else:
             return "pending"
         

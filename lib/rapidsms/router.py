@@ -253,7 +253,6 @@ class Router (component.Receiver):
             except SystemExit:
                 break
         
-        # rl - Seems odd that stop_all_apps wasn't here before. =|
         self.stop_all_apps()
         self.stop_all_backends()
         self.running = False
