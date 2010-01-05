@@ -127,9 +127,9 @@ class TestSMS (TestScript):
         1245 > sawa
         1245 < Asante
         1245 > shida
-        1245 < Pole
+        1245 < Asante. Tutakupigia simu hivi karibuni.
         1245 > shida 1
-        1245 < Pole for 'No Answer'
+        1245 < Asante. Tutakupigia simu hivi karibuni. ('No Answer')
         1245 > Unrecognized randomness
         1245 < Command not recognized
         """
@@ -165,11 +165,11 @@ class TestSMS (TestScript):
         1262 > well report
         1262 < No problem patients
         1260 > shida
-        1260 < Pole
+        1260 < Asante. Tutakupigia simu hivi karibuni.
         1262 > well report
         1262 < BA1011 1260 shida
         1261 > shida 2
-        1261 < Pole for 'Disappeared'
+        1261 < Asante. Tutakupigia simu hivi karibuni. ('Disappeared')
         1262 > well report
         1262 < BA1011 1260 shida BA1012 1261 other
         1261 > sawa
