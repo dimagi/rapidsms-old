@@ -99,13 +99,13 @@ class Patient(WeltelUser):
         self.alias = value
     patient_id = property(_get_patient_id, _set_patient_id)
     
-    def register_event(self, code, issuer=None):
+    def register_event(self, code, issuer=None, notes=None):
         event = EventType.objects.get(code=code)
         if event.next_state is not None:
             self.state = event.next_state
         self.save()
         if issuer is None: issuer = self.alias
-        EventLog(event=event, patient=self, triggered_by=unicode(issuer)).save()
+        EventLog(event=event, patient=self, triggered_by=unicode(issuer), notes=notes).save()
         return event
 
     def subscribe(self):
@@ -158,7 +158,7 @@ class EventLog(models.Model):
     # can be triggered by patient, nurse, admin, IT, etc.
     # through sms, webui, etc.
     triggered_by = models.CharField(max_length=63, null=True)
-    notes = models.CharField(max_length=255, null=True)
+    notes = models.CharField(max_length=160, null=True)
     active = models.BooleanField(default=True)
     subscribed = models.BooleanField(default=True)
 
