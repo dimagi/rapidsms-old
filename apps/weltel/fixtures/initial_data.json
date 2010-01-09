@@ -1504,5 +1504,23 @@
             "name": "Healthy", 
             "description": "Patient is healthy again."
         }
+    },
+    {
+        "pk": 7, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "code": "inactive", 
+            "name": "Inactive", 
+            "description": "Patient is marked inactive."
+        }
+    },
+    {
+        "pk": 8, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "code": "unsubscribed", 
+            "name": "Unsubscribed", 
+            "description": "Patient has unsubscribed."
+        }
     }
 ]

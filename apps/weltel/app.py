@@ -13,11 +13,9 @@ from reporters.models import Reporter, PersistantConnection
 from scheduler.models import set_daily_event, EventSchedule
 from weltel.formslogic import WeltelFormsLogic, REGISTER_COMMAND, NURSE_COMMAND
 from weltel.models import Nurse, Patient, PatientState, OutcomeType, ProblemType, EventType
+from weltel.models import SAWA_CODE, SHIDA_CODE
 
-SAWA_CODE = 'sawa'
-SHIDA_CODE = 'shida'
-OTHER_CODE = 'other'
-WELTEL_KEYWORD = "well"
+WELTEL_KEYWORD = "well?"
 PATIENT_ID_REGEX = "[a-z]+[0-9]+"
 
 class App (rapidsms.app.App):
@@ -40,13 +38,27 @@ class App (rapidsms.app.App):
             
             self.boostrapped = True
             
-            # set up bi-weekly shida report
+            # set up bi-daily shida report
             try:
                 EventSchedule.objects.get(callback="weltel.callbacks.shida_report")
             except EventSchedule.DoesNotExist:
                 schedule = EventSchedule(callback="weltel.callbacks.shida_report", \
                                          hours=set([8,15]), minutes=set([0]) )
                 schedule.save()
+
+            # set up daily inactive check
+            try:
+                EventSchedule.objects.get(callback="weltel.callbacks.mark_inactive")
+            except EventSchedule.DoesNotExist:
+                set_daily_event("weltel.callbacks.mark_inactive", 
+                                hour=0, minute=15, callback_args=[3])
+
+            # set up daily 'other report'
+            try:
+                EventSchedule.objects.get(callback="weltel.callbacks.other_report")
+            except EventSchedule.DoesNotExist:
+                set_daily_event("weltel.callbacks.other_report", 
+                                hour=15, minute=30, callback_args=[])
 
     def parse (self, message):
         """Parse and annotate messages in the parse phase."""
@@ -117,7 +129,7 @@ class App (rapidsms.app.App):
     def is_nurse(f):
         def decorator(self, message, *args):
             if not isinstance(message.reporter,Nurse):
-                message.respond( _("This number is not registered to a nurse.") )
+                message.respond( _("This number is not registered.") )
                 return
             f(self, message, *args)
         return decorator
@@ -126,7 +138,7 @@ class App (rapidsms.app.App):
         def decorator(self, message, *args):
             if not isinstance(message.reporter,Patient) and \
                 not isinstance(message.reporter,Nurse):
-                    message.respond( _("This number is not registered.") + \
+                    message.respond( _("This number is not registered. ") + \
                                      REGISTER_COMMAND )
                     return
             f(self, message, *args)
@@ -156,11 +168,18 @@ class App (rapidsms.app.App):
                          {'id':patient_id, 'code':outcome.name} )
 
     # for unit tests ONLY - sends messages to all nurses!
-    @kw("%(well)s report.*" % {'well':WELTEL_KEYWORD} )
+    @kw("%(well)s report shida.*" % {'well':WELTEL_KEYWORD} )
     @is_nurse
     def shida_report(self, message):
         from weltel.callbacks import shida_report
         shida_report(self.router)
+
+    # for unit tests ONLY - sends messages to all nurses!
+    @kw("%(well)s report other.*" % {'well':WELTEL_KEYWORD} )
+    @is_nurse
+    def other_report(self, message):
+        from weltel.callbacks import other_report
+        other_report(self.router)
 
     @kw("(%s)\s*(.*)" % PATIENT_ID_REGEX)
     def from_other_phone(self, message, patient_id, text):
@@ -276,8 +295,7 @@ class App (rapidsms.app.App):
 
     @is_patient
     def other(self, message):
-        message.reporter.register_event(OTHER_CODE)
         message.reporter.related_messages.add(message.persistent_msg)
         logging.info("Patient %s sent unrecognized command '%s'" % \
-                     (message.reporter.alias, OTHER_CODE))
-        message.respond( _("Command not recognized") )
+                     (message.reporter.alias, message.persistent_msg))
+        message.respond( _("Please respond 'sawa' or 'shida', followed by any additional comments you have.") )

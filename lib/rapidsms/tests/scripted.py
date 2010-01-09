@@ -101,6 +101,8 @@ class TestScript (TestCase):
                 self.router.run()
             elif dir == '<':
                 msg = self.backend.next_message()
+                if msg is None:
+                    self.fail("Message expected but none returned. Last message sent was: %s" % last_msg)
                 # smart_str is a django util that prevents dumb terminals
                 # from barfing on strange character sets 
                 # see http://code.djangoproject.com/ticket/10183

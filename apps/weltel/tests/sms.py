@@ -16,14 +16,14 @@ class TestSMS (TestScript):
     
     def setUp(self):
         TestScript.setUp(self)
-        
+            
     testOutcomeToOtherPhone = """
         1248 > well register BA107 male
         1248 < Patient BA107 registered with new number 1248
         1299 > BA107 2
-        1299 < Command not recognized
+        1299 < Please respond 'sawa' or 'shida', followed by any additional comments you have.
     """
-
+    
     test_unknown_patient_other = """
         # (%s)\s*(.*)" % PATIENT_ID_REGEX)
         1240 > XY10001 1
@@ -33,20 +33,20 @@ class TestSMS (TestScript):
     test_unknown_site_patient = """
         # new patient - these have only been tested with empty db (no forms). may break once populated.
         1240 > well register nonexistantsite/1 female
-        1240 < Error. Unknown sitecode non
+        1240 < Error. Site non does not exist
         """
     
     test_unknown_site_nurse = """
         # new nurse - these have only been tested with empty db (no forms). may break once populated.
         1240 > well nurse nonexistantsite
-        1240 < Error. Unknown sitecode nonexistantsite
+        1240 < Error. Site nonexistantsite does not exist
         """
     
     test_unregistered = """
         1233 > asdf
-        1233 < This number is not registered. To register, text: 'well register patient_id gender (phone_number)
+        1233 < This number is not registered. To register, please refer to your information card.
     """
-
+    
     test_patient_registration = """
         # new patient new number
         1234 > well register BA101 female
@@ -71,13 +71,13 @@ class TestSMS (TestScript):
         
     test_patient_registration_err = """
         1238 > well register
-        1238 < This number is not registered. To register, text: 'well register patient_id gender (phone_number)
+        1238 < This number is not registered. To register, please refer to your information card.
         1238 > well register 1
-        1238 < Error. Poorly formatted patient_id: 1
+        1238 < Error. Patient (1) not recognized
         1238 > well register f BA101
-        1238 < Error. Poorly formatted patient_id: f
+        1238 < Error. Patient (f) not recognized
         """
-
+    
     test_nurse_registration = """
         # new nurse
         1240 > well nurse BA1
@@ -99,7 +99,7 @@ class TestSMS (TestScript):
     test_nurse_registration_err = """
         # new nurse
         1240 > well nurse
-        1240 < This number is not registered. To register, text: 'well register patient_id gender (phone_number)
+        1240 < This number is not registered. To register, please refer to your information card.
         """
         
     test_commands = """
@@ -131,7 +131,7 @@ class TestSMS (TestScript):
         1245 > shida 1
         1245 < Asante. Tutakupigia simu hivi karibuni. ('No Answer')
         1245 > Unrecognized randomness
-        1245 < Command not recognized
+        1245 < Please respond 'sawa' or 'shida', followed by any additional comments you have.
         """
         
     testOutcome = """
@@ -146,7 +146,7 @@ class TestSMS (TestScript):
         1246 > BA107 2
         1246 < Patient BA107 updated to 'Disappeared'
         """
-    
+
     testShidaReport = """
         1260 > well register BA1011 female
         1260 < Patient BA1011 registered with new number 1260
@@ -154,32 +154,53 @@ class TestSMS (TestScript):
         1261 < Patient BA1012 registered with new number 1261
         1262 > well nurse BA1
         1262 < Nurse registered with new number 1262
-        1262 > well report
-        1262 < BA1011 1260 default BA1012 1261 default
+        1262 > well report shida
+        1262 < BA1011-1260 BA1012-1261
         1260 > sawa
         1260 < Asante
-        1262 > well report
-        1262 < BA1012 1261 default
+        1262 > well report shida
+        1262 < BA1012-1261
         1261 > sawa
         1261 < Asante
-        1262 > well report
+        1262 > well report shida
         1262 < No problem patients
         1260 > shida
         1260 < Asante. Tutakupigia simu hivi karibuni.
-        1262 > well report
-        1262 < BA1011 1260 shida
+        1262 > well report shida
+        1262 < BA1011-1260
         1261 > shida 2
         1261 < Asante. Tutakupigia simu hivi karibuni. ('Disappeared')
-        1262 > well report
-        1262 < BA1011 1260 shida BA1012 1261 other
+        1262 > well report shida
+        1262 < BA1011-1260 BA1012-1261
         1261 > sawa
         1261 < Asante
-        1262 > well report
-        1262 < BA1011 1260 shida
+        1262 > well report shida
+        1262 < BA1011-1260
         """
-        
-        # We should also test what happens to the shida report
-        # after 'unsubscribe' and 'inactive' 
-        # (once we get clarification from ana)
 
+    testEmptyOtherReport = """
+        1262 > well nurse BA1
+        1262 < Nurse registered with new number 1262        
+        1262 > well report other
+        1262 < No patients unsubscribed or were marked inactive today.       
+    """
+    
+    testOtherReport = """
+        1260 > well register BA1011 female
+        1260 < Patient BA1011 registered with new number 1260
+        1260 > well unsubscribe
+        1260 < Kwaheri
+        1261 > well register BA1012 female
+        1261 < Patient BA1012 registered with new number 1261
+        1261 > well unsubscribe
+        1261 < Kwaheri
+        1262 > well nurse BA1
+        1262 < Nurse registered with new number 1262
+        1262 > well report other
+        1262 < Unsubscribed: BA1011-1260 BA1012-1261
+        1261 > well subscribe
+        1261 < Karibu
+        1262 > well report other
+        1262 < Unsubscribed: BA1011-1260
+        """
         

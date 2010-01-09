@@ -6,6 +6,12 @@ from locations.models import Location
 from scheduler.models import EventSchedule, set_weekly_event
 from logger.models import IncomingMessage
 
+# identifiers for state transitions
+SAWA_CODE = 'sawa'
+SHIDA_CODE = 'shida'
+UNSUBSCRIBE_CODE = 'unsubscribed'
+INACTIVE_CODE = 'inactive'
+
 class Site(Location):
     """ This model represents a WelTel site """
     # fields TBD
@@ -95,7 +101,8 @@ class Patient(WeltelUser):
     
     def register_event(self, code, issuer=None):
         event = EventType.objects.get(code=code)
-        self.state = event.next_state
+        if event.next_state is not None:
+            self.state = event.next_state
         self.save()
         if issuer is None: issuer = self.alias
         EventLog(event=event, patient=self, triggered_by=unicode(issuer)).save()
@@ -109,6 +116,10 @@ class Patient(WeltelUser):
         if len(scheds) == 0:
             set_weekly_event("weltel.callbacks.send_mambo", day=5, hour=12, \
                              minute=30, callback_args=[self.id])
+
+    def unsubscribe(self):
+        self.register_event(UNSUBSCRIBE_CODE)
+        super(Patient, self).unsubscribe()
 
 class PatientState(models.Model):
     code = models.CharField(max_length=15)
@@ -124,7 +135,8 @@ class EventType(models.Model):
     code = models.CharField(max_length=15)
     name = models.CharField(max_length=63, null=True, blank=True)
     description = models.CharField(max_length=255, null=True, blank=True)
-    next_state = models.ForeignKey(PatientState)
+    # if specified, next_state determines the next state for the patient
+    next_state = models.ForeignKey(PatientState, null=True, blank=True)
 
     def __unicode__(self):
         return self.name if self.name else self.code
