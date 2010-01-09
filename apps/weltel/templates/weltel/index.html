@@ -15,7 +15,9 @@
 				<th scope="col">{% trans "Nurses" %}</th>
 				<th scope="col">{% trans "Sawa" %}</th>
 				<th scope="col">{% trans "Shida" %}</th>
-				<th scope="col">{% trans "Other" %}</th>
+				<th scope="col"></th>
+				<th scope="col">{% trans "Sawa This Week" %}</th>
+				<th scope="col">{% trans "Shida This Week" %}</th>
 			</tr>
 		</thead>
 		<tbody>{% if sites.object_list %}{% for site in sites.object_list %}
@@ -25,10 +27,12 @@
                 <td>{% if site.nurse_count %}{{ site.nurse_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if site.sawa_count %}{{ site.sawa_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if site.shida_count %}{{ site.shida_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
-                <td>{% if site.other_count %}{{ site.other_count }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>&nbsp;&nbsp;&nbsp;</td>
+                <td>{% if site.shawa_count_this_week %}{{ site.shawa_count_this_week }}{% else %}<span class="na">n/a</span>{% endif %}</td>
+                <td>{% if site.shida_count_this_week %}{{ site.shida_count_this_week }}{% else %}<span class="na">n/a</span>{% endif %}</td>
 			</tr>{% endfor %}{% else %}
 			<tr class="no-data">
-				<td colspan="3">
+				<td colspan="8">
 					{% trans "No sites yet" %}
 					<!--
 					<a href="/site/add" class="add">
@@ -40,7 +44,7 @@
 		</tbody>
 		<tfoot>
 			<tr>
-				<td colspan="3">
+				<td colspan="8">
 					{% paginator sites %}
 				</td>
 			</tr>

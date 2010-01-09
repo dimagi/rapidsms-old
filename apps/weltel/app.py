@@ -43,7 +43,7 @@ class App (rapidsms.app.App):
                 EventSchedule.objects.get(callback="weltel.callbacks.shida_report")
             except EventSchedule.DoesNotExist:
                 schedule = EventSchedule(callback="weltel.callbacks.shida_report", \
-                                         hours=set([8,15]), minutes=set([0]) )
+                                         hours=set([8,14]), minutes=set([0]) )
                 schedule.save()
 
             # set up daily inactive check
@@ -58,7 +58,7 @@ class App (rapidsms.app.App):
                 EventSchedule.objects.get(callback="weltel.callbacks.other_report")
             except EventSchedule.DoesNotExist:
                 set_daily_event("weltel.callbacks.other_report", 
-                                hour=15, minute=30, callback_args=[])
+                                hour=14, minute=30, callback_args=[])
 
     def parse (self, message):
         """Parse and annotate messages in the parse phase."""

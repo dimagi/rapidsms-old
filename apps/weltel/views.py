@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4 encoding=utf-8
 
+from datetime import datetime, timedelta
 from django.db.models import Q
 from django.db import connection
 from django.utils.translation import ugettext as _
@@ -10,21 +11,34 @@ from rapidsms.webui.utils import paginated, render_to_response
 from logger.models import IncomingMessage
 from reporters.models import Reporter, PersistantBackend, PersistantConnection
 from weltel.models import Site, Nurse, Patient, EventType, EventLog
-
-SAWA = 'sawa'
-SHIDA = 'shida'
-OTHER = 'other'
+from weltel.models import SAWA_CODE, SHIDA_CODE
 
 @login_required
 def index(request, template="weltel/index.html"):
     context = {}
     sites = Site.objects.all()
+    start_of_week = datetime.now()
+    # set to monday 00:00
+    print start_of_week.minute
+    start_of_week = start_of_week - timedelta(days=start_of_week.weekday(), 
+                                              hours=start_of_week.hour, 
+                                              minutes=start_of_week.minute)
+    
     for site in sites:
-        site.patient_count = Patient.objects.filter(site=site).count()
+        patients = Patient.objects.filter(site=site)
+        site.patient_count = patients.count()
         site.nurse_count = Nurse.objects.filter(sites=site).count()
-        site.sawa_count = Patient.objects.filter(site=site).filter(state__code=SAWA).count()
-        site.shida_count = Patient.objects.filter(site=site).filter(state__code=SHIDA).count()
-        site.other_count = Patient.objects.filter(site=site).filter(state__code=OTHER).count()
+        sawa_patients = patients.filter(state__code=SAWA_CODE)
+        shida_patients = patients.filter(state__code=SHIDA_CODE)
+        site.sawa_count = sawa_patients.count()
+        site.shida_count = shida_patients.count()
+        
+        sawa_patients_this_week = sawa_patients.filter(active=True).filter(subscribed=True)
+        sawa_patients_this_week = sawa_patients_this_week.filter(eventlog__date__gte=start_of_week)
+        site.sawa_count_this_week = sawa_patients_this_week.distinct().count()
+        shida_patients_this_week = shida_patients.filter(active=True).filter(subscribed=True)
+        shida_patients_this_week = shida_patients_this_week.filter(eventlog__date__gte=start_of_week)
+        site.shida_count_this_week = shida_patients_this_week.distinct().count()
     context['sites'] = paginated(request, sites)
     #messages = EventLog.objects.select_related().order_by('-received')
     #context.update( format_events_in_context(request, context, messages) )
