@@ -99,7 +99,7 @@ class TestSchedule (TestScript):
         time.sleep(1.0)
         # test regular report
         script = """
-            1252 < BA1-1-010-1257 BA1-1-011-1258
+            1252 < 010-1257 011-1258
         """
         self.runScript(script)
         schedule.delete()
@@ -137,7 +137,7 @@ class TestSchedule (TestScript):
     
         # test regular report
         script = """
-            1252 < Inactive: BA1-1-09-1251
+            1252 < Inactive: 09-1251
         """
         self.runScript(script)
         

@@ -27,12 +27,14 @@ def shida_report(router, nurse=None):
         # generate report
         report = ''
         for patient in patients:
+            # take the last '1' from Patient ID BA3-2-1
+            id = patient.patient_id.rsplit('-',1)[-1]
             if hasattr(patient,'connection') and patient.connection is not None:
                 report = report + "%(id)s-%(identity)s " % \
-                                  {'id':patient.patient_id,
+                                  {'id':id,
                                    'identity': patient.connection.identity}
             else:
-                report = report + "%(id)s-None " % {'id':patient.patient_id }
+                report = report + "%(id)s-None " % {'id':id }
         # send report to given nurse, or if nurse not supplied, 
         # all nurses registered for that site
         nurses = [nurse] if nurse is not None else Nurse.objects.filter(sites=site)
@@ -96,11 +98,12 @@ def other_report(router, nurse=None):
             if not unsubscribe_event:
                 logging.error("Patient is unsubscribed without unsubscribe event!")
             elif unsubscribe_event.date > timeout:
+                id = p.patient_id.rsplit('-',1)[-1]
                 if hasattr(p, 'connection') and p.connection is not None:
-                    report_unsubscribed = report_unsubscribed + "%s-%s " % (p.patient_id, \
-                             p.connection.identity)
+                    report_unsubscribed = report_unsubscribed + "%s-%s " % \
+                            (id, p.connection.identity)
                 else:
-                    report_unsubscribed = report_unsubscribed + "%s-None " % (p.patient_id)
+                    report_unsubscribed = report_unsubscribed + "%s-None " % (id)
         # get patients who were marked 'inactive' today
         report_inactive = ''
         inactive = Patient.objects.filter(site=site).filter(active=False)
@@ -109,11 +112,12 @@ def other_report(router, nurse=None):
             if not inactivated_event:
                 logging.error("Patient is inactivated without inactivate event!")
             elif inactivated_event.date > timeout:
+                id = p.patient_id.rsplit('-',1)[-1]
                 if hasattr(p, 'connection') and p.connection is not None:
-                    report_inactive = report_inactive + "%s-%s " % (p.patient_id, \
+                    report_inactive = report_inactive + "%s-%s " % (id, \
                              p.connection.identity)
                 else:
-                    report_inactive = report_inactive + "%s-None " % (p.patient_id)                    
+                    report_inactive = report_inactive + "%s-None " % (id)                    
 
         if report_unsubscribed:
             report = report + "Unsubscribed: " + report_unsubscribed

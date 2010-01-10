@@ -157,11 +157,11 @@ class TestSMS (TestScript):
         1262 > well nurse BA1-1
         1262 < Nurse registered with new number 1262
         1262 > well report shida
-        1262 < BA1-1-011-1260 BA1-1-012-1261
+        1262 < 011-1260 012-1261
         1260 > sawa
         1260 < Asante
         1262 > well report shida
-        1262 < BA1-1-012-1261
+        1262 < 012-1261
         1261 > sawa
         1261 < Asante
         1262 > well report shida
@@ -169,15 +169,15 @@ class TestSMS (TestScript):
         1260 > shida
         1260 < Asante. Tutakupigia simu hivi karibuni.
         1262 > well report shida
-        1262 < BA1-1-011-1260
+        1262 < 011-1260
         1261 > shida 2
         1261 < Asante. Tutakupigia simu hivi karibuni. ('pain')
         1262 > well report shida
-        1262 < BA1-1-011-1260 BA1-1-012-1261
+        1262 < 011-1260 012-1261
         1261 > sawa
         1261 < Asante
         1262 > well report shida
-        1262 < BA1-1-011-1260
+        1262 < 011-1260
         """
     
     testEmptyOtherReport = """
@@ -199,15 +199,15 @@ class TestSMS (TestScript):
         1262 > well nurse BA1-1
         1262 < Nurse registered with new number 1262
         1262 > well report other
-        1262 < Unsubscribed: BA1-1-011-1260 BA1-1-012-1261
+        1262 < Unsubscribed: 011-1260 012-1261
         1261 > well subscribe
         1261 < Karibu
         1262 > well report other
-        1262 < Unsubscribed: BA1-1-011-1260
+        1262 < Unsubscribed: 011-1260
         1261 > well inactive
         1261 < Kwaheri
         1262 > well report other
-        1262 < Unsubscribed: BA1-1-011-1260 Inactive: BA1-1-012-1261
+        1262 < Unsubscribed: 011-1260 Inactive: 012-1261
         """
 
     testShidaReportNoConnection = """
@@ -220,7 +220,7 @@ class TestSMS (TestScript):
         1262 > well nurse BA1-1
         1262 < Nurse registered with new number 1262
         1262 > well report other
-        1262 < Unsubscribed: BA1-1-011-None
+        1262 < Unsubscribed: 011-None
         """
         
     testOtherReportNoConnection = """
@@ -233,5 +233,5 @@ class TestSMS (TestScript):
         1262 > well nurse BA1-1
         1262 < Nurse registered with new number 1262
         1262 > well report shida
-        1262 < BA1-1-011-None
+        1262 < 011-None
         """
