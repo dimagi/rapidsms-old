@@ -19,7 +19,6 @@ def index(request, template="weltel/index.html"):
     sites = Site.objects.all().order_by('name')
     start_of_week = datetime.now()
     # set to monday 00:00
-    print start_of_week.minute
     start_of_week = start_of_week - timedelta(days=start_of_week.weekday(), 
                                               hours=start_of_week.hour, 
                                               minutes=start_of_week.minute)
