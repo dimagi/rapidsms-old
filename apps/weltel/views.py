@@ -16,7 +16,7 @@ from weltel.models import SAWA_CODE, SHIDA_CODE
 @login_required
 def index(request, template="weltel/index.html"):
     context = {}
-    sites = Site.objects.all()
+    sites = Site.objects.all().order_by('name')
     start_of_week = datetime.now()
     # set to monday 00:00
     print start_of_week.minute

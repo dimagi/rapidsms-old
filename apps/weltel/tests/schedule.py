@@ -20,7 +20,7 @@ class TestSchedule (TestScript):
     def test_mambo(self):
         wfl = WeltelFormsLogic()
         backend = PersistantBackend.objects.get_or_create(slug=self.backend.slug)[0]
-        patient, response = wfl.get_or_create_patient("BA108", \
+        patient, response = wfl.get_or_create_patient("BA1-1-08", \
                                                       phone_number="1250", \
                                                       backend=backend, 
                                                       gender="f", 
@@ -48,7 +48,7 @@ class TestSchedule (TestScript):
         """
         wfl = WeltelFormsLogic()
         backend = PersistantBackend.objects.get_or_create(slug=self.backend.slug)[0]
-        nurse, response = wfl.get_or_create_nurse(site_code="BA1", \
+        nurse, response = wfl.get_or_create_nurse(site_code="BA1-1", \
                                                   phone_number="1252", \
                                                   backend=backend)
         # timeout after one week
@@ -72,7 +72,7 @@ class TestSchedule (TestScript):
     def test_shida_report(self):
         wfl = WeltelFormsLogic()
         backend = PersistantBackend.objects.get_or_create(slug=self.backend.slug)[0]
-        nurse, response = wfl.get_or_create_nurse(site_code="BA1", \
+        nurse, response = wfl.get_or_create_nurse(site_code="BA1-1", \
                                                   phone_number="1252", \
                                                   backend=backend)
         # timeout after one week
@@ -80,14 +80,14 @@ class TestSchedule (TestScript):
                                  minutes='*')
         schedule.save()
         # create problem patients
-        patient, response = wfl.get_or_create_patient("BA1010", \
+        patient, response = wfl.get_or_create_patient("BA1-1-010", \
                                                       phone_number="1257", \
                                                       backend=backend, 
                                                       gender="m",
                                                       date_registered=datetime.now())
         patient.register_event(SHIDA_CODE)
         # create problem patients
-        patient2, response = wfl.get_or_create_patient("BA1011", \
+        patient2, response = wfl.get_or_create_patient("BA1-1-011", \
                                                       phone_number="1258", \
                                                       backend=backend, 
                                                       gender="m",
@@ -99,7 +99,7 @@ class TestSchedule (TestScript):
         time.sleep(1.0)
         # test regular report
         script = """
-            1252 < BA1010-1257 BA1011-1258
+            1252 < BA1-1-010-1257 BA1-1-011-1258
         """
         self.runScript(script)
         schedule.delete()
@@ -110,12 +110,12 @@ class TestSchedule (TestScript):
         backend = PersistantBackend.objects.get_or_create(slug=self.backend.slug)[0]
         delta = timedelta(weeks=3)
         registered = datetime.now() - delta
-        patient, response = wfl.get_or_create_patient("BA109", \
+        patient, response = wfl.get_or_create_patient("BA1-1-09", \
                                                       phone_number="1251", \
                                                       backend=backend, 
                                                       gender="m", 
                                                       date_registered=registered)
-        nurse, response = wfl.get_or_create_nurse(site_code="BA1", \
+        nurse, response = wfl.get_or_create_nurse(site_code="BA1-1", \
                                                   phone_number="1252", \
                                                   backend=backend)
         # setup timeout after one week
@@ -137,7 +137,7 @@ class TestSchedule (TestScript):
     
         # test regular report
         script = """
-            1252 < Inactive: BA109-1251
+            1252 < Inactive: BA1-1-09-1251
         """
         self.runScript(script)
         
@@ -158,7 +158,7 @@ class TestSchedule (TestScript):
         backend = PersistantBackend.objects.get_or_create(slug=self.backend.slug)[0]
         delta = timedelta(weeks=3)
         registered = datetime.now() - delta
-        patient, response = wfl.get_or_create_patient("BA109", \
+        patient, response = wfl.get_or_create_patient("BA1-1-09", \
                                                       phone_number="1251", \
                                                       backend=backend, 
                                                       gender="m", 
@@ -172,7 +172,7 @@ class TestSchedule (TestScript):
         inactivated.date = datetime.now() - delta
         inactivated.save()
         
-        nurse, response = wfl.get_or_create_nurse(site_code="BA1", \
+        nurse, response = wfl.get_or_create_nurse(site_code="BA1-1", \
                                                   phone_number="1252", \
                                                   backend=backend)
         # other report

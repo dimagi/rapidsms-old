@@ -16,7 +16,7 @@ from weltel.models import Nurse, Patient, PatientState, OutcomeType, ProblemType
 from weltel.models import SAWA_CODE, SHIDA_CODE, INACTIVE_CODE
 
 WELTEL_KEYWORD = "well?"
-PATIENT_ID_REGEX = "[a-z]+[0-9]+"
+PATIENT_ID_REGEX = "[a-z]{2}[0-9]-[0-9]-[0-9]+"
 
 class App (rapidsms.app.App):
     kw = Keyworder()
@@ -167,20 +167,6 @@ class App (rapidsms.app.App):
         message.respond( _("Patient %(id)s updated to '%(code)s'") % \
                          {'id':patient_id, 'code':outcome.name} )
 
-    @kw("(%s)\s+(.*)" % PATIENT_ID_REGEX)
-    @is_nurse
-    def outcome_err(self, message, patient_id, poorly_formatted):
-        """ poorly formatted outcome reporting"""
-        try:
-            patient = Patient.objects.get(alias=patient_id)
-        except Patient.DoesNotExist:
-            message.respond( _("Patient (%(id)s) not recognized.")%{'id':patient_id} )
-            return
-        patient.related_messages.add(message.persistent_msg)
-        logging.info("Nurse %s sent unrecognized command '%s'" % \
-                     (message.reporter.alias, message.persistent_msg))
-        message.respond( _("Please report patient outcomes in the format 'patient-id outcome-code notes'") )
-
     @kw("%(well)s report(.*)" % {'well':WELTEL_KEYWORD} )
     @is_nurse
     def report(self, message, report_name):
@@ -199,10 +185,32 @@ class App (rapidsms.app.App):
     @kw("(%s)\s*(.*)" % PATIENT_ID_REGEX)
     def from_other_phone(self, message, patient_id, text):
         try:
-            message.reporter = Patient.objects.get(alias=patient_id)
+            patient = Patient.objects.get(alias=patient_id)
         except Patient.DoesNotExist:
             message.respond(_("Unknown patient %(id)s.") % {'id':patient_id})
             return
+        if isinstance(message.reporter,Nurse):
+            """ this is an 'outcome' command from a nurse """
+            patient.related_messages.add(message.persistent_msg)
+            m = re.match('[0-9]+', text)
+            if m is None:
+                # improperly formatted            
+                logging.info("Nurse %s sent unrecognized command '%s'" % \
+                             (message.reporter.alias, message.persistent_msg))
+                message.respond( _("Please report patient outcomes in the format 'patient-id outcome-code notes'") )
+                return
+            outcome_code = m.group(0)            
+            try:
+                notes = text.strip('outcome_code')
+                outcome = patient.register_event(outcome_code, message.reporter, notes=notes)
+            except OutcomeType.DoesNotExist:
+                message.respond( _("Outcome (%(code)s) not recognized.")%{'code':outcome_code} )
+                return
+            message.respond( _("Patient %(id)s updated to '%(code)s'") % \
+                             {'id':patient_id, 'code':outcome.name} )
+            return
+        """ This is a message sent by a client from another phone """
+        message.reporter = patient
         try:
             func,groups = self.kw.match(None, text)
         except TypeError:
@@ -210,7 +218,7 @@ class App (rapidsms.app.App):
             self.other(message)
             return
         func(self, message, groups)
-
+    
     @kw("(sawa|poa|nzuri|safi)(.*)")
     @is_patient
     def sawa(self, message, sawa, notes=None):

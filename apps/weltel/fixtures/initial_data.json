@@ -1306,8 +1306,8 @@
         "pk": 1, 
         "model": "locations.location", 
         "fields": {
-            "code": "BA1", 
-            "name": "Weltel Site 1", 
+            "code": "BA1-1", 
+            "name": "Weltel Site 1-1", 
             "parent": null, 
             "longitude": null, 
             "latitude": null, 
@@ -1318,8 +1318,8 @@
         "pk": 2, 
         "model": "locations.location", 
         "fields": {
-            "code": "BA2", 
-            "name": "Weltel Site 2", 
+            "code": "BA2-1", 
+            "name": "Weltel Site 2-1", 
             "parent": null, 
             "longitude": null, 
             "latitude": null, 
@@ -1330,8 +1330,80 @@
         "pk": 3, 
         "model": "locations.location", 
         "fields": {
-            "code": "BA3", 
-            "name": "Weltel Site 3", 
+            "code": "BA3-1", 
+            "name": "Weltel Site 3-1", 
+            "parent": null, 
+            "longitude": null, 
+            "latitude": null, 
+            "type": null
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "locations.location", 
+        "fields": {
+            "code": "BA1-2", 
+            "name": "Weltel Site 1-2", 
+            "parent": null, 
+            "longitude": null, 
+            "latitude": null, 
+            "type": null
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "locations.location", 
+        "fields": {
+            "code": "BA2-2", 
+            "name": "Weltel Site 2-2", 
+            "parent": null, 
+            "longitude": null, 
+            "latitude": null, 
+            "type": null
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "locations.location", 
+        "fields": {
+            "code": "BA3-2", 
+            "name": "Weltel Site 3-2", 
+            "parent": null, 
+            "longitude": null, 
+            "latitude": null, 
+            "type": null
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "locations.location", 
+        "fields": {
+            "code": "BA1-3", 
+            "name": "Weltel Site 1-3", 
+            "parent": null, 
+            "longitude": null, 
+            "latitude": null, 
+            "type": null
+        }
+    }, 
+    {
+        "pk": 8, 
+        "model": "locations.location", 
+        "fields": {
+            "code": "BA2-3", 
+            "name": "Weltel Site 2-3", 
+            "parent": null, 
+            "longitude": null, 
+            "latitude": null, 
+            "type": null
+        }
+    }, 
+    {
+        "pk": 9, 
+        "model": "locations.location", 
+        "fields": {
+            "code": "BA3-3", 
+            "name": "Weltel Site 3-3", 
             "parent": null, 
             "longitude": null, 
             "latitude": null, 
@@ -1406,6 +1478,36 @@
     }, 
     {
         "pk": 3, 
+        "model": "weltel.site", 
+        "fields": {}
+    }, 
+    {
+        "pk": 4, 
+        "model": "weltel.site", 
+        "fields": {}
+    }, 
+    {
+        "pk": 5, 
+        "model": "weltel.site", 
+        "fields": {}
+    }, 
+    {
+        "pk": 6, 
+        "model": "weltel.site", 
+        "fields": {}
+    }, 
+    {
+        "pk": 7, 
+        "model": "weltel.site", 
+        "fields": {}
+    }, 
+    {
+        "pk": 8, 
+        "model": "weltel.site", 
+        "fields": {}
+    }, 
+    {
+        "pk": 9, 
         "model": "weltel.site", 
         "fields": {}
     }, 
