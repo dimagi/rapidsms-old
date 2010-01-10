@@ -1684,5 +1684,45 @@
             "name": "other", 
             "description": "Other"
         }
+    },
+    {
+        "pk": 15, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "next_state": 3, 
+            "code": "clinic", 
+            "name": "clinic", 
+            "description": "Come to the clinic"
+        }
+    },
+    {
+        "pk": 16, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "next_state": 3, 
+            "code": "referral", 
+            "name": "referral", 
+            "description": "Referred to another clinic/hospital"
+        }
+    },
+    {
+        "pk": 17, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "next_state": 3, 
+            "code": "observe", 
+            "name": "observe", 
+            "description": "Observe the signs/symptoms. If worse, visit a health facility."
+        }
+    },
+    {
+        "pk": 18, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "next_state": 3, 
+            "code": "drugs", 
+            "name": "drugs",
+            "description": "Pick drugs from the nearest health centre/clinic."
+        }
     }
 ]

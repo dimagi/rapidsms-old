@@ -192,7 +192,7 @@ class App (rapidsms.app.App):
         if isinstance(message.reporter,Nurse):
             """ this is an 'outcome' command from a nurse """
             patient.related_messages.add(message.persistent_msg)
-            m = re.match('[0-9]+', text)
+            m = re.match('[0-9a-z]+', text)
             if m is None:
                 # improperly formatted            
                 logging.info("Nurse %s sent unrecognized command '%s'" % \
