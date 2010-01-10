@@ -132,7 +132,7 @@ def get_history_for_patient(patient):
                 ON t.id = e.event_id
             WHERE e.patient_id=%(patient_id)s
             )
-        ORDER BY date DESC 
+        ORDER BY date DESC, sender DESC
         ''' % {
             # useful in case we ever change the model names
             'msg_log':IncomingMessage._meta.db_table,
