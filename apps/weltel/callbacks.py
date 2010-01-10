@@ -17,24 +17,31 @@ def send_mambo(router, patient_id):
     be = router.get_backend(connection.backend.slug)
     be.message(connection.identity, response).send()
 
-def shida_report(router):
-    # list of 'shida' patients for each site
-    for site in Site.objects.all():
+def shida_report(router, nurse=None):
+    # list of 'shida' patients for each site, or for a specific nurse if given
+    sites = nurse.sites.all() if nurse is not None else Site.objects.all()
+    for site in sites:
         sawa = PatientState.objects.get(code='sawa')
         # get all active patients who responded shida or are in the default state
         patients = Patient.objects.filter(site=site).exclude(state=sawa).exclude(active=False).exclude(subscribed=False)
         # generate report
         report = ''
         for patient in patients:
-            report = report + "%s-%s " % (patient.patient_id, \
-                     patient.connection.identity)
-        # send report to all nurses registered for that site
-        for nurse in Nurse.objects.filter(sites=site):
-            be = router.get_backend(nurse.connection.backend.slug)
-            if report:
-                be.message(nurse.connection.identity, report).send()
+            if hasattr(patient,'connection') and patient.connection is not None:
+                report = report + "%(id)s-%(identity)s " % \
+                                  {'id':patient.patient_id,
+                                   'identity': patient.connection.identity}
             else:
-                be.message(nurse.connection.identity, _("No problem patients")).send()
+                report = report + "%(id)s-None " % {'id':patient.patient_id }
+        # send report to given nurse, or if nurse not supplied, 
+        # all nurses registered for that site
+        nurses = [nurse] if nurse is not None else Nurse.objects.filter(sites=site)
+        for n in nurses:
+            be = router.get_backend(n.connection.backend.slug)
+            if report:
+                be.message(n.connection.identity, report).send()
+            else:
+                be.message(n.connection.identity, _("No problem patients")).send()
 
 
 def mark_inactive(router, timeout_weeks):
@@ -72,13 +79,14 @@ def mark_inactive(router, timeout_weeks):
             patient.save()
     return
 
-def other_report(router):
+def other_report(router, nurse=None):
     # list of 'inactive' and unsubscribed patients for each site
     sawa = PatientState.objects.get(code='sawa')
     timeout_interval = timedelta(days=1)
     timeout = datetime.now() - timeout_interval
+    sites = nurse.sites.all() if nurse is not None else Site.objects.all()
     
-    for site in Site.objects.all():
+    for site in sites:
         report = ''
         # get all active patients who unsubscribed today
         report_unsubscribed = ''
@@ -88,8 +96,11 @@ def other_report(router):
             if not unsubscribe_event:
                 logging.error("Patient is unsubscribed without unsubscribe event!")
             elif unsubscribe_event.date > timeout:
-                report_unsubscribed = report_unsubscribed + "%s-%s " % (p.patient_id, \
-                         p.connection.identity)
+                if hasattr(p, 'connection') and p.connection is not None:
+                    report_unsubscribed = report_unsubscribed + "%s-%s " % (p.patient_id, \
+                             p.connection.identity)
+                else:
+                    report_unsubscribed = report_unsubscribed + "%s-None " % (p.patient_id)
         # get patients who were marked 'inactive' today
         report_inactive = ''
         inactive = Patient.objects.filter(site=site).filter(active=False)
@@ -98,8 +109,11 @@ def other_report(router):
             if not inactivated_event:
                 logging.error("Patient is inactivated without inactivate event!")
             elif inactivated_event.date > timeout:
-                report_inactive = report_inactive + "%s-%s " % (p.patient_id, \
-                         p.connection.identity)
+                if hasattr(p, 'connection') and p.connection is not None:
+                    report_inactive = report_inactive + "%s-%s " % (p.patient_id, \
+                             p.connection.identity)
+                else:
+                    report_inactive = report_inactive + "%s-None " % (p.patient_id)                    
 
         if report_unsubscribed:
             report = report + "Unsubscribed: " + report_unsubscribed
@@ -107,10 +121,11 @@ def other_report(router):
             report = report + "Inactive: " + report_inactive
         
         # send report to all nurses registered for that site
-        for nurse in Nurse.objects.filter(sites=site):
-            be = router.get_backend(nurse.connection.backend.slug)
+        nurses = [nurse] if nurse is not None else Nurse.objects.filter(sites=site)
+        for n in nurses:
+            be = router.get_backend(n.connection.backend.slug)
             if report:
-                be.message(nurse.connection.identity, report).send()
+                be.message(n.connection.identity, report).send()
             else:
-                be.message(nurse.connection.identity, _("No patients unsubscribed or were marked inactive today.")).send()
+                be.message(n.connection.identity, _("No patients unsubscribed or were marked inactive today.")).send()
 

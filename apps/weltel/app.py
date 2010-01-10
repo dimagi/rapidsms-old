@@ -13,7 +13,7 @@ from reporters.models import Reporter, PersistantConnection
 from scheduler.models import set_daily_event, EventSchedule
 from weltel.formslogic import WeltelFormsLogic, REGISTER_COMMAND, NURSE_COMMAND
 from weltel.models import Nurse, Patient, PatientState, OutcomeType, ProblemType, EventType
-from weltel.models import SAWA_CODE, SHIDA_CODE
+from weltel.models import SAWA_CODE, SHIDA_CODE, INACTIVE_CODE
 
 WELTEL_KEYWORD = "well?"
 PATIENT_ID_REGEX = "[a-z]+[0-9]+"
@@ -181,19 +181,20 @@ class App (rapidsms.app.App):
                      (message.reporter.alias, message.persistent_msg))
         message.respond( _("Please report patient outcomes in the format 'patient-id outcome-code notes'") )
 
-    # for unit tests ONLY - sends messages to all nurses!
-    @kw("%(well)s report shida.*" % {'well':WELTEL_KEYWORD} )
+    @kw("%(well)s report(.*)" % {'well':WELTEL_KEYWORD} )
     @is_nurse
-    def shida_report(self, message):
-        from weltel.callbacks import shida_report
-        shida_report(self.router)
-
-    # for unit tests ONLY - sends messages to all nurses!
-    @kw("%(well)s report other.*" % {'well':WELTEL_KEYWORD} )
-    @is_nurse
-    def other_report(self, message):
-        from weltel.callbacks import other_report
-        other_report(self.router)
+    def report(self, message, report_name):
+        """ for unit tests ONLY - sends messages to all nurses! """
+        from weltel.callbacks import shida_report, other_report
+        report_name = report_name.strip().lower()
+        if report_name == 'shida':
+            shida_report(self.router, message.reporter)
+        elif report_name == 'other':
+            other_report(self.router, message.reporter)
+        else:
+            logging.info("Nurse %s sent unrecognized command '%s'" % \
+                         (message.reporter.alias, message.persistent_msg))
+            message.respond( _("That report is not recognized.") )
 
     @kw("(%s)\s*(.*)" % PATIENT_ID_REGEX)
     def from_other_phone(self, message, patient_id, text):
@@ -278,6 +279,18 @@ class App (rapidsms.app.App):
         if isinstance(message.reporter,Patient):
             message.reporter.related_messages.add(message.persistent_msg)
         logging.info("%s unsubscribed" % (message.reporter.alias) )
+        message.respond( _("Kwaheri") )
+
+    @kw("(%(well)s inactive.*)" % {'well':WELTEL_KEYWORD} )
+    @is_patient
+    def inactive(self, message, text):
+        """ Set patient to inactive; just for debugging! """
+        message.reporter.active = False
+        message.reporter.save()
+        message.reporter.register_event(INACTIVE_CODE)
+        if isinstance(message.reporter,Patient):
+            message.reporter.related_messages.add(message.persistent_msg)
+        logging.info("%s deactivated" % (message.reporter.alias) )
         message.respond( _("Kwaheri") )
 
     @kw("%(well)s\s+phone\s+(%(id)s).*"  % {'well':WELTEL_KEYWORD, 'id':PATIENT_ID_REGEX} )

@@ -16,7 +16,7 @@ class TestSMS (TestScript):
     
     def setUp(self):
         TestScript.setUp(self)
-            
+    
     testOutcomeToOtherPhone = """
         1248 > well register BA107 male
         1248 < Patient BA107 registered with new number 1248
@@ -146,7 +146,7 @@ class TestSMS (TestScript):
         1246 > BA107 2
         1246 < Patient BA107 updated to 'Disappeared'
         """
-
+    
     testShidaReport = """
         1260 > well register BA1011 female
         1260 < Patient BA1011 registered with new number 1260
@@ -177,7 +177,7 @@ class TestSMS (TestScript):
         1262 > well report shida
         1262 < BA1011-1260
         """
-
+    
     testEmptyOtherReport = """
         1262 > well nurse BA1
         1262 < Nurse registered with new number 1262        
@@ -202,5 +202,34 @@ class TestSMS (TestScript):
         1261 < Karibu
         1262 > well report other
         1262 < Unsubscribed: BA1011-1260
+        1261 > well inactive
+        1261 < Kwaheri
+        1262 > well report other
+        1262 < Unsubscribed: BA1011-1260 Inactive: BA1012-1261
+        """
+
+    testShidaReportNoConnection = """
+        1260 > well register BA1011
+        1260 < Patient BA1011 registered with new number 1260
+        1260 > well unsubscribe
+        1260 < Kwaheri
+        1260 > well register BA2011
+        1260 < Patient BA2011 registered with existing number 1260 (from patient BA1011)
+        1262 > well nurse BA1
+        1262 < Nurse registered with new number 1262
+        1262 > well report other
+        1262 < Unsubscribed: BA1011-None
         """
         
+    testOtherReportNoConnection = """
+        1260 > well register BA1011
+        1260 < Patient BA1011 registered with new number 1260
+        1260 > shida
+        1260 < Asante. Tutakupigia simu hivi karibuni.
+        1260 > well register BA2011
+        1260 < Patient BA2011 registered with existing number 1260 (from patient BA1011)
+        1262 > well nurse BA1
+        1262 < Nurse registered with new number 1262
+        1262 > well report shida
+        1262 < BA1011-None
+        """
