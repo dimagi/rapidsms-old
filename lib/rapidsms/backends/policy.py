@@ -47,14 +47,19 @@ def split_long_message(send):
     """
     def decorator(klass, message):
         if len(message.text)>160:
+            original_text = message.text
             start = 0
             message_texts = []
             while len(message.text[start:start+160])>0:
+                # TODO - if we can break on a space, then do
                 message_texts.append( message.text[start:start+160] )
                 start = start + 160
             for m in message_texts:
                 message.text = m
                 send(klass, message)
+            # return the original text back to the message
+            # so that logging, etc. continue to work seamlessly
+            message.text = original_text
         else:
             send(klass, message)
     return decorator
