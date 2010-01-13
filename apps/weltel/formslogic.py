@@ -105,6 +105,8 @@ class WeltelFormsLogic(FormsLogic):
         try:
             patient = Patient.objects.get(alias__iexact=patient_id)
             response = _("Patient %(id)s reregistered ") % {"id": patient_id }
+            if not patient.subscribed:
+                patient.subscribe()
             p_created = False
         except Patient.DoesNotExist:
             patient = Patient(alias=patient_id)

@@ -67,6 +67,9 @@ class App (rapidsms.app.App):
     def handle (self, message):
         try:
             message.reporter = Patient.objects.get(reporter_ptr=message.reporter)
+            if message.reporter.active == False:
+                message.reporter.active = True
+                message.reporter.save()
         except Patient.DoesNotExist:
             try:
                 message.reporter = Nurse.objects.get(reporter_ptr=message.reporter)

@@ -109,6 +109,8 @@ class Patient(WeltelUser):
         return event
 
     def subscribe(self):
+        if self.subscribed:
+            return
         super(Patient, self).set_subscribe(True)
         # set up weekly mambo schedule for friday @ 12:30 pm
         scheds = EventSchedule.objects.filter(callback="weltel.callbacks.send_mambo", \
