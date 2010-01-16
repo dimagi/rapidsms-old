@@ -17,6 +17,7 @@ from weltel.models import SAWA_CODE, SHIDA_CODE, INACTIVE_CODE
 
 WELTEL_KEYWORD = "well?"
 PATIENT_ID_REGEX = "[a-z]{2}[0-9]-[0-9]-[0-9]+"
+PHONE_NUMBER_REGEX = "\+?[0-9]{8,16}"
 
 class App (rapidsms.app.App):
     kw = Keyworder()
@@ -184,6 +185,28 @@ class App (rapidsms.app.App):
             logging.info("Nurse %s sent unrecognized command '%s'" % \
                          (message.reporter.alias, message.persistent_msg))
             message.respond( _("That report is not recognized.") )
+
+    @kw("(%s)\s*(.*)" % PHONE_NUMBER_REGEX)
+    def from_other_phone_num(self, message, phone_number, text):
+        if not ((len(phone_number) == 14 and phone_number[:4] == '+254') or \
+            (len(phone_number) == 11 and phone_number[0] == '0')):
+            message.respond( "Poorly formatted phone number. Do not use spaces or dashes, e.g. +254712222333." )
+            return
+        if len(phone_number) == 14 and phone_number[:4] == '+254':
+            # remove leading '+254'
+            phone_number = phone_number[4:]
+        elif len(phone_number) == 11 and phone_number[0] == '0':
+            #remove leading '0'
+            phone_number = phone_number[1:]
+        try:
+            conn = PersistantConnection.objects.get(identity__contains=phone_number)
+        except PersistantConnection.DoesNotExist:
+            message.respond( _("That phone number is not recognized.") )
+            return
+        except PersistantConnection.MultipleObjectsReturned:
+            message.respond( _("That phone number is associated with more than one account. Please use client ID.") )
+            return
+        self.from_other_phone(message, conn.reporter.alias, text)
 
     @kw("(%s)\s*(.*)" % PATIENT_ID_REGEX)
     def from_other_phone(self, message, patient_id, text):

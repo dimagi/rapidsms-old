@@ -17,6 +17,29 @@ class TestSMS (TestScript):
     def setUp(self):
         TestScript.setUp(self)
     
+    testFromLocalNum = """
+        +2547111222333 > well register BA1-1-10
+        +2547111222333 < Patient BA1-1-10 registered with new number +2547111222333
+        +2547111222333 > 07111222333 sawa
+        +2547111222333 < Asante
+        +2547111222333 > 07111222333 shida notes
+        +2547111222333 < Asante. Tutakupigia simu hivi karibuni.
+    """
+
+    testFromNumErr2 = """
+        +2547111222333 > 0711122237 shida notes
+        +2547111222333 < Poorly formatted phone number. Do not use spaces or dashes, e.g. +254712222333.
+    """
+    
+    testFromIntlNum = """
+        +2547111222333 > well register BA1-1-10
+        +2547111222333 < Patient BA1-1-10 registered with new number +2547111222333
+        +2547111222333 > +2547111222333 sawa
+        +2547111222333 < Asante
+        +2547111222333 > +2547111222333 shida notes
+        +2547111222333 < Asante. Tutakupigia simu hivi karibuni.
+    """
+
     testOutcomeToOtherPhone = """
         1248 > well register BA1-1-07 male
         1248 < Patient BA1-1-07 registered with new number 1248
@@ -209,7 +232,7 @@ class TestSMS (TestScript):
         1262 > well report other
         1262 < Unsubscribed: 011-1260 Inactive: 012-1261
         """
-
+    
     testShidaReportNoConnection = """
         1260 > well register BA1-1-011
         1260 < Patient BA1-1-011 registered with new number 1260
