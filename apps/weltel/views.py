@@ -107,6 +107,11 @@ def get_history_for_patient(patient):
     
     """
     cursor = connection.cursor()
+    # Known Bug: This JOIN doesn't take into account messages that were 
+    # sent by another phone on behalf of a registered user. Let's see if
+    # this is an important enough use case for us to fix later.
+    # We'd need to rewrite this query to draw from the patient.related_messages
+    # table in addition to the incoming message log
     cursor.execute('''
         (SELECT 
             m.identity AS sender, 
