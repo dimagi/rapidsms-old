@@ -180,6 +180,12 @@ class TestSMS (TestScript):
         1262 > well nurse BA1-1
         1262 < Nurse registered with new number 1262
         1262 > well report shida
+        1262 < No problem patients
+        1260 > shida
+        1260 < Asante. Tutakupigia simu hivi karibuni.
+        1261 > shida
+        1261 < Asante. Tutakupigia simu hivi karibuni.
+        1262 > well report shida
         1262 < 011-1260 012-1261
         1260 > sawa
         1260 < Asante
