@@ -67,7 +67,8 @@ def patient_messages(request, pk, template="weltel/patient.html"):
     context = {}
     context['patient'] = patient
     logs = get_messages_for_patient(patient)
-    context['messages'] = paginated(request, logs)    
+    if logs:
+        context['messages'] = paginated(request, logs)
     return render_to_response(request, template, context )
 
 def nurse(request, pk, template="weltel/nurse.html"):

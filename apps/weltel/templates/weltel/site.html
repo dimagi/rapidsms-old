@@ -21,6 +21,8 @@
 			</tr>
 		</thead>
 		<tbody>{% if patients.object_list %}{% for patient in patients.object_list %}
+			<!-- Do not show reporters without connections, since they're useless -->
+			{% if patient.connection.identity %}
 			<tr>
 				<td><a href="/patient/{{ patient.pk }}">{{ patient }}</a></td>
                 <td>{% if patient.first_name %}{{ patient.first_name }}{% else %}<span class="na">n/a</span>{% endif %}</td>
@@ -30,7 +32,7 @@
                 <td>{% if patient.state %}{{ patient.state }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if patient.active %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</td>
                 <td>{% if patient.subscribed %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</td>
-			</tr>{% endfor %}{% else %}
+			</tr>{% endif %}{% endfor %}{% else %}
 			<tr class="no-data">
 				<td colspan="8">
 					{% trans "No patients yet" %}
@@ -65,12 +67,13 @@
 			</tr>
 		</thead>
 		<tbody>{% if nurses.object_list %}{% for nurse in nurses.object_list %}
+			{% if nurse.connection.identity %}
 			<tr>
 				<td><a href="/nurse/{{ nurse.pk }}">{{ nurse }}</a></td>
                 <td>{% if nurse.first_name %}{{ nurse.first_name }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if nurse.family_name %}{{ nurse.family_name }}{% else %}<span class="na">n/a</span>{% endif %}</td>
                 <td>{% if nurse.connection.identity %}{{ nurse.connection.identity }}{% else %}<span class="na">n/a</span>{% endif %}</td>
-			</tr>{% endfor %}{% else %}
+			</tr>{% endif %}{% endfor %}{% else %}
 			<tr class="no-data">
 				<td colspan="5">
 					{% trans "No nurses yet" %}

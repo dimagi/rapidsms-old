@@ -51,7 +51,9 @@
 		<tfoot>
 			<tr>
 				<td colspan="2">
-					{% paginator logs %}
+					{% if logs %}
+						{% paginator logs %}
+					{% endif %}
 				</td>
 			</tr>
 		</tfoot>
