@@ -21,9 +21,9 @@ def shida_report(router, nurse=None):
     # list of 'shida' patients for each site, or for a specific nurse if given
     sites = nurse.sites.all() if nurse is not None else Site.objects.all()
     for site in sites:
-        sawa = PatientState.objects.get(code='sawa')
+        shida = PatientState.objects.get(code='shida')
         # get all active patients who responded shida or are in the default state
-        patients = Patient.objects.filter(site=site).exclude(state=sawa).exclude(active=False).exclude(subscribed=False)
+        patients = Patient.objects.filter(site=site).filter(state=shida).exclude(active=False).exclude(subscribed=False)
         # generate report
         report = ''
         for patient in patients:
