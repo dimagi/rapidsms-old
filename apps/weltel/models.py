@@ -19,7 +19,8 @@ class Site(Location):
 
 class WeltelUser(Reporter):
     """ This model represents any weltel users """
-    subscribed = models.BooleanField(default=True)
+    # subscribed is False, until the user provides a valid connection
+    subscribed = models.BooleanField(default=False)
     class Meta:
         abstract = True
         

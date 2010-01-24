@@ -125,7 +125,7 @@ class WeltelFormsLogic(FormsLogic):
         patient.save()
 
         if phone_number is None:
-            return response
+            return (patient, response)
         # save connections
         conn, c_created = PersistantConnection.objects.get_or_create(\
                           identity= phone_number, backend=backend)
@@ -142,9 +142,10 @@ class WeltelFormsLogic(FormsLogic):
                                       {"old_id": conn.reporter.alias }
         conn.reporter = patient
         conn.save()
-        patient.set_preferred_connection( conn )        
-        if p_created:
-            patient.subscribe()
+        patient.set_preferred_connection( conn )
+        # you can only subscribe the patient once you have established 
+        # their preferred connection
+        patient.subscribe()
         return (patient, response)
 
     def get_or_create_nurse(self, site_code, phone_number, backend):
@@ -157,7 +158,6 @@ class WeltelFormsLogic(FormsLogic):
         nurse, n_created = Nurse.objects.get_or_create(alias= phone_number)
         nurse.sites.add(site)
         if n_created:
-            nurse.subscribe()
             response = _("Nurse registered") % {"id": nurse.alias }
         else:
             response = _("Nurse reregistered") % {"id": nurse.alias }
@@ -176,4 +176,5 @@ class WeltelFormsLogic(FormsLogic):
                             {"id": nurse.alias, "old_id": conn.reporter.alias }) 
         conn.reporter = nurse
         conn.save()
+        nurse.subscribe()
         return nurse, response

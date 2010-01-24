@@ -37,7 +37,7 @@ def shida_report(router, nurse=None):
                 report = report + "%(id)s-None " % {'id':id }
         # send report to given nurse, or if nurse not supplied, 
         # all nurses registered for that site
-        nurses = [nurse] if nurse is not None else Nurse.objects.filter(sites=site)
+        nurses = [nurse] if nurse is not None else Nurse.objects.filter(sites=site).filter(subscribed=True)
         for n in nurses:
             be = router.get_backend(n.connection.backend.slug)
             if report:
@@ -125,7 +125,7 @@ def other_report(router, nurse=None):
             report = report + "Inactive: " + report_inactive
         
         # send report to all nurses registered for that site
-        nurses = [nurse] if nurse is not None else Nurse.objects.filter(sites=site)
+        nurses = [nurse] if nurse is not None else Nurse.objects.filter(sites=site).filter(subscribed=True)
         for n in nurses:
             be = router.get_backend(n.connection.backend.slug)
             if report:
