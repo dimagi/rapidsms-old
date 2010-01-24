@@ -168,5 +168,5 @@ class EventLog(models.Model):
         get_latest_by = 'date'
     
     def __unicode__(self):
-        return self.name if self.name else self.code
+        return self.event.name if self.event.name else self.event.code
 
