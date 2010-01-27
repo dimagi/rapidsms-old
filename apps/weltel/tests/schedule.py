@@ -8,7 +8,7 @@ import form.app as form_app
 import weltel.app as weltel_app
 from weltel.models import *
 from weltel.formslogic import WeltelFormsLogic
-from weltel.app import SAWA_CODE, SHIDA_CODE
+from weltel.models import SAWA_CODE, SHIDA_CODE, INACTIVE_CODE
 
 class TestSchedule (TestScript):
     #apps = ([scheduler_app.App])
@@ -20,7 +20,7 @@ class TestSchedule (TestScript):
     def test_mambo(self):
         wfl = WeltelFormsLogic()
         backend = PersistantBackend.objects.get_or_create(slug=self.backend.slug)[0]
-        patient, response = wfl.get_or_create_patient("tst/8", \
+        patient, response = wfl.get_or_create_patient("BA1-1-08", \
                                                       phone_number="1250", \
                                                       backend=backend, 
                                                       gender="f", 
@@ -40,41 +40,7 @@ class TestSchedule (TestScript):
         self.runScript(script)
         self.router.stop()
         schedule.delete()
-        
-    def test_automatic_deregistration(self):
-        # create patient
-        wfl = WeltelFormsLogic()
-        backend = PersistantBackend.objects.get_or_create(slug=self.backend.slug)[0]
-        delta = timedelta(weeks=3)
-        registered = datetime.now() - delta
-        patient, response = wfl.get_or_create_patient("tst/9", \
-                                                      phone_number="1251", \
-                                                      backend=backend, 
-                                                      gender="m", 
-                                                      date_registered=registered)
-        # setup timeout after one week
-        schedule = EventSchedule(callback="weltel.callbacks.automatic_deregistration", \
-                                 days_of_week='*', hours='*', minutes='*', callback_args=[1] )
-        schedule.save()
-        self.router.start()
-        # speedup the scheduler so that 1 second == 7 days
-        self.router.get_app('scheduler').schedule_thread._debug_speedup(days=7)
-
-        # test tst/9 is inactive
-        time.sleep(3.0)
-        updated_patient = Patient.objects.get(id=patient.id)
-        self.assertTrue(updated_patient.active==False)
-
-        # reactivate
-        patient.register_event(SAWA_CODE)
-        time.sleep(1.0)
-        updated_patient = Patient.objects.get(id=patient.id)
-        self.assertTrue(updated_patient.active==True)
-        
-        #wrap up
-        self.router.stop()
-        schedule.delete()
-            
+    
     def test_shida_report_basic(self):
         """ it's difficult to check shida_empty and shida in sequence
         since self.runScript stops the router (without any sleep's)
@@ -82,7 +48,7 @@ class TestSchedule (TestScript):
         """
         wfl = WeltelFormsLogic()
         backend = PersistantBackend.objects.get_or_create(slug=self.backend.slug)[0]
-        nurse, response = wfl.get_or_create_nurse(site_code="tst", \
+        nurse, response = wfl.get_or_create_nurse(site_code="BA1-1", \
                                                   phone_number="1252", \
                                                   backend=backend)
         # timeout after one week
@@ -106,7 +72,7 @@ class TestSchedule (TestScript):
     def test_shida_report(self):
         wfl = WeltelFormsLogic()
         backend = PersistantBackend.objects.get_or_create(slug=self.backend.slug)[0]
-        nurse, response = wfl.get_or_create_nurse(site_code="tst", \
+        nurse, response = wfl.get_or_create_nurse(site_code="BA1-1", \
                                                   phone_number="1252", \
                                                   backend=backend)
         # timeout after one week
@@ -114,14 +80,14 @@ class TestSchedule (TestScript):
                                  minutes='*')
         schedule.save()
         # create problem patients
-        patient, response = wfl.get_or_create_patient("tst/10", \
+        patient, response = wfl.get_or_create_patient("BA1-1-010", \
                                                       phone_number="1257", \
                                                       backend=backend, 
                                                       gender="m",
                                                       date_registered=datetime.now())
         patient.register_event(SHIDA_CODE)
         # create problem patients
-        patient2, response = wfl.get_or_create_patient("tst/11", \
+        patient2, response = wfl.get_or_create_patient("BA1-1-011", \
                                                       phone_number="1258", \
                                                       backend=backend, 
                                                       gender="m",
@@ -133,8 +99,97 @@ class TestSchedule (TestScript):
         time.sleep(1.0)
         # test regular report
         script = """
-            1252 < tst/10 1257 shida tst/11 1258 shida
+            1252 < 010-1257 011-1258
         """
         self.runScript(script)
         schedule.delete()
+    
+    def test_inactive_and_other(self):
+        # create patient
+        wfl = WeltelFormsLogic()
+        backend = PersistantBackend.objects.get_or_create(slug=self.backend.slug)[0]
+        delta = timedelta(weeks=3)
+        registered = datetime.now() - delta
+        patient, response = wfl.get_or_create_patient("BA1-1-09", \
+                                                      phone_number="1251", \
+                                                      backend=backend, 
+                                                      gender="m", 
+                                                      date_registered=registered)
+        nurse, response = wfl.get_or_create_nurse(site_code="BA1-1", \
+                                                  phone_number="1252", \
+                                                  backend=backend)
+        # setup timeout after one week
+        schedule_inactive = EventSchedule(callback="weltel.callbacks.mark_inactive", \
+                                 days_of_week='*', hours='*', minutes='*', callback_args=[1] )
+        schedule_inactive.save()
+        # other report
+        schedule_other_report = EventSchedule(callback="weltel.callbacks.other_report", \
+                                 minutes='*')
+        schedule_other_report.save()
+        self.router.start()
+        # speedup the scheduler so that 1 second == 7 days
+        self.router.get_app('scheduler').schedule_thread._debug_speedup(days=8)
+    
+        # test BA109 is inactive
+        time.sleep(3.0)
+        updated_patient = Patient.objects.get(id=patient.id)
+        self.assertTrue(updated_patient.active==False)
+    
+        # test regular report
+        script = """
+            1252 < Inactive: 09-1251
+        """
+        self.runScript(script)
+        
+        # reactivate
+        patient.register_event(SAWA_CODE)
+        time.sleep(1.0)
+        updated_patient = Patient.objects.get(id=patient.id)
+        self.assertTrue(updated_patient.active==True)
+        
+        #wrap up
+        self.router.stop()
+        schedule_inactive.delete()
+        schedule_other_report.delete()
 
+    def test_other_report_the_day_after(self):
+        # create patient
+        wfl = WeltelFormsLogic()
+        backend = PersistantBackend.objects.get_or_create(slug=self.backend.slug)[0]
+        delta = timedelta(weeks=3)
+        registered = datetime.now() - delta
+        patient, response = wfl.get_or_create_patient("BA1-1-09", \
+                                                      phone_number="1251", \
+                                                      backend=backend, 
+                                                      gender="m", 
+                                                      date_registered=registered)
+        # configure patient ot be inactivated 3 weeks ago
+        patient.register_event(INACTIVE_CODE)
+        patient.active = False
+        patient.save()
+        inactive = EventType.objects.get(code=INACTIVE_CODE)
+        inactivated = EventLog.objects.get(patient=patient, event=inactive)
+        inactivated.date = datetime.now() - delta
+        inactivated.save()
+        
+        nurse, response = wfl.get_or_create_nurse(site_code="BA1-1", \
+                                                  phone_number="1252", \
+                                                  backend=backend)
+        # other report
+        schedule = EventSchedule(callback="weltel.callbacks.other_report", \
+                                 minutes='*')
+        schedule.save()
+        self.router.start()
+        # speedup the scheduler so that 1 second == 7 days
+        self.router.get_app('scheduler').schedule_thread._debug_speedup(days=8)
+
+        # test BA109 does not appear in shida_report
+        time.sleep(1.0)        
+        script = """
+            1252 < No patients unsubscribed or were marked inactive today.
+        """
+        self.runScript(script)
+
+        #wrap up
+        self.router.stop()
+        schedule.delete()

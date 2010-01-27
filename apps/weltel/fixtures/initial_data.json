@@ -1119,7 +1119,7 @@
             "last_login": "2009-09-07 12:56:53", 
             "groups": [], 
             "user_permissions": [], 
-            "password": "sha1$be3ed$28263872870b02ffa3ba4e4c8d9fa2a32d5778b9", 
+            "password": "sha1$cc94d$3fb9ab08c838564f450acf84bca59ae7192ba299", 
             "email": "t@t.com", 
             "date_joined": "2009-09-07 12:56:14"
         }
@@ -1306,8 +1306,104 @@
         "pk": 1, 
         "model": "locations.location", 
         "fields": {
-            "code": "tst", 
-            "name": "Test Site", 
+            "code": "BA1-1", 
+            "name": "Weltel Site 1-1", 
+            "parent": null, 
+            "longitude": null, 
+            "latitude": null, 
+            "type": null
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "locations.location", 
+        "fields": {
+            "code": "BA2-1", 
+            "name": "Weltel Site 2-1", 
+            "parent": null, 
+            "longitude": null, 
+            "latitude": null, 
+            "type": null
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "locations.location", 
+        "fields": {
+            "code": "BA3-1", 
+            "name": "Weltel Site 3-1", 
+            "parent": null, 
+            "longitude": null, 
+            "latitude": null, 
+            "type": null
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "locations.location", 
+        "fields": {
+            "code": "BA1-2", 
+            "name": "Weltel Site 1-2", 
+            "parent": null, 
+            "longitude": null, 
+            "latitude": null, 
+            "type": null
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "locations.location", 
+        "fields": {
+            "code": "BA2-2", 
+            "name": "Weltel Site 2-2", 
+            "parent": null, 
+            "longitude": null, 
+            "latitude": null, 
+            "type": null
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "locations.location", 
+        "fields": {
+            "code": "BA3-2", 
+            "name": "Weltel Site 3-2", 
+            "parent": null, 
+            "longitude": null, 
+            "latitude": null, 
+            "type": null
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "locations.location", 
+        "fields": {
+            "code": "BA1-3", 
+            "name": "Weltel Site 1-3", 
+            "parent": null, 
+            "longitude": null, 
+            "latitude": null, 
+            "type": null
+        }
+    }, 
+    {
+        "pk": 8, 
+        "model": "locations.location", 
+        "fields": {
+            "code": "BA2-3", 
+            "name": "Weltel Site 2-3", 
+            "parent": null, 
+            "longitude": null, 
+            "latitude": null, 
+            "type": null
+        }
+    }, 
+    {
+        "pk": 9, 
+        "model": "locations.location", 
+        "fields": {
+            "code": "BA3-3", 
+            "name": "Weltel Site 3-3", 
             "parent": null, 
             "longitude": null, 
             "latitude": null, 
@@ -1376,6 +1472,46 @@
         "fields": {}
     }, 
     {
+        "pk": 2, 
+        "model": "weltel.site", 
+        "fields": {}
+    }, 
+    {
+        "pk": 3, 
+        "model": "weltel.site", 
+        "fields": {}
+    }, 
+    {
+        "pk": 4, 
+        "model": "weltel.site", 
+        "fields": {}
+    }, 
+    {
+        "pk": 5, 
+        "model": "weltel.site", 
+        "fields": {}
+    }, 
+    {
+        "pk": 6, 
+        "model": "weltel.site", 
+        "fields": {}
+    }, 
+    {
+        "pk": 7, 
+        "model": "weltel.site", 
+        "fields": {}
+    }, 
+    {
+        "pk": 8, 
+        "model": "weltel.site", 
+        "fields": {}
+    }, 
+    {
+        "pk": 9, 
+        "model": "weltel.site", 
+        "fields": {}
+    }, 
+    {
         "pk": 1, 
         "model": "weltel.patientstate", 
         "fields": {
@@ -1435,40 +1571,158 @@
         "pk": 3, 
         "model": "weltel.eventtype", 
         "fields": {
-            "next_state": 4, 
-            "code": "other", 
-            "name": "Other", 
-            "description": "Unrecognized Command"
+            "code": "inactive", 
+            "name": "Inactive", 
+            "description": "Patient is marked inactive."
         }
-    }, 
+    },
     {
         "pk": 4, 
         "model": "weltel.eventtype", 
         "fields": {
-            "next_state": 3, 
-            "code": "1", 
-            "name": "No Answer", 
-            "description": "Patient did not pick up the phone."
+            "code": "unsubscribed", 
+            "name": "Unsubscribed", 
+            "description": "Patient has unsubscribed."
         }
-    }, 
+    },
     {
         "pk": 5, 
         "model": "weltel.eventtype", 
         "fields": {
-            "next_state": 4, 
-            "code": "2", 
-            "name": "Disappeared", 
-            "description": "Patient has disappeared. "
+            "next_state": 3, 
+            "code": "1", 
+            "name": "pain (abdominal)", 
+            "description": "Abdominal pains"
         }
     }, 
     {
         "pk": 6, 
         "model": "weltel.eventtype", 
         "fields": {
-            "next_state": 2, 
+            "next_state": 3, 
+            "code": "2", 
+            "name": "pain", 
+            "description": "Generalized body pains"
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "next_state": 3, 
             "code": "3", 
-            "name": "Healthy", 
-            "description": "Patient is healthy again."
+            "name": "derm", 
+            "description": "Dermatological e.g. itchiness"
+        }
+    },
+    {
+        "pk": 8, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "next_state": 3, 
+            "code": "4", 
+            "name": "headache", 
+            "description": "Headache"
+        }
+    },
+    {
+        "pk": 9, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "next_state": 3, 
+            "code": "5", 
+            "name": "boils", 
+            "description": "Boils"
+        }
+    },
+    {
+        "pk": 10, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "next_state": 3, 
+            "code": "6", 
+            "name": "coughing", 
+            "description": "Coughing"
+        }
+    },
+    {
+        "pk": 11, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "next_state": 3, 
+            "code": "7", 
+            "name": "vomiting", 
+            "description": "Vomiting"
+        }
+    },
+    {
+        "pk": 12, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "next_state": 3, 
+            "code": "8", 
+            "name": "diarrhoea", 
+            "description": "Diarrhoea"
+        }
+    },
+    {
+        "pk": 13, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "next_state": 3, 
+            "code": "9", 
+            "name": "weight", 
+            "description": "Weight gain on some body parts"
+        }
+    },
+    {
+        "pk": 14, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "next_state": 3, 
+            "code": "10", 
+            "name": "other", 
+            "description": "Other"
+        }
+    },
+    {
+        "pk": 15, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "next_state": 3, 
+            "code": "clinic", 
+            "name": "clinic", 
+            "description": "Come to the clinic"
+        }
+    },
+    {
+        "pk": 16, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "next_state": 3, 
+            "code": "referral", 
+            "name": "referral", 
+            "description": "Referred to another clinic/hospital"
+        }
+    },
+    {
+        "pk": 17, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "next_state": 3, 
+            "code": "observe", 
+            "name": "observe", 
+            "description": "Observe the signs/symptoms. If worse, visit a health facility."
+        }
+    },
+    {
+        "pk": 18, 
+        "model": "weltel.eventtype", 
+        "fields": {
+            "next_state": 3, 
+            "code": "drugs", 
+            "name": "drugs",
+            "description": "Pick drugs from the nearest health centre/clinic."
         }
     }
 ]

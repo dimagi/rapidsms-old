@@ -13,12 +13,11 @@ from reporters.models import Reporter, PersistantConnection
 from scheduler.models import set_daily_event, EventSchedule
 from weltel.formslogic import WeltelFormsLogic, REGISTER_COMMAND, NURSE_COMMAND
 from weltel.models import Nurse, Patient, PatientState, OutcomeType, ProblemType, EventType
+from weltel.models import SAWA_CODE, SHIDA_CODE, INACTIVE_CODE
 
-SAWA_CODE = 'sawa'
-SHIDA_CODE = 'shida'
-OTHER_CODE = 'other'
-WELTEL_KEYWORD = "well"
-PATIENT_ID_REGEX = "[a-z]+/[0-9]+"
+WELTEL_KEYWORD = "well?"
+PATIENT_ID_REGEX = "[a-z]{2}[0-9]-[0-9]-[0-9]+"
+PHONE_NUMBER_REGEX = "\+?[0-9]{8,16}"
 
 class App (rapidsms.app.App):
     kw = Keyworder()
@@ -40,22 +39,27 @@ class App (rapidsms.app.App):
             
             self.boostrapped = True
             
-            # we could also put this in the fixture
-            # set up automatic deregistration event
-            try:
-                EventSchedule.objects.get(callback="weltel.callbacks.automatic_deregistration")
-            except EventSchedule.DoesNotExist:
-                # automatically deregister users we haven't seen in 3 weeks
-                set_daily_event("weltel.callbacks.automatic_deregistration", \
-                                hour=0, minute=15, callback_args=3)
-                
-            # set up bi-weekly shida report
+            # set up bi-daily shida report
             try:
                 EventSchedule.objects.get(callback="weltel.callbacks.shida_report")
             except EventSchedule.DoesNotExist:
                 schedule = EventSchedule(callback="weltel.callbacks.shida_report", \
-                                         hours=set([8,15]), minutes=set([0]) )
+                                         hours=set([8,14]), minutes=set([0]) )
                 schedule.save()
+
+            # set up daily inactive check
+            try:
+                EventSchedule.objects.get(callback="weltel.callbacks.mark_inactive")
+            except EventSchedule.DoesNotExist:
+                set_daily_event("weltel.callbacks.mark_inactive", 
+                                hour=0, minute=15, callback_args=[3])
+
+            # set up daily 'other report'
+            try:
+                EventSchedule.objects.get(callback="weltel.callbacks.other_report")
+            except EventSchedule.DoesNotExist:
+                set_daily_event("weltel.callbacks.other_report", 
+                                hour=14, minute=30, callback_args=[])
 
     def parse (self, message):
         """Parse and annotate messages in the parse phase."""
@@ -64,6 +68,9 @@ class App (rapidsms.app.App):
     def handle (self, message):
         try:
             message.reporter = Patient.objects.get(reporter_ptr=message.reporter)
+            if message.reporter.active == False:
+                message.reporter.active = True
+                message.reporter.save()
         except Patient.DoesNotExist:
             try:
                 message.reporter = Nurse.objects.get(reporter_ptr=message.reporter)
@@ -135,23 +142,27 @@ class App (rapidsms.app.App):
         def decorator(self, message, *args):
             if not isinstance(message.reporter,Patient) and \
                 not isinstance(message.reporter,Nurse):
-                    message.respond( _("This number is not registered.") + \
+                    message.respond( _("This number is not registered. ") + \
                                      REGISTER_COMMAND )
                     return
             f(self, message, *args)
         return decorator        
 
-    @kw("(%s)\s+(numbers)" % PATIENT_ID_REGEX)
-    @is_nurse
-    def outcome(self, message, patient_id, outcome_code):
+    @kw("(%s)\s+(numbers)\s+(.*)" % PATIENT_ID_REGEX)
+    def outcome(self, message, patient_id, outcome_code, notes):
         """ Expecting a text from a nurse of the form: <patient-id> <outcome-code> """
+        if not isinstance(message.reporter,Nurse):
+            # we do nurse check manually here, since we want to call 'from_other_phone' 
+            # if sender is not nurse
+            self.from_other_phone(message, patient_id, outcome_code)
+            return
         try:
             patient = Patient.objects.get(alias=patient_id)
         except Patient.DoesNotExist:
             message.respond( _("Patient (%(id)s) not recognized.")%{'id':patient_id} )
             return
         try:
-            outcome = patient.register_event(outcome_code, message.reporter)
+            outcome = patient.register_event(outcome_code, message.reporter, notes=notes)
         except OutcomeType.DoesNotExist:
             message.respond( _("Outcome (%(code)s) not recognized.")%{'code':outcome_code} )
             return
@@ -160,16 +171,72 @@ class App (rapidsms.app.App):
         message.respond( _("Patient %(id)s updated to '%(code)s'") % \
                          {'id':patient_id, 'code':outcome.name} )
 
-    # for unit tests ONLY - sends messages to all nurses!
-    @kw("%(well)s report.*" % {'well':WELTEL_KEYWORD} )
+    @kw("%(well)s report(.*)" % {'well':WELTEL_KEYWORD} )
     @is_nurse
-    def shida_report(self, message):
-        from weltel.callbacks import shida_report
-        shida_report(self.router)
+    def report(self, message, report_name):
+        """ for unit tests ONLY - sends messages to all nurses! """
+        from weltel.callbacks import shida_report, other_report
+        report_name = report_name.strip().lower()
+        if report_name == 'shida':
+            shida_report(self.router, message.reporter)
+        elif report_name == 'other':
+            other_report(self.router, message.reporter)
+        else:
+            logging.info("Nurse %s sent unrecognized command '%s'" % \
+                         (message.reporter.alias, message.persistent_msg))
+            message.respond( _("That report is not recognized.") )
+
+    @kw("(%s)\s*(.*)" % PHONE_NUMBER_REGEX)
+    def from_other_phone_num(self, message, phone_number, text):
+        if not ((len(phone_number) == 14 and phone_number[:4] == '+254') or \
+            (len(phone_number) == 11 and phone_number[0] == '0')):
+            message.respond( "Poorly formatted phone number. Do not use spaces or dashes, e.g. +254712222333." )
+            return
+        if len(phone_number) == 14 and phone_number[:4] == '+254':
+            # remove leading '+254'
+            phone_number = phone_number[4:]
+        elif len(phone_number) == 11 and phone_number[0] == '0':
+            #remove leading '0'
+            phone_number = phone_number[1:]
+        try:
+            conn = PersistantConnection.objects.get(identity__contains=phone_number)
+        except PersistantConnection.DoesNotExist:
+            message.respond( _("That phone number is not recognized.") )
+            return
+        except PersistantConnection.MultipleObjectsReturned:
+            message.respond( _("That phone number is associated with more than one account. Please use client ID.") )
+            return
+        self.from_other_phone(message, conn.reporter.alias, text)
 
     @kw("(%s)\s*(.*)" % PATIENT_ID_REGEX)
     def from_other_phone(self, message, patient_id, text):
-        message.reporter = Patient.objects.get(alias=patient_id)
+        try:
+            patient = Patient.objects.get(alias=patient_id)
+        except Patient.DoesNotExist:
+            message.respond(_("Unknown patient %(id)s.") % {'id':patient_id})
+            return
+        if isinstance(message.reporter,Nurse):
+            """ this is an 'outcome' command from a nurse """
+            patient.related_messages.add(message.persistent_msg)
+            m = re.match('[0-9a-z]+', text)
+            if m is None:
+                # improperly formatted            
+                logging.info("Nurse %s sent unrecognized command '%s'" % \
+                             (message.reporter.alias, message.persistent_msg))
+                message.respond( _("Please report patient outcomes in the format 'patient-id outcome-code notes'") )
+                return
+            outcome_code = m.group(0)            
+            try:
+                notes = text.strip('outcome_code')
+                outcome = patient.register_event(outcome_code, message.reporter, notes=notes)
+            except OutcomeType.DoesNotExist:
+                message.respond( _("Outcome (%(code)s) not recognized.")%{'code':outcome_code} )
+                return
+            message.respond( _("Patient %(id)s updated to '%(code)s'") % \
+                             {'id':patient_id, 'code':outcome.name} )
+            return
+        """ This is a message sent by a client from another phone """
+        message.reporter = patient
         try:
             func,groups = self.kw.match(None, text)
         except TypeError:
@@ -177,41 +244,41 @@ class App (rapidsms.app.App):
             self.other(message)
             return
         func(self, message, groups)
-
-    @kw("(sawa|poa|nzuri|safi).*")
+    
+    @kw("(sawa|poa|nzuri|safi)(.*)")
     @is_patient
-    def sawa(self, message, sawa):
-        message.reporter.register_event(SAWA_CODE)
+    def sawa(self, message, sawa, notes=None):
+        message.reporter.register_event(SAWA_CODE, notes=notes)
         message.reporter.related_messages.add(message.persistent_msg)
         # Note that all messages are already logged in logger
         logging.info("Patient %s set to '%s'" % (message.reporter.alias, SAWA_CODE))
         message.respond( _("Asante") )
     
-    @kw("shida\s*([0-9]+).*")
+    @kw("shida\s*([0-9]+)(.*)")
     @is_patient
-    def shida(self, message, problem_code):
+    def shida(self, message, problem_code, notes):
         response = ''
         try:
-            problem = message.reporter.register_event(problem_code)
+            problem = message.reporter.register_event(problem_code, notes=notes)
         except ProblemType.DoesNotExist:
             response = _("Problem %(code)s not recognized. ") % \
                         {'code':problem_code} 
             problem = message.reporter.register_event(SHIDA_CODE)
         message.reporter.related_messages.add(message.persistent_msg)
         logging.info("Patient %s set to '%s'" % (message.reporter.alias, SHIDA_CODE) )
-        message.respond( response + _("Pole for '%(code)s'") % {'code':problem.name} )
+        message.respond( response + _("Asante. Tutakupigia simu hivi karibuni. ('%(code)s')") % {'code':problem.name} )
     
     @kw("(shida)(whatever)?")
     @is_patient
-    def shida_new(self, message, shida, new_problem=None):
-        message.reporter.register_event(SHIDA_CODE)
+    def shida_new(self, message, shida, notes=None):
+        message.reporter.register_event(SHIDA_CODE, notes=notes)
         message.reporter.related_messages.add(message.persistent_msg)
         logging.info("Patient %s set to '%s'" % (message.reporter.alias, SHIDA_CODE) )
-        message.respond( _("Pole") )
+        message.respond( _("Asante. Tutakupigia simu hivi karibuni.") )
 
     @kw("(%(well)s set phone.*)" % {'well':WELTEL_KEYWORD} )
     @is_patient
-    def set_default_phone(self, message, shida, new_problem=None):
+    def set_default_phone(self, message, text):
         message.reporter.set_preferred_connection( message.persistant_connection )
         message.reporter.related_messages.add(message.persistent_msg)
         logging.info("Patient %(id)s default phone set to %(num)s" % \
@@ -224,7 +291,7 @@ class App (rapidsms.app.App):
     # for unit tests
     @kw("(%(well)s get phone.*)" % {'well':WELTEL_KEYWORD} )
     @is_patient
-    def get_default_phone(self, message, shida, new_problem=None):
+    def get_default_phone(self, message, text):
         message.reporter.related_messages.add(message.persistent_msg)
         message.respond( "Patient %(id)s default phone is %(num)s" % \
                          {"num": message.reporter.connection.identity, \
@@ -232,7 +299,7 @@ class App (rapidsms.app.App):
 
     @kw("(%(well)s subscribe.*)" % {'well':WELTEL_KEYWORD} )
     @is_weltel_user
-    def subscribe(self, message, shida, new_problem=None):
+    def subscribe(self, message, text):
         message.reporter.subscribe()
         if isinstance(message.reporter,Patient):
             message.reporter.related_messages.add(message.persistent_msg)
@@ -241,11 +308,23 @@ class App (rapidsms.app.App):
 
     @kw("(%(well)s unsubscribe.*)" % {'well':WELTEL_KEYWORD} )
     @is_weltel_user
-    def unsubscribe(self, message, shida, new_problem=None):
+    def unsubscribe(self, message, text):
         message.reporter.unsubscribe()
         if isinstance(message.reporter,Patient):
             message.reporter.related_messages.add(message.persistent_msg)
         logging.info("%s unsubscribed" % (message.reporter.alias) )
+        message.respond( _("Kwaheri") )
+
+    @kw("(%(well)s inactive.*)" % {'well':WELTEL_KEYWORD} )
+    @is_patient
+    def inactive(self, message, text):
+        """ Set patient to inactive; just for debugging! """
+        message.reporter.active = False
+        message.reporter.save()
+        message.reporter.register_event(INACTIVE_CODE)
+        if isinstance(message.reporter,Patient):
+            message.reporter.related_messages.add(message.persistent_msg)
+        logging.info("%s deactivated" % (message.reporter.alias) )
         message.respond( _("Kwaheri") )
 
     @kw("%(well)s\s+phone\s+(%(id)s).*"  % {'well':WELTEL_KEYWORD, 'id':PATIENT_ID_REGEX} )
@@ -277,8 +356,7 @@ class App (rapidsms.app.App):
 
     @is_patient
     def other(self, message):
-        message.reporter.register_event(OTHER_CODE)
         message.reporter.related_messages.add(message.persistent_msg)
         logging.info("Patient %s sent unrecognized command '%s'" % \
-                     (message.reporter.alias, OTHER_CODE))
-        message.respond( _("Command not recognized") )
+                     (message.reporter.alias, message.persistent_msg))
+        message.respond( _("Please respond 'sawa' or 'shida', followed by any additional comments you have.") )

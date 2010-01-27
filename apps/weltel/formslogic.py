@@ -8,8 +8,8 @@ from scheduler.models import set_weekly_event
 from weltel.models import Site, Patient, PatientState, Nurse, MALE, FEMALE
 from weltel.util import site_code_from_patient_id
 
-REGISTER_COMMAND = _("To register, text: 'well register patient_id gender (phone_number)")
-NURSE_COMMAND = _("To register, text: 'well nurse site_id")
+REGISTER_COMMAND = _("To register, please refer to your information card.")
+NURSE_COMMAND = _("To register, please refer to your information card.")
 
 #TODO - add basic check for when people submit fields in wrong order
 #TODO - wrap the validation and actions in pretty wrapper functions
@@ -70,16 +70,17 @@ class WeltelFormsLogic(FormsLogic):
 
     def is_patient_invalid(self, patient_id, gender=None, phone_number=None):
         if len(patient_id) == 0:
-            return [_("Missing 'patient_id'.") + REGISTER_COMMAND ]
+            return [_("Missing 'patient_id'. ") + REGISTER_COMMAND ]
         try:
             site_code = site_code_from_patient_id(patient_id)
         except ValueError:
-            return [_("Poorly formatted patient_id: %(code)s") % \
-                    {"code" : patient_id}]
+            return [_("Patient (%(id)s) not recognized") % \
+                    {"id" : patient_id}]
         try:
-            Site.objects.get(code=site_code)
+            Site.objects.get(code__iexact=site_code)
         except Site.DoesNotExist:
-            return [_("Unknown sitecode %(code)s") % {"code" : site_code}]
+            response = _("Site %(code)s does not exist") % {"code": site_code }
+            return [response]
         if len(gender) > 0:
             if not gender.lower().startswith('m') and not gender.lower().startswith('f'):
                 return [_("Invalid gender %(gender)s") % {"gender" : gender}]
@@ -90,26 +91,33 @@ class WeltelFormsLogic(FormsLogic):
     
     def is_nurse_invalid(self, site_code):
         if len(site_code) == 0:
-            return [_("Missing 'site_code'.") + NURSE_COMMAND ]
+            return [_("Missing 'site_code'. ") + NURSE_COMMAND ]
         try:
-            Site.objects.get(code=site_code)
+            Site.objects.get(code__iexact=site_code)
         except Site.DoesNotExist:
-            return [_("Unknown sitecode %(code)s") % {"code" : site_code}]
+            response = _("Site %(code)s does not exist") % {"code": site_code }
+            return [response]
         return False
 
     def get_or_create_patient(self, patient_id, phone_number=None, \
                               backend=None, gender=None, date_registered=None):
         response = ''
         try:
-            patient = Patient.objects.get(alias=patient_id)
+            patient = Patient.objects.get(alias__iexact=patient_id)
             response = _("Patient %(id)s reregistered ") % {"id": patient_id }
+            if not patient.subscribed:
+                patient.subscribe()
             p_created = False
         except Patient.DoesNotExist:
             patient = Patient(alias=patient_id)
             response = _("Patient %(id)s registered ") % {"id": patient_id }
             p_created = True
         site_code = site_code_from_patient_id(patient_id)
-        patient.site = Site.objects.get( code=site_code )
+        try:
+            patient.site = Site.objects.get( code__iexact=site_code )
+        except Site.DoesNotExist:
+            response = _("Site %(code)s does not exist") % {"code": site_code }
+            return (patient, response)
         if gender: patient.gender = gender
         patient.state = PatientState.objects.get(code='default')
         if date_registered: 
@@ -117,7 +125,7 @@ class WeltelFormsLogic(FormsLogic):
         patient.save()
 
         if phone_number is None:
-            return response
+            return (patient, response)
         # save connections
         conn, c_created = PersistantConnection.objects.get_or_create(\
                           identity= phone_number, backend=backend)
@@ -134,22 +142,22 @@ class WeltelFormsLogic(FormsLogic):
                                       {"old_id": conn.reporter.alias }
         conn.reporter = patient
         conn.save()
-        patient.set_preferred_connection( conn )        
-        if p_created:
-            patient.subscribe()
+        patient.set_preferred_connection( conn )
+        # you can only subscribe the patient once you have established 
+        # their preferred connection
+        patient.subscribe()
         return (patient, response)
 
     def get_or_create_nurse(self, site_code, phone_number, backend):
         try:
-            site = Site.objects.get(code=site_code)
+            site = Site.objects.get(code__iexact=site_code)
         except Site.DoesNotExist:
-            message.respond(_("Site %(code)s does not exist") % {"code": site_code })
-            return
+            response = _("Site %(code)s does not exist") % {"code": site_code }
+            return None, response
         # for now, set unique id to be phone number
         nurse, n_created = Nurse.objects.get_or_create(alias= phone_number)
         nurse.sites.add(site)
         if n_created:
-            nurse.subscribe()
             response = _("Nurse registered") % {"id": nurse.alias }
         else:
             response = _("Nurse reregistered") % {"id": nurse.alias }
@@ -168,4 +176,5 @@ class WeltelFormsLogic(FormsLogic):
                             {"id": nurse.alias, "old_id": conn.reporter.alias }) 
         conn.reporter = nurse
         conn.save()
+        nurse.subscribe()
         return nurse, response
