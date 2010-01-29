@@ -101,7 +101,8 @@ class Reporter(models.Model):
     # indicate that they probably shouldn't be trusted
     registered_self = models.BooleanField()
 	
-	
+    objects = CustomManager()
+    
     class Meta:
         ordering = ["last_name", "first_name"]
 

@@ -214,3 +214,7 @@ if "customdjango" in RAPIDSMS_CONF:
         AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend'] +\
                           [backend for backend in auths]
 
+CUSTOM_MANAGERS = {}
+if "managers" in RAPIDSMS_CONF:
+    for model_class, method in RAPIDSMS_CONF["managers"].items():
+        CUSTOM_MANAGERS[model_class] = method
