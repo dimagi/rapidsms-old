@@ -16,6 +16,9 @@ def check_availability(req):
 def dashboard(req):
 	return render_to_response(req, "dashboard.html")
 
+def success(req):
+    return HttpResponse("success")
+
 def login(req, template_name="webapp/login.html"):
     '''Login to rapidsms'''
     # this view, and the one below, is overridden because 
