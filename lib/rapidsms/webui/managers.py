@@ -109,7 +109,12 @@ class CustomManager(models.Manager):
         for stack_item in traceback.extract_stack():
             # the third item in the stack list is the line
             # of code that created the call.
-            if objects_call in stack_item[3].lower():
+            method_call = stack_item[3]
+            if not method_call:
+                # this can be null when inside the interpreter.
+                # don't want to break in that case
+                continue
+            elif objects_call in method_call.lower():
                 if found:
                     # Avoid infinite loop, it appeared in the stack
                     # at least twice.  We can be pretty sure its 
