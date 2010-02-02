@@ -117,8 +117,8 @@ class Patient(WeltelUser):
         scheds = EventSchedule.objects.filter(callback="weltel.callbacks.send_mambo", \
                                               callback_args__contains=str(self.id))
         if len(scheds) == 0:
-            set_weekly_event("weltel.callbacks.send_mambo", day=2, hour=16, \
-                             minute=30, callback_args=[self.id])
+            set_weekly_event("weltel.callbacks.send_mambo", day=0, hour=10, \
+                             minute=50, callback_args=[self.id])
 
     def unsubscribe(self):
         self.register_event(UNSUBSCRIBE_CODE)
