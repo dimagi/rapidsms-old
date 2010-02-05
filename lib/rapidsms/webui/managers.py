@@ -7,6 +7,10 @@ from django.contrib.contenttypes.models import ContentType
 import inspect, traceback
 import settings
 
+# if using the recursion helper this will somewhat arbitrarily
+# cut off after this amount of loops.
+MAX_ALLOWABLE_STACK_DEPTH = 100
+
 class RecursiveManager(models.Manager):
     """Provides a method to flatten a recursive model (a model which has a ForeignKey field linked back
        to itself), in addition to the usual models.Manager methods. This Manager queries the database
@@ -46,7 +50,9 @@ class CustomManager(models.Manager):
     
     def get_query_set(self):
         method = self._get_method()
-        if method and not self._recursion_issues():
+        # commented out recursion checker to place the burden on the
+        # writer.
+        if method: # and not self._recursion_issues():
             # if we find a custom method and there are no recursion
             # issues, go ahead and call it. 
             return method()
@@ -88,27 +94,39 @@ class CustomManager(models.Manager):
         self._model_method_cache[model_name] = None
         return None
     
+    # CZUE: 
     def _recursion_issues(self):
         # This is some useful wackiness. Inspect the call stack
         # and if this is the _second_ or greater call to this 
         # model's .objects, we want to bypass the custom method
-        # to avoid infinite loops.  This allows the overriders
-        # to call the model.objects() as if it was normal from
-        # _only_ inside that method.  This is preferable to 
-        # forcing them to use a new manager such as:
+        # to avoid infinite loops.  However this is not even
+        # close to perfectly safe.  It is meant only to help
+        # aid with stack errors.
         # 
+        # The better way to do this is to reference the objects
+        # as follows:
+        #
         # manager = models.Manager()
         # manager.contribute_to_class(Reporter, "Reporter")
         # reporters = manager.all()
-        #
-        # which also works.
-        
+        # 
+        # This code is pretty terrible and we should actually
+        # just let people fix recursion errors on their own
+        # rather than promoting potentially bad practice.
+        # So removing the call above and leaving this in for
+        # legacy sake.  To be removed if not necessary
+                
+        stack = traceback.extract_stack()
+        if len(stack) > MAX_ALLOWABLE_STACK_DEPTH: 
+            return True
         model_name =self.model.__name__.lower()  
         objects_call = "%s.objects" % (model_name)
         found = False
-        for stack_item in traceback.extract_stack():
+        for stack_item in stack:
+            # filename, line number, function name, text
             # the third item in the stack list is the line
             # of code that created the call.
+            
             method_call = stack_item[3]
             if not method_call:
                 # this can be null when inside the interpreter.
@@ -122,5 +140,4 @@ class CustomManager(models.Manager):
                     return True
                 else:
                     found = True
-        return False
         
