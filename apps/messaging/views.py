@@ -12,6 +12,12 @@ from models import combined_message_log, __combined_message_log_row
 
 
 def index(req):
+    return _messaging(req)
+
+def groups(req):
+    return _messaging(req, groups=True)
+
+def _messaging(req, groups=False):
     def cookie_recips(status):
         flat = urllib.unquote(req.COOKIES.get("recip-%s" % status, ""))
         return map(int, re.split(r'\s+', flat)) if flat != "" else []
@@ -24,13 +30,28 @@ def index(req):
     filtered    = False
     hits        = []
 
-    def __reporter(rep):
-        rep.is_checked = rep.pk in checked
-        rep.is_error   = rep.pk in error
-        rep.is_sent    = rep.pk in sent
-        rep.is_hit     = rep.pk in hits
-        return rep
+    def __decorate(obj):
+        # this can decorate a reporter or group - anything in the UI
+        obj.is_checked = obj.pk in checked
+        obj.is_error   = obj.pk in error
+        obj.is_sent    = obj.pk in sent
+        obj.is_hit     = obj.pk in hits
+        return obj
 
+    # set a few obects so we can deal with reporters and groups
+    # through the same utility code and templates.
+    
+    # Instead of referencing the model, we do it through this
+    # variable, allowing us to be agnostic about whether we're talking
+    # about reporters or groups.
+    model_class = ReporterGroup if groups else Reporter
+    item_template = "messaging/partials/group.html" if groups \
+                    else "messaging/partials/reporter.html"
+    headers = ("Title", "Description", "Members") if groups \
+              else ("Name", "Role", "Location") 
+    post_url = "/ajax/messaging/group_message" if groups \
+               else "/ajax/messaging/send_message"
+    
     # if the field/cmp/query parameters were provided (ALL
     # OF THEM), we will mark some of the reporters as HIT
     if "query" in req.GET or "field" in req.GET or "cmp" in req.GET:
@@ -40,7 +61,7 @@ def index(req):
 
         # search with: field__cmp=query
         kwargs = { str("%s__%s" % (req.GET["field"], req.GET["cmp"])): req.GET["query"] }
-        hits = Reporter.objects.filter(**kwargs).values_list("pk", flat=True)
+        hits = model_class.objects.filter(**kwargs).values_list("pk", flat=True)
         show_search = True
         filtered = True
 
@@ -51,12 +72,17 @@ def index(req):
     # the columns to display in the "field"
     # field of the search form. this is WAY
     # ugly, and should be introspected
-    columns = [
-        ("alias", "Alias"),
-        ("first_name", "First Name"),
-        ("last_name", "Last Name")]#,
-        #("role__title", "Role"),
-        #("location__name", "Location")]
+    if not groups:
+        columns = [
+                   ("alias", "Alias"),
+                   ("first_name", "First Name"),
+                   ("last_name", "Last Name")]#,
+            #("role__title", "Role"),
+            #("location__name", "Location")]
+    else:
+        columns = [("title", "Title"),
+                   ("description", "Description")]
+                   
 
     resp = render_to_response(req,
         "messaging/index.html", {
@@ -66,8 +92,11 @@ def index(req):
             "field":       req.GET.get("field", ""),
             "cmp":         req.GET.get("cmp", ""),
             "show_search": show_search,
+            "item_template": item_template,
+            "post_url":    post_url,
+            "headers":     headers,
             "message_log": paginated(req, combined_message_log(checked), prefix="msg", wrapper=__combined_message_log_row),
-            "reporters":   paginated(req, Reporter.objects.all(), wrapper=__reporter) })
+            "reporters":   paginated(req, model_class.objects.all(), wrapper=__decorate) })
 
     # if we just searched via GET (not via AJAX), store the hits
     # in a cookie for the client-side javascript to pick up. if

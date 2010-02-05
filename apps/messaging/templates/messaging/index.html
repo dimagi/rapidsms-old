@@ -6,6 +6,12 @@
 {% load reporters-tags %}
 {% load pagination-tags %}
 
+{% block page_tabs %}
+<ul id="page-tabs">
+    <li class="page"><a href="/messaging">Message People</a></li>
+    <li class="page"><a href="/messaging/groups">Message Groups</a></li>
+</ul>
+{% endblock %}
 {% block content %}
 <div class="split">
 	<div class="left">
@@ -47,17 +53,16 @@
 				<thead>
 					<tr>
 						<th></th>
-						<th>Name</th>
-						<th>Role</th>
-						<th>Location</th>
+						{% for header in headers %}
+						<th>{{ header }}</th>
+						
+						{% endfor %}
 					</tr>
 				</thead>
-				<tbody class="recips{% if filtered %} filtered{% endif %}">{% for reporter in reporters.object_list %}
-					<tr uid="{{ reporter.pk }}" class="{% if reporter.is_hit %}hit{% endif %} {% if reporter.is_checked %} checked{% endif %}">
+				<tbody class="recips{% if filtered %} filtered{% endif %}">{% for item in reporters.object_list %}
+					<tr uid="{{ item.pk }}" class="{% if item.is_hit %}hit{% endif %} {% if item.is_checked %} checked{% endif %}">
 						<td class="check"></td>
-						<td>{{ reporter.full_name }}</td>
-						<td>{{ reporter.role }}</td>
-						<td>{{ reporter.location }}</td>
+						{% include item_template %}
 					</tr>{% endfor %}
 				</tbody>
 				<tfoot>
@@ -487,7 +492,7 @@
 					
 					send_xhr = $.ajax({
 						"type": "POST",
-						"url":  "/ajax/messaging/send_message",
+						"url":  "{{post_url}}",
 						"data": {
 							"uid":  uid,
 							"text": text,
