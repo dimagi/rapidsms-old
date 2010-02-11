@@ -91,21 +91,17 @@ def start (args):
     os.environ["RAPIDSMS_INI"] = ini
     os.environ["DJANGO_SETTINGS_MODULE"] = "rapidsms.webui.settings"
 
-    # import the base settings before touching config.  This prevents
-    # potential circular imports of settings if you try to do too
-    # much in your __init__.py or config.py files in your apps.
-    # This builds the django config from rapidsms.config, in a 
-    # round-about way.
-    # Can't do it until env[RAPIDSMS_INI] is defined
-        
-    from rapidsms.webui import settings
     # read the config, which is shared
     # between the back and frontend
     conf = Config(ini)
     
     # if we found a config ini, try to configure Django
     if conf.sources:
-
+        # This builds the django config from rapidsms.config, in a 
+        # round-about way.
+        # Can't do it until env[RAPIDSMS_INI] is defined
+        from rapidsms.webui import settings 
+        
         import_local_settings(settings, ini)
 
         # whatever we're doing, we'll need to call
