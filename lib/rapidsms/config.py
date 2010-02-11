@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 
-import os, log
+import os, log, sys, traceback
 from ConfigParser import SafeConfigParser
 import logging
 
@@ -103,7 +103,9 @@ class Config (object):
                 return module
         
         except ImportError, e:
-            logging.error("App import error: " + str(e))            
+            info = sys.exc_info()
+            logging.error("App import error from %s: %s\n%s" % (class_tmpl, str(e), traceback.print_tb(info[2])))
+                
             pass
 
 
