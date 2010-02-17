@@ -113,11 +113,6 @@ def render_to_response(req, template_name, dictionary=None, **kwargs):
     if "context_instance" not in kwargs:
         kwargs["context_instance"] = RequestContext(req)
     
-    # add the template information to the dictionary, 
-    # if necessary
-    if not "base_template" in rs_dict:
-        rs_dict["base_template"] = settings.BASE_TEMPLATE
-    
     # Let apps know whether i18n is on or off
     if hasattr(settings,"RAPIDSMS_I18N"):
         kwargs["context_instance"]["USE_I18N"] = True

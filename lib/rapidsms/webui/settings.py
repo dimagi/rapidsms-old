@@ -69,7 +69,8 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     "django.core.context_processors.debug",
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
-    "django.core.context_processors.request"
+    "django.core.context_processors.request",
+    "webapp.context_processors.base_template" # sticks the base template inside all responses
 ]
 
 TEMPLATE_DIRS = [
@@ -213,6 +214,12 @@ if "customdjango" in RAPIDSMS_CONF:
             RAPIDSMS_CONF["customdjango"]["authentications"] = auths
         AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend'] +\
                           [backend for backend in auths]
+    if "context_processors" in RAPIDSMS_CONF["customdjango"]:
+        procs = RAPIDSMS_CONF["customdjango"]["context_processors"]
+        if isinstance(procs, basestring):
+            procs = [procs]
+        TEMPLATE_CONTEXT_PROCESSORS = TEMPLATE_CONTEXT_PROCESSORS +\
+                          [proc for proc in procs]
 
 CUSTOM_MANAGERS = {}
 if "managers" in RAPIDSMS_CONF:
