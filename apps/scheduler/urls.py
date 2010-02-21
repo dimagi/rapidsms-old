@@ -6,6 +6,6 @@ from django.conf.urls.defaults import *
 import scheduler.views as views
 
 urlpatterns = patterns('',
-    url(r'^scheduler/?$', views.index),
+    url(r'^scheduler/?$', views.index, name="scheduler"),
     url(r'^scheduler/(?P<pk>\d+)/?$', views.edit),
 )

@@ -5,12 +5,14 @@
 {% block content %}
 
 <div class="module">
-	<h2>Edit Schedule {{ schedule.pk }}</h2>
-
+	<h2>Edit Schedule {{ schedule.pk }}</h2><br/>
     <p/>
-    {% if status %}<div>{{ status }}</div>{% endif %}
-    {% if errors %}<div class="error" style="color:red">{{ errors }}</div>{% endif %}
+    
+    {% if status %}<div>{{ status }}</div><p/>{% endif %}
+    {% if errors %}<div class="error" style="color:red">{{ errors }}</div><p/>{% endif %}
 
+	<i>Note that we currently do not support adding a schedule from the UI, 
+	nor modifying start-time, end_time, or the function to be called.</i>
 	<form action="" method="POST">
 	<tr><th><label>Name of Python callback function: </label></th>
 		<td><b>{{schedule.callback}}</b></td></tr> 
@@ -32,11 +34,8 @@
 		<input {% if schedule.active %}checked="checked"{% endif %} type="checkbox" name="active" id="id_active" /></td></tr><p/> 
 	<input type="submit" value="{% trans 'Submit' %}" /> 
 	</form><p/>
-   	
-   	<div class="toolbar">
-	   	<a href="/schedule/{{ village.pk }}/edit" class="edit">{% trans "Edit This Schedule" %}</a>
-	</div>
 
+	<a href="{% url scheduler %}">{% trans 'Return to the list of schedules' %}</a>
 </div>
 
 {% endblock %}
