@@ -5,14 +5,38 @@
     <script type="text/javascript" src="/static/schools/javascripts/message.js"></script>
 {% endblock %}
 {% block pagecontent %}
-<h1>{{ school.name }}</h1>
-{% if school.headmaster %}
-<p><span class="prompt">Headmaster: </span><span class="prompt_value">{{ school.headmaster }}</span></p>
-<div class="messagetrigger js_link" onclick="new_message({{school.headmaster.id}}, '#dialog');">send a message </div>
-<br>
-{% else %}
-<p><b>No Headmasters Registered</b></p>
-{% endif %}
+<div class="span-8">
+    <h2>{{ school.name }}</h2>
+    {% if school.headmaster %}
+    <p><span class="prompt">Headmaster: </span><span class="prompt_value">{{ school.headmaster }}</span></p>
+    {% comment %}
+    ===== commenting out the message, as it really doesn't play nice with the map =======
+    <div class="messagetrigger js_link" onclick="new_message({{school.headmaster.id}}, '#dialog');">send a message </div>
+    {% include "schools/partials/message_div.html" %}
+    <br>
+    {% endcomment %}
+    {% else %}
+    <p><b>No Headmasters Registered</b></p>
+    {% endif %}
+    <p><span class="prompt">Region: </span><span class="prompt_value">{{ school.parent.parent }}</span><br>  
+       <span class="prompt">District: </span><span class="prompt_value">{{ school.parent }}</span></p>
+    {% if school.groups.all %}
+    <h3>Other Groups</h3>
+    <ul>
+        {% for group in school.groups.all %}
+            {% ifequal group.type "headmaster" %}{# we special case these so ignore #}{% else %}
+        <li><span class="prompt">{{ group.group_title}}:</span> 
+            <span class="prompt_value">{{ group.members_list_display }}</span></li>
+            {% endifequal %}
+        {% endfor %}
+    </ul>
+    {% endif %}
+    <p><a href="/blaster?school={{ school.id }}">send a question to this school</a></p>
+</div>
+<div class="span-16 last">
+    {% include "schools/partials/map.html" %}
+</div>
+<div class="span-24 last">
 <h2>Summary Data</h2>
 <table>
     <thead>
@@ -24,8 +48,8 @@
     </thead>
     <tbody>
         <tr>
-            <td>Teacher Attendance</td>
-        {% if teacher_attendance %}
+            <td>Teacher Attendance Reports</td>
+        {% if school.teacher_attendance_reports %}
             {# we assume the list is sorted, descending #}
             {% with teacher_attendance.0 as most_recent %}
             <td>{{ most_recent.percent }}% ({{ most_recent.actual }} / {{ most_recent.estimated }})</td>
@@ -69,5 +93,24 @@
         </tr>
     </tbody>
 </table>
-{% include "schools/partials/message_div.html" %}
+</div>
+<div class="span-12">
+{% if school.teacher_attendance_reports.all %}
+    <h2>Teacher Attendance Reports</h2>
+    {% with school.teacher_attendance_reports.all as reports %}
+        {% include "schools/partials/attendance_table.html" %}
+    {% endwith %}
+{% else %}
+    <h3>No Teacher Attendance Reports Found</h3>
+{% endif %}
+</div>
+<div class="span-12 last">
+{% if school.water_reports.all %}
+    <h2>School Water Reports</h2>
+    {% with school.water_reports.all as reports %}
+        {% include "schools/partials/water_table.html" %}
+    {% endwith %}
+{% else %}
+    <h3>No Water Reports Found</h3>
+{% endif %}
 {% endblock %}

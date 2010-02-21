@@ -38,8 +38,12 @@
 	
 	{% if messages %}
 		{% include 'weltel/partials/messages.html' %}
+		<p/>
+		Return to history view <a href="{% url patient_history patient.pk %}">here</a>.
 	{% else %}{% if history %}
-		{% include 'weltel/partials/history.html' %}	
+		{% include 'weltel/partials/history.html' %}
+		<p/>
+		View raw message logs <a href="{% url patient_messages patient.pk %}">here</a>.
 	{% endif %}{% endif %}
 
 </div>

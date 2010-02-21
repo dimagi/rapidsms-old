@@ -1,6 +1,6 @@
 def site_code_from_patient_id(id):
-    splitted = id.split('/',1)
-    if len(splitted)==1:
+    id = id.strip()
+    if id is None or len(id)<7:
         raise ValueError
-    return splitted[0]
+    return id[:5]
 

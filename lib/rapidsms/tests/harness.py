@@ -45,7 +45,6 @@ class MockRouter (Router):
 
     def stop (self):
         self.running = False
-        # rl - Seems odd that stop_all_apps wasn't here before. =|
         self.stop_all_apps()
         self.stop_all_backends()
         

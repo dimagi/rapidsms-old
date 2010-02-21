@@ -6,6 +6,7 @@ import random
 import re
 import urllib, urllib2
 from datetime import datetime
+from policy import split_long_message
 
 def _uni(str):
     """
@@ -431,6 +432,7 @@ class End2EndHandler(RapidBaseHttpHandler):
                 return
 
     @classmethod
+    @split_long_message
     def outgoing(klass, message):
         klass.backend.debug("End2End outgoing message: %s" % message)
         params = End2EndHandler.outgoing_params.copy()

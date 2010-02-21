@@ -4,3 +4,4 @@
 import unittest
 from sms import *
 from schedule import *
+from model_tests import *

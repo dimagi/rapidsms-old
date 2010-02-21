@@ -85,30 +85,36 @@ class SchedulerThread (threading.Thread):
         while not self.stopped():
             event_schedules = EventSchedule.objects.filter(active=True)
             for schedule in event_schedules:
-                if schedule.should_fire(now):
-                    # call the callback function
-                    # possibly passing in args and kwargs
-                    module, callback = schedule.callback.rsplit(".", 1)
-                    module = __import__(module, globals(), locals(), [callback])
-                    callback = getattr(module, callback)
-                    if schedule.callback_args and schedule.callback_kwargs:
-                        callback(self._router, *schedule.callback_args, **schedule.callback_kwargs)
-                    elif schedule.callback_args:
-                        callback(self._router, *schedule.callback_args)
-                    elif schedule.callback_kwargs:
-                        callback(self._router, **schedule.callback_kwargs)
-                    else:
-                        callback(self._router)
-                    if schedule.count:
-                        schedule.count = schedule.count - 1
+                try:
+                    if schedule.should_fire(now):
+                        # call the callback function
+                        # possibly passing in args and kwargs
+                        module, callback = schedule.callback.rsplit(".", 1)
+                        module = __import__(module, globals(), locals(), [callback])
+                        callback = getattr(module, callback)
+                        if schedule.callback_args and schedule.callback_kwargs:
+                            callback(self._router, *schedule.callback_args, **schedule.callback_kwargs)
+                        elif schedule.callback_args:
+                            callback(self._router, *schedule.callback_args)
+                        elif schedule.callback_kwargs:
+                            callback(self._router, **schedule.callback_kwargs)
+                        else:
+                            callback(self._router)
+                        if schedule.count:
+                            schedule.count = schedule.count - 1
+                            # should we delete expired schedules? we do now.
+                            if schedule.count <= 0: 
+                                schedule.deactivate()
+                            else: schedule.save()
                         # should we delete expired schedules? we do now.
-                        if schedule.count <= 0: 
-                            schedule.deactivate()
-                        else: schedule.save()
-                    # should we delete expired schedules? we do now.
-                    if schedule.end_time:
-                        if now > schedule.end_time:
-                            schedule.deactivate()
+                        if schedule.end_time:
+                            if now > schedule.end_time:
+                                schedule.deactivate()
+                except Exception, e:
+                    # Don't prevent exceptions from killing the thread
+                    self._router.error("Problem in scheduler for: %s. %s" % (schedule,
+                                                                             e.message))
+                    
             if self._speedup is not None: # debugging/testing only!
                 now = now + self._speedup
                 time.sleep(1)

@@ -122,10 +122,10 @@ class KenyaReport(Report):
     
 
 class UgandaReport(Report):
-    sex_with_partner = models.BooleanField(null=True, blank=True)
-    condom_with_partner = models.BooleanField(null=True, blank=True)
-    sex_with_other = models.BooleanField(null=True, blank=True)
-    condom_with_other = models.BooleanField(null=True, blank=True)
+    sex_with_partner = models.NullBooleanField(null=True, blank=True)
+    condom_with_partner = models.NullBooleanField(null=True, blank=True)
+    sex_with_other = models.NullBooleanField(null=True, blank=True)
+    condom_with_other = models.NullBooleanField(null=True, blank=True)
 
     def summary_list(self):
         return [self.reporter.location.code, 

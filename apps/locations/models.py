@@ -18,9 +18,9 @@ class LocationType(models.Model):
 
 
 class Location(models.Model):
-    """A Location is technically a geopgraphical point (lat+long), but is often
+    """A Location is technically a geographical point (lat+long), but is often
        used to represent a large area such as a city or state. It is recursive
-       via the _parent_ field, which can be used to create a hierachy (Country
+       via the _parent_ field, which can be used to create a hierarchy (Country
        -> State -> County -> City) in combination with the _type_ field."""
     
     objects = RecursiveManager()

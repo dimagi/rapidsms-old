@@ -41,9 +41,17 @@ class App (rapidsms.app.App):
     # those that were sent from within the messaging UI (below)
 
 
+    def ajax_POST_group_message(self, params, form):
+        group = ReporterGroup.objects.get(pk=form["uid"])
+        reps = group.reporters.all()
+        return self._send_utility(params, form, reps)
+    
+    
     def ajax_POST_send_message(self, params, form):
         rep = Reporter.objects.get(pk=form["uid"])
-
+        return self._send_utility(params, form, [rep])
+    
+    def _send_utility(self, params, form, reps):
         # if this message contains the same text as the _previous_ message sent,
         # and is within 6 hours, we'll recycle it (since it has-many recipients)
         try:
@@ -59,19 +67,29 @@ class App (rapidsms.app.App):
                 sent=datetime.now(),
                 text=form["text"])
 
-        # attach this recipient to
+        # attach these recipients to
         # the (old or new) message
-        msg.recipients.create(
-            reporter=rep)
+        for rep in reps:
+            msg.recipients.create(reporter=rep)
+            
+        errors = []
+        sent = True
+        for rep in reps:
+            # abort if we don't know where to send the message to
+            # (if the device the reporter registed with has been
+            # taken by someone else, or was created in the WebUI)
+            pconn = rep.connection
+            if pconn is None:
+                errors.append("%s is unreachable (no connection)" % rep)
 
-        # abort if we don't know where to send the message to
-        # (if the device the reporter registed with has been
-        # taken by someone else, or was created in the WebUI)
-        pconn = rep.connection
-        if pconn is None:
-            raise Exception("%s is unreachable (no connection)" % rep)
-
-        return self._send_message(pconn, form["text"])
+            # if any fail, we want to know about it
+            sent = sent and self._send_message(pconn, form["text"])
+        
+        if errors:
+            # fail loudly with all errors
+            raise Exception(" and ".join(errors))
+        
+        return sent
         
     def ajax_POST_send_message_to_connection(self, params, form):
         '''Sends a message using a connection id, instead of

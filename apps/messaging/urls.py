@@ -6,6 +6,7 @@ import messaging.views as views
 
 urlpatterns = patterns('',
     url(r"^messaging$",        views.index,  name="messaging-index"),
+    url(r"^messaging/groups$", views.groups,  name="messaging-index"),
     url(r"^messaging/search$", views.search, name="messaging-search"),
     url(r"^messaging/all$",    views.all),
     url(r"^messaging/none$",   views.none),

@@ -69,7 +69,8 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     "django.core.context_processors.debug",
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
-    "django.core.context_processors.request"
+    "django.core.context_processors.request",
+    "webapp.context_processors.base_template" # sticks the base template inside all responses
 ]
 
 TEMPLATE_DIRS = [
@@ -196,12 +197,31 @@ INSTALLED_APPS = [
 # ====================
 # INJECT RAPIDSMS MIDDLEWARES IF PRESENT
 # ====================
- 
+
+
 if "customdjango" in RAPIDSMS_CONF:
     if "middlewares" in RAPIDSMS_CONF["customdjango"]:
+        middlewares = RAPIDSMS_CONF["customdjango"]["middlewares"]
+        if isinstance(middlewares, basestring):
+            middlewares = [middlewares]
+            RAPIDSMS_CONF["customdjango"]["middlewares"] = middlewares
         MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES +\
-                          [middleware for middleware in RAPIDSMS_CONF["customdjango"]["middlewares"]]
+                          [middleware for middleware in middlewares]
     if "authentications" in RAPIDSMS_CONF["customdjango"]:
+        auths = RAPIDSMS_CONF["customdjango"]["authentications"]
+        if isinstance(auths, basestring):
+            auths = [auths]
+            RAPIDSMS_CONF["customdjango"]["authentications"] = auths
         AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend'] +\
-                          [backend for backend in RAPIDSMS_CONF["customdjango"]["authentications"]]
+                          [backend for backend in auths]
+    if "context_processors" in RAPIDSMS_CONF["customdjango"]:
+        procs = RAPIDSMS_CONF["customdjango"]["context_processors"]
+        if isinstance(procs, basestring):
+            procs = [procs]
+        TEMPLATE_CONTEXT_PROCESSORS = TEMPLATE_CONTEXT_PROCESSORS +\
+                          [proc for proc in procs]
 
+CUSTOM_MANAGERS = {}
+if "managers" in RAPIDSMS_CONF:
+    for model_class, method in RAPIDSMS_CONF["managers"].items():
+        CUSTOM_MANAGERS[model_class] = method

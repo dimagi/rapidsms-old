@@ -8,7 +8,7 @@
 
 
 body {
-	background: #eef url("../images/page-bg.png") repeat-y 50% 0;
+	background: #eee url("../images/body-bg.png");
 	font: 9pt "Lucida Grande", "Bitstream Vera Sans", Verdana, sans-serif;
 	line-height: 1;
 	color: #333;
@@ -40,8 +40,8 @@ abbr {
 
 p {
 	line-height: 1.4; }
-	
-		
+
+
 /* position accessibility-only parts of labels (which are
  * more verbose than is necessary, sometimes) off-screen:
  *
@@ -63,9 +63,16 @@ div.clear-hack {
 
 
 #wrapper {
-	width: 80em;
+	width: 83em;
 	margin: 0 auto;
 	background: #fff;
+
+	/* a little pretty for the 10/dec demo */
+	-moz-box-shadow: 4px 4px 8px #aaa;
+	box-shadow: 4px 4px 8px #aaa;
+	margin-top: 0.5em;
+	-moz-border-radius-bottomright: 1em;
+	-moz-border-radius-bottomleft: 1em;
 }
 
 	/* no scaling for ie6 */
@@ -82,18 +89,23 @@ div.clear-hack {
 	position: relative;
 	color: #ccf;
 }
-	
-        /* get the crude login and
-         * logout links into the
-         * upper right corner */
-        #auth p {
-                float: right;
-                margin-top: -21px;
-        }
 
-        #auth p a{
-                color: white;
-        }
+/* hide the login/logout link in the top right. this doesn't
+ * need to be especially discoverable, since when the user
+ * tries to do something that requires authentication, they
+ * should be redirected automatically */
+#auth {
+	font-size: 80%;
+	position: absolute;
+	line-height: 22px;
+	margin: 0 10px;
+	right: 0;
+	top: 0;
+}
+
+	#auth a {
+		color: #fff;
+	}
 
 
 	#branding {
@@ -164,7 +176,7 @@ div.clear-hack {
 		 * positioned backgrounds */
 		#tabs li      { margin-right: 5px; }
 		#page-tabs li { margin-left: 5px; }
-	
+
 			#tabs li a,
 			#page-tabs li a {
 				color: #fff;
@@ -173,42 +185,56 @@ div.clear-hack {
 				background: #2fa5d1 url("../images/tab-bg.png") repeat-x;
 				border-right: 1px solid #11bad0;
 				border-left: 1px solid #11bad0;
+
+				/* disable the focus outline on tabs, to avoid a rather
+				 * unsightly dotted box around tabs while they have focus (we
+				 * remain accessible by providing an alternative :focus, later) */
+				outline: none;
 			}
-			
+
 			/* there are unread messages in this tab!
 			 * TODO: is this *just* for the training
-			 * app? f so, move it there! */
+			 * app? if so, move it there! */
 			#tabs li.unread a span {
 				display: block;
 				padding-right: 21px;
 				background: url("../icons/silk/email_open.png") no-repeat 100% 50%;
 			}
-		
-			#tabs li.active a,
-			#page-tabs li.active a,
-			#tabs li.active a:hover,
-			#page-tabs li.active a:hover {
-				background: #55cfde url("../images/tab-bg-active.png") repeat-x;
-				
+
+			/* style the active (in the navigation sense, not the css :active
+			 * sense) tab constantly, even when it's being hovered or focused,
+			 * since navigating to it again is valid but mostly useless */
+			#tabs li.active a,       #page-tabs li.active a,
+			#tabs li.active a:hover, #page-tabs li.active a:hover,
+			#tabs li.active a:focus, #page-tabs li.active a:focus {
+
+				background: #fff url("../images/tab-bg-active.png") repeat-x;
+				text-shadow: none;
+				color: #000;
+
 				/* border the same color as the
 				 * strip in the header-bg.png */
 				border: 1px solid #cef1f5;
 				border-bottom: 0;
-			
+
 				/* nudge the active tab
 				 * north by one pixel */
 				margin-top: -1px;
-			
+
 				/* don't underline links, even when hovering,
 				 * so we don't highlight the fact that this
 				 * is a link (it's already active)  */
 				text-decoration: none;
 			}
-		
-			/* brighten up inactive tabs when hovering */
-			#tabs li a:hover,
-			#page-tabs li a:hover {
-				background-image: url("../images/tab-bg-hover.png"); }
+
+			/* brighten up inactive tabs when hovering
+			 * or tab-focusing with the keyboard */
+			#tabs li a:hover, #page-tabs li a:hover,
+			#tabs li a:focus, #page-tabs li a:focus {
+				background-image: url("../images/tab-bg-hover.png");
+				text-shadow: #cef1f5 0 0 2px;
+				text-decoration: none;
+			}
 
 
 
@@ -227,43 +253,71 @@ div.clear-hack {
 
 #inner {
 	padding: 1em;
+	position: relative;
 }
-	
+
+/* only a single h1 per view */
+#inner h1 {
+	color: #ccc;
+	font-size: 2em;
+	line-height: 1;
+	font-weight: normal;
+	margin: 0.5em 0 1em 0;
+	text-shadow: #eee 2px 2px 2px;
+}
+
+	#inner h1 a {
+		color: #000;
+		text-decoration: none;
+	}
+
+	/* some parts of the page title are dynamic (or
+	 * otherwise really important), like search terms */
+	#inner h1 span.highlight {
+		background: #ffa;
+		-moz-border-radius: 5px;
+		border: 2px solid #ff0;
+		padding: 0 4px;
+		margin-left: -4px;
+	}
+
 	/* split a section vertically in
 	 * half, with some css hackery */
-	 
-	#inner div.split {
+	#inner div.split,
+	#inner div.split-2 {
 		padding: 0 0.5em;
 	}
-		
+
 		/* TODO: explain the margins! */
-		#inner div.split .left {
+		#inner div.split .left,
+		#inner div.split-2 .left {
 			margin-left: -0.5em;
 			float: left;
 			border: none;
 			width: 50%;
 		}
-		
-		#inner div.split .right {
+
+		#inner div.split .right,
+		#inner div.split-2 .right {
 			margin-right: -0.5em;
 			float: right;
 			border: none;
 			width: 50%;
 		}
-	
+
 	/* split a section into THREE */
-	
+
 	#inner div.split-3 {
 		padding: 0 1em;
 	}
-		
+
 		#inner div.split-3 .left {
 			margin-left: -1em;
 			float: left;
 			border: none;
 			width: 33%;
 		}
-		
+
 		#inner div.split-3 .mid {
 			margin-right: 1em;
 			margin-left: 1em;
@@ -271,14 +325,29 @@ div.clear-hack {
 			border: none;
 			width: 34%;
 		}
-		
+
 		#inner div.split-3 .right {
 			margin-right: -1em;
 			float: right;
 			border: none;
 			width: 33%;
 		}
-	
+
+	/* split a section into FOUR */
+
+	#inner div.split-4 {
+		padding-left: 3em; }
+
+		#inner div.split-4 .left,  #inner div.split-4 .mid-left,
+		#inner div.split-4 .right, #inner div.split-4 .mid-right {
+			margin-left: 1em;
+			float: left;
+			width: 25%;
+		}
+
+		#inner div.split-4 .left {
+			margin-left: -3em; }
+
 	/* when an app has something really
 	 * important to say, it can use the
 	 * apps/webui/templates/message.html
@@ -287,7 +356,7 @@ div.clear-hack {
 		text-align: center;
 		padding: 4em 25%;
 	}
-	
+
 		#inner div.message p {
 			margin: 0 0 0.5em 0;
 			font-size: 2em;
@@ -346,3 +415,33 @@ input.small {
 		margin: 0;
 	}
 
+
+
+
+	#top{
+		background-color: #333333;
+	}
+
+	#middle{
+		width: 1030px;
+		margin-right: auto;
+		margin-left: auto;
+		background-color: #FFF;
+		padding-top: 10px;
+		min-height: 600px;
+	}
+
+	#bottom{
+		background-color: #FFF;
+	}
+
+	#one_third{
+		float: left;
+		margin-left: 10px;
+		width: 310px;
+	}
+	#two_thirds{
+		float: left;
+		margin-left: 10px;
+		width: 630px;
+	}
