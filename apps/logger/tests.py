@@ -70,4 +70,4 @@ class TestApp (TestScript):
     def testSortingRetainsSearch(self):
         self.client.login(username='brian', password='test')
         response = self.client.get('/logger', {'q': 'foo'})
-        self.assertContains(response, "?q=foo", 6) # 5 from the columns + 1 from a pagination link
+        self.assertContains(response, "?q=foo", 7) # 5 from the columns + 1 from a pagination link + 1 from csv link
