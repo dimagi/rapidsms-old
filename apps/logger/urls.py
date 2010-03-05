@@ -7,5 +7,6 @@ import logger.views as views
 
 urlpatterns = patterns('',
     url(r'^logger/?$', views.index),
+    url(r'^logger/csv/?$', views.csv_export, name="logger.views.csv_export"),
     url(r'^logger/migrate?$', views.migrate),
 )

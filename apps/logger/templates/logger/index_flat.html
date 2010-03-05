@@ -9,16 +9,18 @@
 
 {% block content %}
 <h1>
-	<a href="">Message Log</a>{% if search_string %}
-	/ <a href="">Search for <span class="highlight">{{ search_string }}</span></a>{% endif %}
+    <a href="">Message Log</a>{% if search_string %}
+    / <a href="">Search for <span class="highlight">{{ search_string }}</span></a>{% endif %}
 </h1>
-
+<div class="span-12">
 <form method="get" id="search">
-	<input name="q" type="text" value="{{ search_string }}" />
-	<input type="submit" value="Search" />
+    <input name="q" type="text" value="{{ search_string }}" />
+    <input type="submit" value="Search" />
 </form>
-
-<h2>Messages</h2>
+</div>
+<div class="span-12 last" style="text-align:right;">
+<a href="{%url logger.views.csv_export %}{% if search_string %}?q={{search_string}}{% endif %}">download csv file</a>
+</div>
 <table class="sortable">
 	{% for column, display in columns %}
 		<col{% ifequal column sort_column %} class="sorted"{% endifequal %} />

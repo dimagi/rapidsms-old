@@ -1,10 +1,15 @@
-from rapidsms.webui.utils import render_to_response, paginated
-from models import *
+from StringIO import StringIO
+import csv
 from datetime import datetime, timedelta
+
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse
 from django.db import transaction
 from django.db.models import Q
+
+from rapidsms.webui.utils import render_to_response, paginated
+from logger.models import *
+
 
 @login_required
 @permission_required("logger.can_view")
@@ -38,6 +43,37 @@ def index(req):
                                                    "sort_descending": sort_descending,
                                                    "search_string": search_string})
 
+@login_required
+@permission_required("logger.can_view")
+def csv_export(req):
+    headings = ["Date", "From/To", "Backend", "Direction", "Message"]
+    search_string = req.REQUEST.get("q", "")
+    messages = Message.objects.order_by("-date")
+    
+    if search_string:
+        messages = messages.filter(
+           Q(text__icontains=search_string) |
+           Q(connection__identity__icontains=search_string))
+        filename = "sms_export_%s_%s.csv" % (search_string, 
+                                             str(datetime.now().date()))
+    else:
+        filename = "sms_export_%s.csv" % (str(datetime.now().date()))
+    
+    output = StringIO()
+    w = csv.writer(output)
+    w.writerow(headings)
+    for message in messages:
+        direction = "From Phone" if message.is_incoming else "To Phone"
+        w.writerow([message.date, message.connection.identity, message.connection.backend,
+                    direction, message.text])
+    
+    output.seek(0)
+    response = HttpResponse(output.read(),
+                        mimetype='application/ms-excel')
+    response["content-disposition"] = "attachment; filename=%s" % filename
+    return response    
+    
+    
 @login_required
 @permission_required("logger.can_view")
 def migrate(req):
