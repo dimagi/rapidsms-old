@@ -5,6 +5,7 @@
 	<table>
 		<thead>
 			<tr>
+				<th scope="col">{% trans "Type" %}</th>
 				<th scope="col">{% trans "Source" %}</th>
 				<th scope="col">{% trans "Description" %}</th>
 				<th scope="col">{% trans "Date" %}</th>
@@ -17,14 +18,14 @@
                 {% endfor %}
 			</tr>{% endfor %}{% else %}
 			<tr class="no-data">
-				<td colspan="3">
+				<td colspan="4">
 					{% trans "No information has been submitted." %}
 				</td>
 			</tr>{% endif %}
 		</tbody>
 		<tfoot>
 			<tr>
-				<td colspan="3">
+				<td colspan="4">
 					{% paginator history %}
 				</td>
 			</tr>

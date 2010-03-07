@@ -115,6 +115,7 @@ def get_history_for_patient(patient):
     # table in addition to the incoming message log
     cursor.execute('''
         (SELECT 
+            "Message Received" as type, 
             m.identity AS sender, 
             m.text AS description, 
             m.received AS date
@@ -130,6 +131,7 @@ def get_history_for_patient(patient):
             )
         UNION ALL
         (SELECT 
+            "Status Changed" as type,
             e.triggered_by AS sender, 
             t.description AS description, 
             e.date AS date
