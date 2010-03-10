@@ -41,7 +41,7 @@ def shida_report(router, nurse=None):
         for n in nurses:
             be = router.get_backend(n.connection.backend.slug)
             if report:
-                be.message(n.connection.identity, report).send()
+                be.message(n.connection.identity, 'Shida Report: %s' % report).send()
             else:
                 be.message(n.connection.identity, _("No problem patients")).send()
 

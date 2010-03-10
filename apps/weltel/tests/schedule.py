@@ -31,7 +31,7 @@ class TestSchedule (TestScript):
         # speedup the scheduler so that 1 second == 1 minute
         self.router.start()
         self.router.get_app('scheduler').schedule_thread._debug_speedup(minutes=1)
-        time.sleep(3.0)
+        time.sleep(4.0)
         script = """
             1250 < Mambo?
             1250 < Mambo?
@@ -99,7 +99,7 @@ class TestSchedule (TestScript):
         time.sleep(1.0)
         # test regular report
         script = """
-            1252 < 010-1257 011-1258
+            1252 < Shida Report: 010-1257 011-1258
         """
         self.runScript(script)
         schedule.delete()
