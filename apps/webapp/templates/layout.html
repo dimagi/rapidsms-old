@@ -56,19 +56,21 @@
             </div><!-- End Container Class -->
 			<div id="inner">
 			    <div class="container">
-			    {% if USE_I18N %}
-					<form action="/i18n/setlang/" method="post" style="float:right">
-					    <select name="language">
-					    {% for lang in LANGUAGES %}
-					      <option value="{{ lang.0 }}" 
-					      {% ifequal LANGUAGE_CODE lang.0 %}selected{% endifequal %}>
-					      {{ lang.1 }}
-					      </option>
-					    {% endfor %}
-					    </select>
-					<input type="submit" class="small" value="Submit"/>
-					</form>
-				{% endif %}
+				{% block language_selector %}
+				    {% if USE_I18N %}
+						<form action="/i18n/setlang/" method="post" style="float:right">
+						    <select name="language">
+						    {% for lang in LANGUAGES %}
+						      <option value="{{ lang.0 }}" 
+						      {% ifequal LANGUAGE_CODE lang.0 %}selected{% endifequal %}>
+						      {{ lang.1 }}
+						      </option>
+						    {% endfor %}
+						    </select>
+						<input type="submit" class="small" value="Submit"/>
+						</form>
+					{% endif %}
+				{% endblock language_selector %}
 				{% block content %}{% endblock %}
 			    </div><!-- End Container Class -->
 			</div>
