@@ -46,7 +46,7 @@ def index(req):
 @login_required
 @permission_required("logger.can_view")
 def csv_export(req):
-    headings = ["Date", "From/To", "Backend", "Direction", "Message"]
+    headings = ["Id", "Date", "From/To", "Backend", "Direction", "Message"]
     search_string = req.REQUEST.get("q", "")
     messages = Message.objects.order_by("-date")
     
@@ -64,8 +64,9 @@ def csv_export(req):
     w.writerow(headings)
     for message in messages:
         direction = "From Phone" if message.is_incoming else "To Phone"
-        w.writerow([message.date, message.connection.identity, message.connection.backend,
-                    direction, message.text])
+        w.writerow([message.id, message.date, message.connection.identity, 
+                    message.connection.backend, direction, message.text])
+                    
     
     output.seek(0)
     response = HttpResponse(output.read(),
