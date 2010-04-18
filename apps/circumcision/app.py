@@ -6,7 +6,7 @@ Created on Mar 31, 2010
 
 import rapidsms
 import logging
-from circumcision.models import Registration
+from circumcision.models import *
 import circumcision.config as config
 from scheduler.models import set_daily_event, EventSchedule
 from datetime import datetime, timedelta, time
@@ -132,7 +132,8 @@ class App (rapidsms.app.App):
             
             schedule = EventSchedule(callback="circumcision.app.send_notification", \
                                      start_time=local_send_at, count=1, minutes='*',
-                                     callback_args=[reg.patient_id, day, reg.language])
+                                     callback_args=[reg.patient_id, day, reg.language],
+                                     description='patient %s; day %d' % (reg.patient_id, day))
             schedule.save()
 
     def calc_send_time (self, reg_time, contact_time, day):
@@ -158,7 +159,10 @@ class App (rapidsms.app.App):
         """send the notification for day N"""
         reg = Registration.objects.get(patient_id=patient_id)
         messaging.app._send_message(reg.connection, get_notification(day, lang))
-        #check for success and record that it was sent in the db?
+        #check for success?
+        
+        log = SentNotif(patient_id=reg, day=day)
+        log.save()
     
     def cleanup (self, message):
         """Perform any clean up after all handlers have run in the

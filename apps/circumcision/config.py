@@ -4,6 +4,9 @@ Created on Apr 8, 2010
 @author: Drew Roos
 '''
 
+title = "Circumcision"
+tab_link = "/circumcision"
+
 incoming_tz = 'Africa/Nairobi'
 server_tz = 'America/New_York' #todo: should find a way to set this automatically;
                                #actually not needed at all if scheduler were able to run off UTC

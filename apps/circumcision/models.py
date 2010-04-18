@@ -14,6 +14,13 @@ class Registration(models.Model):
     registered_on = models.DateField(auto_now_add=True)
     language = models.CharField(max_length=20)
     
+    followup_visit = models.BooleanField(default=False)
+    final_visit = models.BooleanField(default=False)
+    
     def __unicode__ (self):
         return 'registration: %s %d %s %s %s' % (self.patient_id, self.contact_time,
             str(self.connection), str(self.registered_on), self.language)
+        
+class SentNotif(models.Model):
+    patient_id = models.ForeignKey(Registration)
+    day = models.IntegerField()
