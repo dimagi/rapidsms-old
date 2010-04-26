@@ -381,8 +381,12 @@ class End2EndHandler(RapidBaseHttpHandler):
 
 
     def do_GET(self):
-        params = get_params(self)
-        self.handle_params(params)
+        # monitoring URL
+        if _is_uptime_check(self):
+            self.respond(200, "success")
+        else:
+            params = get_params(self)
+            self.handle_params(params)
         
     def do_POST(self):
         params = post_params(self)
