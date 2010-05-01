@@ -4,4 +4,9 @@
 from django.contrib import admin
 from models import Message
 
-admin.site.register(Message)
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ['connection', 'is_incoming', 'text', 'date']
+    list_filter = ['connection', 'is_incoming', 'text', 'date']
+    date_hierarchy = 'date'
+
+admin.site.register(Message, MessageAdmin)
