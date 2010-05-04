@@ -2,19 +2,11 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 from django.contrib import admin
-from models import OutgoingMessage, IncomingMessage
+from models import Message
 
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ['connection', 'is_incoming', 'text', 'date']
+    list_filter = ['connection', 'is_incoming', 'text', 'date']
+    date_hierarchy = 'date'
 
-class OutgoingMessageAdmin(admin.ModelAdmin):
-    list_display = ['identity', 'backend', 'text', 'sent']
-    list_filter = ['identity', 'backend', 'text', 'sent']
-    date_hierarchy = 'sent'
-
-class IncomingMessageAdmin(admin.ModelAdmin):
-    list_display = ['identity', 'backend', 'text', 'received']
-    list_filter = ['identity', 'backend', 'text', 'received']
-    date_hierarchy = 'received'
-
-
-admin.site.register(OutgoingMessage, OutgoingMessageAdmin)
-admin.site.register(IncomingMessage, IncomingMessageAdmin)
+admin.site.register(Message, MessageAdmin)
