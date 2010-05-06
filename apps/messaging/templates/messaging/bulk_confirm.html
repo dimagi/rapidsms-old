@@ -1,28 +1,28 @@
+{% extends "messaging/base.html" %}
 {% load i18n %}
 {% block title %}{% trans "Send SMS via CSV upload" %}{% endblock %}
-{% block buildmanager_content %}
-{% extends base_template %}
+{% block content %}
 
 <h2>{% trans "CSV file to upload for bulk SMS sending" %}</h2>
 <h3>{{msg}}</h3>
 <p>The following SMS will be sent:
 <table>
 	<tr>
-		<td>Recipient ID</td>
+		<td>Recipient</td>
 		<td>Number</td>
 		<td>Message</td>
 	</tr>
-	{% for row in msglist %}
-		{% for key,value in row.items %}
-			<tr>
-				<td>{{ value }}</td>
-			</tr>
-		{% endfor %}
+	{% for reporter_message in msglist %}
+		<tr>
+			<td>{{ reporter_message }}</td>
+			<td>{{ reporter_message.phone_number }}</td>
+			<td>{{ reporter_message.message }}</td>
+		</tr>
 	{% endfor %}
 </table>
 </p>
 <form action="" method="POST" accept-charset="utf-8" enctype="multipart/form-data">
-	<input type="hidden" name="temp-file" id="id_csv_file_upload" value="{{temp-file}}"/>
+	<input type="hidden" name="confirmed" value="1" />
 	<input type="submit" value="Send SMS" />
 </form>
 

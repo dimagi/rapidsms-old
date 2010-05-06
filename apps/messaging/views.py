@@ -2,7 +2,8 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 
-import re, urllib
+import os, re, urllib, uuid, tempfile
+from StringIO import StringIO
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.exceptions import FieldError
 from django.core.urlresolvers import reverse
@@ -188,7 +189,6 @@ def clear(req):
 
 
 
-
 def _send_message(req, id, text):
     # also send the message, by hitting the ajax url of the messaging app
     data = {"uid": id, "text": text}
@@ -215,58 +215,67 @@ def parse_csv(input_stream):
                 raise ValueError('Unknown phone number')
             to_return.append({"reporter":obj.reporter, "msg":msg})
         else:
+            # empty lines are fine
             if len(row)>1 or len(row[0].strip())>0:
-                raise ValueError("Poorly formatted input file")
+                # junk lines are not
+                raise ValueError("Poorly formatted input file\n (%s)" % unicode(row))
     if counter == 0:
         raise ValueError ("Input file is empty")
     return to_return
  
 @login_required
-def confirm_csv_sms(request,template_name="confirm_csv.html"):
+def confirm_bulk_message_with_csv(request,template_name="messaging/bulk_confirm.html"):
     '''Chance to view what SMS will be sent before sending'''
     context = {}
-    
+    if 'bulk_messages_file_name' in request.session:
+        fin = open(request.session['bulk_messages_file_name'])
+        msglist = parse_csv(fin)
+        # this is only necessary since templates don't support dictionary display
+        display = []
+        for m in msglist:
+            row = m['reporter']
+            row.phone_number = m['reporter'].connection.identity
+            row.message = m['msg']
+            display.append(row)
+        context['msglist'] = display
+        fin.close()
     if request.method == 'POST':
         try:
-            if request.POST["confirmed"] == 1:
-                # send them
-                msglist = parse_csv(request.POST["temp-file"])
+            if "confirmed" in request.POST and request.POST["confirmed"] == "1":
                 for m in msglist:
-                    _send_message(request, m["id"], m["msg"])
-                return HttpResponseRedirect(reverse("reports.views.upload_csv_sms"))
+                    _send_message(request, m["reporter"].id, m["msg"])
+                os.remove(request.session['bulk_messages_file_name'])
+                return HttpResponseRedirect(reverse("bulk"))
             else:
-                # get them all
-                msglist = parse_csv(request.FILES["csv_file_upload"], True)
-                context['msglist'] = msglist
-                tf = tempfile.NamedTemporaryFile(delete=False)
-                msglist = csv.reader(open(request.FILES["csv_file_upload"]))
-                for line in msglist:
-                    tf.write(line)
-                context['temp-file'] = tf.name 
+                context['errors'] = "Post but not confirmed. wtf?"
         except Exception, e:
             logging.error("Error importing csv file.", 
                           extra={'exception':e, 
                                  'request.POST': request.POST, 
-                                 'request.FILES': request.FILES, 
-                                 'form':form})
-            context['errors'] = "Could not commit build: " + str(e)
+                                 'request.FILES': request.FILES})
+            context['errors'] = "Could not send message: %s" % str(e)
     return render_to_response(request, template_name, context)
  
 @login_required
-def upload_csv_for_sms(request,template_name="upload_csv.html"):
+def bulk_message_with_csv(request,template_name="messaging/bulk.html"):
     '''A view for bulk sending SMS from a CSV file upload'''
     context = {}
-    
     if request.method == 'POST':
         try:
-            msglist = parse_csv(request.FILES["csv_file_upload"])
+            input_string = request.FILES["csv_file_upload"].read()
+            input_stream = StringIO(input_string)
+            msglist = parse_csv(input_stream)
         except Exception, e:
             logging.error("Error importing csv file.", 
                           extra={'exception':e, 
                                  'request.POST': request.POST, 
-                                 'request.FILES': request.FILES, 
-                                 'form':form})
-            context['errors'] = "Could not commit build: " + str(e)
-        return HttpResponseRedirect(reverse("reports.views.confirm_csv_sms"))
+                                 'request.FILES': request.FILES})
+            context['errors'] = "Could not parse bulk messages file: " + str(e)
+        else:
+            path = os.path.join(tempfile.gettempdir(),str(uuid.uuid1()))
+            tf = open(path,'w+')
+            tf.write(input_string)
+            request.session['bulk_messages_file_name'] = path
+            tf.close()
+            return HttpResponseRedirect(reverse("confirm_bulk"))
     return render_to_response(request, template_name, context)
-
