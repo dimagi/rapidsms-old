@@ -1,7 +1,7 @@
+{% extends "messaging/base.html" %}
 {% load i18n %}
 {% block title %}{% trans "Send SMS via CSV upload" %}{% endblock %}
-{% block buildmanager_content %}
-{% extends base_template %}
+{% block content %}
 
 <h2>{% trans "CSV file to upload for bulk SMS sending" %}</h2>
 <h3>{{msg}}</h3>
@@ -11,4 +11,4 @@
 </form>
 {{errors}}
 
-{%endblock%}
+{% endblock %}
