@@ -1,0 +1,14 @@
+{% load i18n %}
+{% block title %}{% trans "Send SMS via CSV upload" %}{% endblock %}
+{% block buildmanager_content %}
+{% extends base_template %}
+
+<h2>{% trans "CSV file to upload for bulk SMS sending" %}</h2>
+<h3>{{msg}}</h3>
+<form action="" method="POST" accept-charset="utf-8" enctype="multipart/form-data">
+	<input type="file" name="csv_file_upload" id="id_csv_file_upload" />
+	<input type="submit" value="Submit" />
+</form>
+{{errors}}
+
+{%endblock%}

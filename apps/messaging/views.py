@@ -182,3 +182,76 @@ def clear(req):
     resp.delete_cookie("recip-error")
     resp.delete_cookie("recip-sent")
     return resp
+
+
+
+
+
+def _send_message(req, id, text):
+    # also send the message, by hitting the ajax url of the messaging app
+    data = {"uid": id, "text": text}
+    encoded = urllib.urlencode(data)
+    headers = {"Content-type": "application/x-www-form-urlencoded", 
+               "Accept": "text/plain"}
+    conn = httplib.HTTPConnection(req.META["HTTP_HOST"])
+    conn.request("POST", "/ajax/messaging/send_message", encoded, headers)
+    response = conn.getresponse()
+ 
+def parse_csv(filename=""):
+    '''helper function to parse phone_number, message CSV files'''
+    to_return = []
+    with open(filename) as f:
+        msglist = csv.reader(f)
+        for row in msglist:
+            obj = PersistantConnection.objects.get(identity=row[0])
+            to_return.append({"id":obj.reporter, "number":obj.identity, "msg":row[1]})
+    return to_return
+ 
+@login_required
+def confirm_csv_sms(request,template_name="confirm_csv.html"):
+    '''Chance to view what SMS will be sent before sending'''
+    context = {}
+    
+    if request.method == 'POST':
+        try:
+            if request.POST["confirmed"] == 1:
+                # send them
+                msglist = parse_csv(request.POST["temp-file"])
+                for m in msglist:
+                    _send_message(request, m["id"], m["msg"])
+                return HttpResponseRedirect(reverse("reports.views.upload_csv_sms")
+            else:
+                # get them all
+                msglist = parse_csv(request.FILES["csv_file_upload"], True)
+                context['msglist'] = msglist
+                tf = tempfile.NamedTemporaryFile(delete=False)
+                with open(request.FILES["csv_file_upload"]) as f:
+                    tf.write(f.read())
+                context['temp-file'] = tf.name 
+        except Exception, e:
+            logging.error("Error importing csv file.", 
+                          extra={'exception':e, 
+                                 'request.POST': request.POST, 
+                                 'request.FILES': request.FILES, 
+                                 'form':form})
+            context['errors'] = "Could not commit build: " + str(e)
+    return render_to_response(request, template_name, context)
+ 
+@login_required
+def upload_csv_for_sms(request,template_name="upload_csv.html"):
+    '''A view for bulk sending SMS from a CSV file upload'''
+    context = {}
+    
+    if request.method == 'POST':
+        try:
+            msglist = parse_csv(request.FILES["csv_file_upload"])
+        except Exception, e:
+            logging.error("Error importing csv file.", 
+                          extra={'exception':e, 
+                                 'request.POST': request.POST, 
+                                 'request.FILES': request.FILES, 
+                                 'form':form})
+            context['errors'] = "Could not commit build: " + str(e)
+        return HttpResponseRedirect(reverse("reports.views.confirm_csv_sms")
+    return render_to_response(request, template_name, context)
+
