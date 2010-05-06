@@ -6,6 +6,8 @@ import re, urllib
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.exceptions import FieldError
 from django.core.urlresolvers import reverse
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import permission_required
 from rapidsms.webui.utils import *
 from reporters.models import *
 from models import combined_message_log, __combined_message_log_row
@@ -197,14 +199,26 @@ def _send_message(req, id, text):
     conn.request("POST", "/ajax/messaging/send_message", encoded, headers)
     response = conn.getresponse()
  
-def parse_csv(filename=""):
+def parse_csv(input_stream):
     '''helper function to parse phone_number, message CSV files'''
     to_return = []
-    with open(filename) as f:
-        msglist = csv.reader(f)
-        for row in msglist:
-            obj = PersistantConnection.objects.get(identity=row[0])
-            to_return.append({"id":obj.reporter, "number":obj.identity, "msg":row[1]})
+    msglist = csv.reader(input_stream)
+    counter = 0
+    for row in msglist:
+        counter = counter + 1
+        if len(row)==2 and len(row[0].strip())!=0:
+            phone_number = row[0].strip()
+            msg = row[1].strip()
+            try:
+                obj = PersistantConnection.objects.get(identity=phone_number)
+            except PersistantConnection.DoesNotExist:
+                raise ValueError('Unknown phone number')
+            to_return.append({"reporter":obj.reporter, "msg":msg})
+        else:
+            if len(row)>1 or len(row[0].strip())>0:
+                raise ValueError("Poorly formatted input file")
+    if counter == 0:
+        raise ValueError ("Input file is empty")
     return to_return
  
 @login_required
@@ -219,14 +233,15 @@ def confirm_csv_sms(request,template_name="confirm_csv.html"):
                 msglist = parse_csv(request.POST["temp-file"])
                 for m in msglist:
                     _send_message(request, m["id"], m["msg"])
-                return HttpResponseRedirect(reverse("reports.views.upload_csv_sms")
+                return HttpResponseRedirect(reverse("reports.views.upload_csv_sms"))
             else:
                 # get them all
                 msglist = parse_csv(request.FILES["csv_file_upload"], True)
                 context['msglist'] = msglist
                 tf = tempfile.NamedTemporaryFile(delete=False)
-                with open(request.FILES["csv_file_upload"]) as f:
-                    tf.write(f.read())
+                msglist = csv.reader(open(request.FILES["csv_file_upload"]))
+                for line in msglist:
+                    tf.write(line)
                 context['temp-file'] = tf.name 
         except Exception, e:
             logging.error("Error importing csv file.", 
@@ -252,6 +267,6 @@ def upload_csv_for_sms(request,template_name="upload_csv.html"):
                                  'request.FILES': request.FILES, 
                                  'form':form})
             context['errors'] = "Could not commit build: " + str(e)
-        return HttpResponseRedirect(reverse("reports.views.confirm_csv_sms")
+        return HttpResponseRedirect(reverse("reports.views.confirm_csv_sms"))
     return render_to_response(request, template_name, context)
 
