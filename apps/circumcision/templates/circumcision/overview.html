@@ -6,6 +6,11 @@
 {% block content %}
 
 <div class="module">
+    {% if save_msg %}
+    <font color="red">{{ save_msg }}</font>
+    <br><br>
+    {% endif %}
+
 	<h2>Registered Patients</h2>
 	<table>
 		<thead>

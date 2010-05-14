@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% load pagination-tags %}
+
+{% block title %}Kenya Circumcision{% endblock %}
+
+{% block content %}
+
+<div class="module">
+	<h2>Patient {{ px.patient_id }}</h2>
+
+    <form action="/circumcision/" method="post">
+
+	<table border="0" cellpadding="8">
+    <tr><td align="left">Days post-op:</td><td align="right"><b>{{ px.post_op }}</b></td></tr>
+    <tr><td align="left">Registered on:</td><td align="right"><b>{{ px.registered_on }}</b></td></tr>
+    <tr><td align="left">Phone #:</td><td align="right"><b>{{ px.connection.identity }}</b></td></tr>
+    <tr><td align="left">Received notifications for days:</td><td align="right"><b>{{ px.notifications }}</b></td></tr>
+	<tr><td align="left">Contact time:</td><td align="right"><b>{{ px.contact_time }}</b></td></tr>
+	<tr><td align="left">Completed follow-up visit?</td><td align="right">{{ pat_form.followup_visit }}</td></tr>
+	<tr><td align="left">Completed final interview?</td><td align="right">{{ pat_form.final_visit }}</td></tr>
+	</table>
+
+    <br>
+    {{ pat_form.patient_id }}
+    <input type="submit" value="Update" />
+    </form>
+</div>
+
+{% endblock %}

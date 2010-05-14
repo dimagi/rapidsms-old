@@ -9,5 +9,5 @@ from django.conf.urls.defaults import *
 
 urlpatterns = patterns('',
     url(r'^circumcision/$', views.patient_list),
-    url(r'^circumcision/patient/(?P<patid>.+)/$', views.patient_update),
+    url(r'^circumcision/patient/(.+)/$', views.patient_update),
 )
