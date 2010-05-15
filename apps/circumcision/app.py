@@ -154,15 +154,6 @@ class App (rapidsms.app.App):
         send_time_local = datetime.combine(send_date, send_time)
         send_at = local_tz.localize(send_time_local).astimezone(pytz.utc)
         return send_at
-
-    def send_notification (self, patient_id, day, lang):
-        """send the notification for day N"""
-        reg = Registration.objects.get(patient_id=patient_id)
-        messaging.app._send_message(reg.connection, get_notification(day, lang))
-        #check for success?
-        
-        log = SentNotif(patient_id=reg, day=day)
-        log.save()
     
     def cleanup (self, message):
         """Perform any clean up after all handlers have run in the
@@ -190,3 +181,12 @@ class App (rapidsms.app.App):
                 except ValueError:
                     raise ValueError('no notification set for day %d in language [%s]' % (day, lang))
         
+
+def send_notification (router, patient_id, day, lang):
+    """send the notification for day N"""
+    reg = Registration.objects.get(patient_id=patient_id)
+    router.get_app('messaging')._send_message(reg.connection, get_notification(day, lang))
+    #check for success?
+    
+    log = SentNotif(patient_id=reg, day=day)
+    log.save()
