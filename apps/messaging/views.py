@@ -2,10 +2,13 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 
-import re, urllib
+import os, re, urllib, uuid, tempfile, httplib
+from StringIO import StringIO
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.exceptions import FieldError
 from django.core.urlresolvers import reverse
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import permission_required
 from rapidsms.webui.utils import *
 from reporters.models import *
 from models import combined_message_log, __combined_message_log_row
@@ -182,3 +185,95 @@ def clear(req):
     resp.delete_cookie("recip-error")
     resp.delete_cookie("recip-sent")
     return resp
+
+@login_required
+def bulk_message_with_csv(request,template_name="messaging/bulk.html"):
+    '''A view for bulk sending SMS from a CSV file upload'''
+    context = {}
+    if request.method == 'POST':
+        try:
+            input_string = request.FILES["csv_file_upload"].read()
+            input_stream = StringIO(input_string)
+            msglist = parse_csv(input_stream)
+        except Exception, e:
+            logging.error("Error importing csv file.", 
+                          extra={'exception':e, 
+                                 'request.POST': request.POST, 
+                                 'request.FILES': request.FILES})
+            context['errors'] = "Could not parse bulk messages file: " + str(e)
+        else:
+            path = os.path.join(tempfile.gettempdir(),str(uuid.uuid1()))
+            tf = open(path,'w+')
+            tf.write(input_string)
+            request.session['bulk_messages_file_name'] = path
+            tf.close()
+            return HttpResponseRedirect(reverse("confirm_bulk"))
+    return render_to_response(request, template_name, context)
+
+@login_required
+def confirm_bulk_message_with_csv(request,template_name="messaging/bulk_confirm.html"):
+    '''Chance to view what SMS will be sent before sending'''
+    context = {}
+    if 'bulk_messages_file_name' in request.session:
+        fin = open(request.session['bulk_messages_file_name'])
+        msglist = parse_csv(fin)
+        # this is only necessary since templates don't support dictionary display
+        display = []
+        for m in msglist:
+            row = m['reporter']
+            row.phone_number = m['reporter'].connection.identity
+            row.message = m['msg']
+            display.append(row)
+        context['msglist'] = display
+        fin.close()
+    if request.method == 'POST':
+        try:
+            if "confirmed" in request.POST and request.POST["confirmed"] == "1":
+                for m in msglist:
+                    _send_message(request, m["reporter"].id, m["msg"])
+                os.remove(request.session['bulk_messages_file_name'])
+                return HttpResponseRedirect(reverse("bulk"))
+            else:
+                context['errors'] = "Post but not confirmed. wtf?"
+        except Exception, e:
+            logging.error("Error importing csv file.", 
+                          extra={'exception':e, 
+                                 'request.POST': request.POST, 
+                                 'request.FILES': request.FILES})
+            context['errors'] = "Could not send message: %s" % str(e)
+    return render_to_response(request, template_name, context)
+
+def _send_message(req, id, text):
+    # also send the message, by hitting the ajax url of the messaging app
+    data = {"uid": id, "text": text}
+    encoded = urllib.urlencode(data)
+    headers = {"Content-type": "application/x-www-form-urlencoded", 
+               "Accept": "text/plain"}
+    conn = httplib.HTTPConnection(req.META["HTTP_HOST"])
+    conn.request("POST", "/ajax/messaging/send_message", encoded, headers)
+    response = conn.getresponse()
+ 
+def parse_csv(input_stream):
+    '''helper function to parse phone_number, message CSV files'''
+    to_return = []
+    msglist = csv.reader(input_stream)
+    counter = 0
+    for row in msglist:
+        counter = counter + 1
+        if len(row)==2 and len(row[0].strip())!=0:
+            phone_number = row[0].strip()
+            msg = row[1].strip()
+            try:
+                obj = PersistantConnection.objects.get(identity=phone_number)
+            except PersistantConnection.DoesNotExist:
+                raise ValueError('Unknown phone number')
+            to_return.append({"reporter":obj.reporter, "msg":msg})
+        else:
+            # empty lines are fine
+            if len(row)>1 or len(row[0].strip())>0:
+                # junk lines are not
+                raise ValueError("Poorly formatted input file\n (%s)" % unicode(row))
+    if counter == 0:
+        raise ValueError ("Input file is empty")
+    return to_return
+ 

@@ -1,0 +1,35 @@
+{% extends "messaging/base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Send SMS via CSV upload" %}{% endblock %}
+{% block content %}
+
+<h2>{% trans "CSV file to upload for bulk SMS sending" %}</h2>
+<h3>{{msg}}</h3>
+<p>The following SMS will be sent:
+<table>
+	<tr>
+		<td>Recipient</td>
+		<td>Number</td>
+		<td>Message</td>
+	</tr>
+	{% for reporter_message in msglist %}
+		<tr>
+			<td>{{ reporter_message }}</td>
+			<td>{{ reporter_message.phone_number }}</td>
+			<td>{{ reporter_message.message }}</td>
+		</tr>
+	{% endfor %}
+</table>
+</p>
+
+Click on 'Send SMS' once you are done. <b>THIS MAY TAKE A WHILE</b>. Be patient.
+If you're successful, you'll return to the previous page.
+
+<form action="" method="POST" accept-charset="utf-8" enctype="multipart/form-data">
+	<input type="hidden" name="confirmed" value="1" />
+	<input type="submit" value="Send SMS" />
+</form>
+
+{{errors}}
+
+{%endblock%}

@@ -10,5 +10,7 @@ urlpatterns = patterns('',
     url(r"^messaging/search$", views.search, name="messaging-search"),
     url(r"^messaging/all$",    views.all),
     url(r"^messaging/none$",   views.none),
-    url(r"^messaging/clear$",  views.clear)
+    url(r"^messaging/clear$",  views.clear),
+    url(r"^messaging/bulk/$",   views.bulk_message_with_csv, name="bulk"),
+    url(r"^messaging/bulk/confirm/$",   views.confirm_bulk_message_with_csv, name="confirm_bulk")
 )

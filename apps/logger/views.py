@@ -1,5 +1,4 @@
 from StringIO import StringIO
-import csv
 from datetime import datetime, timedelta
 
 from django.contrib.auth.decorators import login_required, permission_required
@@ -7,7 +6,7 @@ from django.http import HttpResponse
 from django.db import transaction
 from django.db.models import Q
 
-from rapidsms.webui.utils import render_to_response, paginated
+from rapidsms.webui.utils import render_to_response, paginated, UnicodeWriter
 from logger.models import *
 
 
@@ -60,7 +59,7 @@ def csv_export(req):
         filename = "sms_export_%s.csv" % (str(datetime.now().date()))
     
     output = StringIO()
-    w = csv.writer(output)
+    w = UnicodeWriter(output)
     w.writerow(headings)
     for message in messages:
         direction = "From Phone" if message.is_incoming else "To Phone"
