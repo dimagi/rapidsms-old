@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+{% load pagination-tags %}
+
+{% block title %}Kenya Circumcision{% endblock %}
+
+{% block content %}
+
+<div class="module">
+    {% if save_msg %}
+    <font color="red">{{ save_msg }}</font>
+    <br><br>
+    {% endif %}
+
+	<h2>Registered Patients</h2>
+	<table>
+		<thead>
+			<tr>
+				<th scope="col" rowspan="2" valign="bottom">Patient ID</th>
+				<th scope="col" rowspan="2" valign="bottom">Days Post-Op</th>
+				<th scope="col" rowspan="2" valign="bottom">Registered on</th>
+				<th scope="col" rowspan="2" valign="bottom">Phone</th>
+				<th scope="col" colspan="{{ days|length }}">Notifications (day)</th>
+				<th scope="col" rowspan="2" valign="bottom">Followup Visit</th>
+				<th scope="col" rowspan="2" valign="bottom">Final Interview</th>
+			</tr>
+			<tr>
+				{% for d in days %}
+				<th>{{ d }}</th>
+				{% endfor %}
+			</tr>
+		</thead>
+		<tbody>{% if patients.object_list %}{% for px in patients.object_list %}
+			<tr>
+				<td><a href="/circumcision/patient/{{ px.patient_id }}">{{ px.patient_id }}</a></td>
+                <td>{{ px.post_op }}</td>
+                <td>{{ px.registered_on }}</td>
+                <td>{{ px.connection.identity }}</td>
+                {% for dn in px.notifications %}
+                <td>{% if dn %}Y{% else %}n{% endif %}</td>
+                {% endfor %}
+                <td>{% if px.followup_visit %}Y{% else %}n{% endif %}</td>
+                <td>{% if px.final_visit %}Y{% else %}n{% endif %}</td>
+			</tr>{% endfor %}{% else %}
+			<tr class="no-data">
+				<td colspan="{{ days|length|add:"6" }}">No patients registered</td>
+			</tr>{% endif %}
+		</tbody>
+		<tfoot>
+			<tr>
+				<td colspan="{{ days|length|add:"6" }}">
+					{% paginator patients %}
+				</td>
+			</tr>
+		</tfoot>
+	</table>
+
+</div>
+
+{% endblock %}
