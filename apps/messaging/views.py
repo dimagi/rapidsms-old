@@ -266,7 +266,9 @@ def parse_csv(input_stream):
             try:
                 obj = PersistantConnection.objects.get(identity=phone_number)
             except PersistantConnection.DoesNotExist:
-                raise ValueError('Unknown phone number')
+                raise ValueError('Unknown phone number. Please go to /reporters/add to register this user.')
+            if obj.reporter is None:
+                raise ValueError('Unregistered user. Please go to /reporters/add to register this user.')
             to_return.append({"reporter":obj.reporter, "msg":msg})
         else:
             # empty lines are fine

@@ -4,4 +4,3 @@
 import unittest
 from speedup import *
 from faketime import *
-from slow import *

@@ -22,7 +22,13 @@ class ParseCSVTest(TestCase):
         self.assertEqual(returned[2]['msg'], 'message_to_reporter_3')
         
     def test_error_on_bad_phone_number(self):
-        csv = "9898989, message_to_nonexistent_reporter"
+        csv = "9898989, message_to_nonexistent_connection"
+        input_stream = StringIO(csv)
+        self.assertRaises(ValueError, parse_csv, input_stream)
+        
+    def test_error_on_unregistered_user(self):
+        self.connection = self._create_connection("989")
+        csv = "%s, message_to_nonexistent_reporter" % self.connection.identity
         input_stream = StringIO(csv)
         self.assertRaises(ValueError, parse_csv, input_stream)
         
@@ -35,14 +41,21 @@ class ParseCSVTest(TestCase):
         self.assertRaises(ValueError, parse_csv, input_stream)
 
     def _create_reporter(self, alias, phone_number):
-        if not hasattr(self, 'backend'):
-            self.backend = PersistantBackend(slug="MockBackend")
-            self.backend.save()
         reporter = Reporter(alias=alias)
         reporter.save()
-        pconnection = PersistantConnection(backend=self.backend, 
-                                                reporter=reporter, 
-                                                identity=phone_number)
-        pconnection.save()
+        pconnection = self._create_connection(phone_number, reporter)
         reporter.connections.add(pconnection)
         return reporter
+
+    def _create_connection(self, phone_number, reporter=None):
+        if not hasattr(self, 'backend'):
+            try:
+                self.backend = PersistantBackend.objects.get(slug="MockBackend")
+            except PersistantBackend.DoesNotExist:
+                self.backend = PersistantBackend(slug="MockBackend")
+                self.backend.save()
+        pconnection = PersistantConnection(backend=self.backend, 
+                                                reporter=None, 
+                                                identity=phone_number)
+        pconnection.save()
+        return pconnection
