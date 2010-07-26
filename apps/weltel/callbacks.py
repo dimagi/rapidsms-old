@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 from rapidsms.message import Message
 from rapidsms.i18n import ugettext_noop as _
 from logger.models import IncomingMessage
@@ -24,8 +24,10 @@ def shida_report(router, nurse=None):
         shida = PatientState.objects.get(code='shida')
         # get all active patients who responded shida or are in the default state
         patients = Patient.objects.filter(site=site).filter(state=shida).exclude(active=False).exclude(subscribed=False)
-        # only get patients with activity from today
-        patients = patients.filter(eventlog__date__gte=date.today()).distinct()
+        # only get patients with activity from the past 24 hours
+        timeout_interval = timedelta(hours=24)
+        timeout = datetime.now() - timeout_interval
+        patients = patients.filter(eventlog__date__gt=timeout).distinct()
         # generate report
         report = ''
         for patient in patients:
