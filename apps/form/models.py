@@ -97,7 +97,7 @@ class Token(models.Model):
 class FormToken(models.Model):
     token = models.ForeignKey(Token)
     sequence = models.IntegerField()
-    required = models.BooleanField(blank=True, null=True)
+    required = models.NullBooleanField(blank=True, null=True)
 
     def __unicode__(self):
         return "%s: %s" % (str(self.sequence), self.token) 
