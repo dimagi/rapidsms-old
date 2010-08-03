@@ -20,6 +20,7 @@ except:
     # 'rapidsms/lib'
     pass
 
+
 # add extra libs to the python sys path
 sys.path.extend(libs)
 
