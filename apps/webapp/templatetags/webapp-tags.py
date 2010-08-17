@@ -50,7 +50,8 @@ class PermCheck(template.Node):
             if user.has_perm(permission): 
                 # return the stuff between the tags
                 display = self.nodelist.render(context)
-            elif user.is_anonymous():
+            #elif user.is_anonymous():
+            else:
                 # for anonymous users, check against anon_perms
                 # defined in the webui section of rapidsms.ini 
                 if app_conf['webapp'] and "anon_perms" in app_conf["webapp"]:
