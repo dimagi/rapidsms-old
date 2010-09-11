@@ -21,7 +21,13 @@ class AppBase(object, LoggerMixin):
         module_name = "%s.app" % app_name
         module = try_import(module_name)
         if module is None: return None
-        return get_class(module, cls)
+        try:
+            return get_class(module, cls)
+        except AttributeError:
+            # some non-RapidSMS apps (such as elsdorfer's django_talbes)
+            # have an 'app' directory inside, which is unrelated to rapidsms apps
+            # rapidsms should ignore these, so we return None
+            return None
 
 
     def __init__(self, router):
