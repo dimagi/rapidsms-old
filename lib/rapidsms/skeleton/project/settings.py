@@ -100,7 +100,7 @@ RAPIDSMS_TABS = [
 # development at the moment, and full stack traces are very useful
 # when reporting bugs. don't forget to turn this off in production.
 DEBUG = TEMPLATE_DEBUG = True
-
+BASE_TEMPLATE = "layout.html"
 
 # after login (which is handled by django.contrib.auth), redirect to the
 # dashboard rather than 'accounts/profile' (the default).
