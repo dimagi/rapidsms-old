@@ -30,8 +30,8 @@ ME=`readlink -f $0`
 WHERE_AM_I=`dirname $ME`
 
 ############### EDIT ME ##################
-NAME="smsforum" # change to your project name
-DAEMON=$WHERE_AM_I/manage.py
+NAME="weltel" # change to your project name
+DAEMON=$WHERE_AM_I/rapidsms
 DAEMON_OPTS=""
 RUN_AS=root
 APP_PATH=$WHERE_AM_I

@@ -12,7 +12,7 @@ sys.path.append(os.path.join(rootpath,'lib','rapidsms'))
 sys.path.append(os.path.join(rootpath,'lib','rapidsms','webui'))
 
 
-os.environ['RAPIDSMS_INI'] = os.path.join(rootpath,'rapidsms.ini')
+os.environ['RAPIDSMS_INI'] = os.path.join(rootpath,'local.ini')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'rapidsms.webui.settings'
 os.environ["RAPIDSMS_HOME"] = rootpath
 
